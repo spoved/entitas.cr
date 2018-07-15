@@ -70,6 +70,24 @@ module Entitas
       @components[index]
     end
 
+    def has_component?(index : Int32) : Bool
+      @components[index]?
+    end
+
+    def has_components?(indices : Array(Int32)) : Bool
+      indices.each do |index|
+        return false unless @components[index]?
+      end
+      true
+    end
+
+    def has_any_component?(indices : Array(Int32)) : Bool
+      indices.each do |index|
+        return true if @components[index]?
+      end
+      false
+    end
+
     # Will delete the component at the provided index
     def del_component(index : Int32)
       @components.delete_at(index)
