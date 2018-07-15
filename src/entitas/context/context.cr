@@ -1,25 +1,10 @@
-require "../stack"
-require "./component"
-require "./entity/index"
-require "./entity/aerc"
+require "../../stack"
+require "../component"
+require "../entity/index"
+require "../entity/aerc"
+require "./info"
 
 module Entitas
-  class Contexts
-    def self.shared_instance
-      @@_shared_instance ||= Oid::Contexts.new
-    end
-
-    def all_contexts
-      @contexts ||= Array(Entitas::Context).new
-    end
-
-    def reset
-      all_contexts.each do |context|
-        context.reset
-      end
-    end
-  end
-
   # A context manages the lifecycle of entities and groups.
   #  You can create and destroy entities and get groups of entities.
   #  The prefered way to create a context is to use the generated methods
@@ -31,7 +16,7 @@ module Entitas
     # _groups
     @_total_components : Int32
     @_component_pools : Stack(Entitas::Component) = Stack(Entitas::Component).new
-    @_context_info : ContextInfo
+    @_context_info : Context::Info
     @_aerc_factory : Proc(Entitas::Entity, Entitas::SafeAERC(Entitas::Entity))
     # _groupsForIndex
     # _groupChangedListPool
@@ -49,22 +34,22 @@ module Entitas
     # @_on_group_created : Proc(Entitas::Context(Entitas::Entity), Entitas::Entity) -> Nil
 
     def initialize(total_components : Int32, start_creation_index : Int32,
-                   context_info : Entitas::Context::ContextInfo | Nil,
+                   context_info : Entitas::Context::Info | Nil,
                    aerc_factory : Proc(Entitas::Entity, Entitas::AERC) | Nil)
       @_total_components = total_components
       @_creation_index = start_creation_index
       @_context_info = context_info || create_default_context_info
-      @_aerc_factory = aerc_factory.nil? ? ->(entity : Entitas::Entity){ SafeAERC(Entitas::Entity).new(entity) } : aerc_factory
+      @_aerc_factory = aerc_factory.nil? ? ->(entity : Entitas::Entity) { SafeAERC(Entitas::Entity).new(entity) } : aerc_factory
     end
 
-    def create_default_context_info : Entitas::Context::ContextInfo
+    def create_default_context_info : Entitas::Context::Info
       component_names = Array(String).new
       prefix = "Index "
       total_components.times do |i|
         component_names << prefix + i.to_s
       end
 
-      Entitas::Context::ContextInfo.new("Unnamed Context", component_names, Array(Component.class).new)
+      Entitas::Context::Info.new("Unnamed Context", component_names, Array(Component.class).new)
     end
 
     def total_components : Int32
@@ -75,7 +60,7 @@ module Entitas
       @_component_pools
     end
 
-    def context_info : ContextInfo
+    def context_info : Context::Info
       @_context_info
     end
 
@@ -94,7 +79,17 @@ module Entitas
 
     abstract def reset
 
-    abstract def create_entity : Entitas::Entity
+    def create_entity : Entitas::Entity
+      if reusable_entities_size > 0
+        entity = @_reusable_entities.pop
+        @_creation_index += 1
+        entity.reactivate(@_creation_index)
+      else
+        entity = Entitas::Entity.new
+        @_creation_index += 1
+        entity.init(@_creation_index, @_total_components, @_component_pools, @_context_info, @_aerc_factory.call(entity))
+      end
+    end
 
     def has_entity?(entity : Entitas::Entity) : Bool
       @_entities.includes? entity
@@ -102,15 +97,6 @@ module Entitas
 
     def get_entities : Array(Entitas::Entity)
       @_entities ||= Array(Entitas::Entity).new
-    end
-
-    class ContextInfo
-      getter name : String
-      getter component_names : Array(String)
-      getter component_types : Array(Component.class)
-
-      def initialize(@name, @component_names, @component_types)
-      end
     end
   end
 end
