@@ -1,0 +1,13 @@
+name: entitas
+version: 0.1.0
+
+authors:
+  - Holden Omans <holden.omans@gmail.com>
+
+crystal: 0.25.0
+
+license: MIT
+
+dependencies:
+  graphite:
+    github: panickbr/graphite
