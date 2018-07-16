@@ -10,4 +10,7 @@ module Entitas
 
   class ContextInfoException < Exception
   end
+
+  class MatcherException < Exception
+  end
 end

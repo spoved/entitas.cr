@@ -1,50 +1,14 @@
+require "./interfaces"
+
 module Entitas
-  abstract class IMatcher(T)
-    @_indicies : Array(Int32) = Array(Int32).new
-    def indices
-      @_indices
-    end
-
-    abstract def matches?(entity : T) : Bool
-  end
-
-  abstract class ICompoundMatcher(T) < IMatcher(T)
-    @_all_of_indicies : Array(Int32) = Array(Int32).new
-    @_any_of_indicies : Array(Int32) = Array(Int32).new
-    @_none_of_indicies : Array(Int32) = Array(Int32).new
-
-    def all_of_indicies
-      @_all_of_indicies
-    end
-
-    def any_of_indicies
-      @_any_of_indicies
-    end
-
-    def none_of_indicies
-      @_none_of_indicies
-    end
-  end
-
-  abstract class INoneOfMatcher(T) < ICompoundMatcher(T)
-  end
-
-  abstract class IAnyOfMatcher(T) < INoneOfMatcher(T)
-    abstract def none_of(indices : Array(Int32)) : INoneOfMatcher(T)
-    abstract def none_of(matchers : Array(IMatcher(T))) : INoneOfMatcher(T)
-  end
-
-  abstract class IAllOfMatcher(T) < IAnyOfMatcher(T)
-    abstract def any_of(indices : Array(Int32)) : IAnyOfMatcher(T)
-    abstract def any_of(matchers : Array(IMatcher(T))) : IAnyOfMatcher(T)
-  end
-
   class Matcher(T) < IAllOfMatcher(T)
     @_indicies : Array(Int32) = Array(Int32).new
     @_all_of_indicies : Array(Int32) = Array(Int32).new
     @_any_of_indicies : Array(Int32) = Array(Int32).new
     @_none_of_indicies : Array(Int32) = Array(Int32).new
     @component_names : Array(String) = Array(String).new
+    @_hash : Int32 = 0
+    @_is_hash_cached : Bool = false
 
     property component_names : Array(String)
 
@@ -97,6 +61,43 @@ module Entitas
 
     def any_of(matchers : Array(IMatcher(T))) : IAnyOfMatcher(T)
       matchers.map { |matcher| any_of(matcher) }
+    end
+
+    def ==(matcher : Matcher(T)) : Bool
+      if matcher.all_of_indicies != @_all_of_indicies
+          return false
+      end
+      if matcher.any_of_indicies != @_any_of_indicies
+          return false
+      end
+      if matcher.none_of_indicies != @_none_of_indicies
+          return false
+      end
+      true;
+    end
+
+    def get_hash_code : Int32
+      unless @_is_hash_cached
+          # FIXME: GetType().GetHashCode();
+          hash = get_hash_code
+          hash = apply_hash(hash, @_all_of_indicies, 3, 53);
+          hash = apply_hash(hash, @_any_of_indicies, 307, 367);
+          hash = apply_hash(hash, @_none_of_indicies, 647, 683);
+          @_hash = hash;
+          @_is_hash_cached = true;
+      end
+
+      @_hash;
+    end
+
+    def self.apply_hash(hash : Int32, indices : Array(Int32) | Nil, i1 : Int32, i2 : Int32) : Int32
+      unless indicies.nil?
+        indicies.each_index do |i|
+          hash ^= indices[i] * i1;
+        end
+        hash ^= indices.size * i2;
+      end
+      hash
     end
   end
 end
