@@ -99,5 +99,14 @@ module Entitas
       end
       hash
     end
+
+    def self.get_component_names(matchers : Array(IMatcher(T)))
+      matchers.each do |matcher|
+        return matcher.component_names unless matcher.component_names.empty?
+      end
+      nil
+    end
+
+    # TODO: finish https://github.com/sschmid/Entitas-CSharp/blob/master/Entitas/Entitas/Matcher/MatcherStatic.cs
   end
 end
