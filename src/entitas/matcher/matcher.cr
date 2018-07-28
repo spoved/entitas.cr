@@ -65,37 +65,37 @@ module Entitas
 
     def ==(matcher : Matcher(T)) : Bool
       if matcher.all_of_indicies != @_all_of_indicies
-          return false
+        return false
       end
       if matcher.any_of_indicies != @_any_of_indicies
-          return false
+        return false
       end
       if matcher.none_of_indicies != @_none_of_indicies
-          return false
+        return false
       end
-      true;
+      true
     end
 
     def get_hash_code : Int32
       unless @_is_hash_cached
-          # FIXME: GetType().GetHashCode();
-          hash = get_hash_code
-          hash = apply_hash(hash, @_all_of_indicies, 3, 53);
-          hash = apply_hash(hash, @_any_of_indicies, 307, 367);
-          hash = apply_hash(hash, @_none_of_indicies, 647, 683);
-          @_hash = hash;
-          @_is_hash_cached = true;
+        # FIXME: GetType().GetHashCode();
+        hash = get_hash_code
+        hash = apply_hash(hash, @_all_of_indicies, 3, 53)
+        hash = apply_hash(hash, @_any_of_indicies, 307, 367)
+        hash = apply_hash(hash, @_none_of_indicies, 647, 683)
+        @_hash = hash
+        @_is_hash_cached = true
       end
 
-      @_hash;
+      @_hash
     end
 
     def self.apply_hash(hash : Int32, indices : Array(Int32) | Nil, i1 : Int32, i2 : Int32) : Int32
       unless indicies.nil?
         indicies.each_index do |i|
-          hash ^= indices[i] * i1;
+          hash ^= indices[i] * i1
         end
-        hash ^= indices.size * i2;
+        hash ^= indices.size * i2
       end
       hash
     end

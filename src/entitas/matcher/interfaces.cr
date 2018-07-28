@@ -1,6 +1,7 @@
 module Entitas
   abstract class IMatcher(T)
     @_indicies : Array(Int32) = Array(Int32).new
+
     def indices
       @_indices
     end
