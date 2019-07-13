@@ -14,20 +14,57 @@ module Entitas
 
     macro inherited
 
-      annotation ::Component::{{@type.name}}
-      end
+      # TODO: Enable or remove
+      # annotation ::Component::{{@type.name}}
+      # end
 
       # If the component has the unique annotation,
       #   set the class method to `true`
       # The framework will make sure that only one instance of a unique component can be present in your context
       {% if @type.annotation(::Component::Unique) %}
+        # Will return true if the class is a unique component for a context
+        def is_unique?
+          true
+        end
+        # Will return true if the class is a unique component for a context
         def self.is_unique?
           true
         end
+      {% else %}
+        # Will return true if the class is a unique component for a context
+        def is_unique?
+          false
+        end
+        # Will return true if the class is a unique component for a context
+        def self.is_unique?
+          false
+        end
       {% end %}
 
-      class Entitas::Entity
+      # When the class is finished search the method names for each setter
+      # and populate the initialize arguments.
+      macro finished
+        def initialize(
+        \{% for meth in @type.methods %}
+        \{% if meth.name =~ /^_entitas_set_(.*)$/ %}
+        \{% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
+        \{% if meth.args[0].default_value %}
+          @\{{var_name}} : \{{meth.args[0].restriction}} = \{{meth.args[0].default_value}},
+        \{% else %}
+          @\{{var_name}} : \{{meth.args[0].restriction}},
+        \{% end %}
+        \{% end %}
+        \{% end %}
+          )
+        end
+      end
 
+
+      # Add methods to Entitas::Entity
+      ##
+
+      # :no doc:
+      class ::Entitas::Entity
         # Will return the first component that is a `{{@type.name.id}}` or `nil`
         def {{@type.name.id.downcase}} : {{@type.id}} | Nil
           comp = @components.find { |%c| %c.is_a?(::{{@type.name.id}}) }
@@ -54,35 +91,10 @@ module Entitas
           @components.reject! { |%c| %c.is_a?(::{{@type.name.id}}) }
         end
       end
-
-      class ::{{@type.id}}
-        @@properties = Hash(Symbol, Property).new
-
-
-
-        # When the class is finished search the method names for each setter
-        # and populate the initialize arguments.
-        macro finished
-          def initialize(
-          \{% for meth in @type.methods %}
-          \{% if meth.name =~ /^_entitas_set_(.*)$/ %}
-          \{% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
-          \{% if meth.args[0].default_value %}
-            @\{{var_name}} : \{{meth.args[0].restriction}} = \{{meth.args[0].default_value}},
-          \{% else %}
-            @\{{var_name}} : \{{meth.args[0].restriction}},
-          \{% end %}
-          \{% end %}
-          \{% end %}
-            )
-          end
-        end
-      end
     end
 
     # Will create getter/setter for the provided `var`, ensuring its type
     macro prop(var, kype, **kwargs)
-
       {% if kwargs[:default] %}
         property {{ var.id }} : {{kype}} = {{ kwargs[:default] }}
 
@@ -98,19 +110,6 @@ module Entitas
           @{{ var.id }} = value
         end
       {% end %}
-
-      @@properties[:{{var.id}}] = {
-        type:        {{kype}},
-        key:         {{var.id.stringify}},
-        has_default: {{kwargs[:default] ? true : false}},
-        default:     {{kwargs[:default]}},
-      }
-
-    end
-
-    # Class method to indicate if this component is unique
-    def self.is_unique?
-      false
     end
 
     # Will return true if the class is a unique component for a context
