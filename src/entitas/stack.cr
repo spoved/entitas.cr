@@ -1,4 +1,4 @@
-class Stack(T)
+class Entitas::Stack(T)
   include Enumerable(T)
 
   @_array : Array(T)

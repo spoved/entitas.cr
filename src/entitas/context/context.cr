@@ -1,4 +1,4 @@
-require "../../stack"
+require "../stack"
 require "../component"
 require "../entity/index"
 require "../entity/aerc"

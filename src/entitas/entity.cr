@@ -2,57 +2,13 @@ require "./component"
 require "./entity/*"
 
 module Entitas
-  abstract class Entity
+  class Entity
+    class Error < Exception
+    end
+
     include Entitas::Entity::Index
 
     @components : Array(Entitas::Component) = Array(Entitas::Component).new
-
-    macro context(var)
-      class ::{{var}}Context < Entitas::Context
-        def reset
-        end
-
-        def create_entity : Entitas::Entity
-        end
-      end
-
-      class ::Entitas::Contexts
-        def {{var.id.downcase}}
-          ::{{var}}Context
-        end
-      end
-    end
-
-    macro contexts(*vars)
-      {% for var in vars %}
-        context {{ var }}
-      {% end %}
-    end
-
-    # Macro that associates the provided component `var` to the entity class.
-    #  Will create various helper methods for this.
-    macro component(var)
-
-      def {{var.id.downcase}}
-      end
-
-      def add_{{var.id.downcase}}(component : {{var}}Component)
-        check_unique_component(component) if component.component_is_unique?
-        @components << component
-      end
-
-      def del_{{var.id.downcase}}
-        @components.reject! {|comp| comp.class == {{var}}Component }
-      end
-    end
-
-    # Macro that associates the provided list of components to the entity class.
-    #  Will create various helper methods for each component.
-    macro components(*vars)
-      {% for var in vars %}
-        component {{ var }}
-      {% end %}
-    end
 
     # Will add the `Entitas::Component` at the provided index
     def add_component(index : Int32, component : Entitas::Component)
@@ -100,9 +56,6 @@ module Entitas
           raise Entitas::Entity::Error.new("Component #{component.class} is unique")
         end
       end
-    end
-
-    class Error < Exception
     end
   end
 end

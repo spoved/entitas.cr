@@ -1,38 +1,20 @@
 require "../spec_helper"
 
 describe Entitas::Component do
-  describe "#prop" do
-    it "can define a property" do
-      comp = TestComponent.new
-      comp.set_size(1)
-      comp.get_size.should eq 1
-    end
-
-    it "can define default value" do
-      comp = TestComponent.new
-      comp.get_default.should eq "hello"
-    end
-
-    it "can change the property value" do
-      comp = TestComponent.new
-      comp.get_default.should eq "hello"
-      comp.set_default("world")
-      comp.get_default.should eq "world"
-    end
+  it "should add methods" do
+    entity = Entitas::Entity.new
+    entity.add_a
+    entity.a.should be_a A
+    entity.del_a
+    entity.a.should be_nil
   end
 
-  describe "#is_unique?" do
-    it "can be defined as unique" do
-      Entitas::Component.is_unique?.should be_false
-      TestComponent.is_unique?.should be_true
-    end
-  end
-
-  describe "#component_is_unique?" do
-    it "can be defined as unique" do
-      Entitas::Component.is_unique?.should be_false
-      TestComponent.is_unique?.should be_true
-      TestComponent.new.component_is_unique?.should be_true
-    end
+  it "should be able to be initalized with vars" do
+    comp = UniqueComp.new(size: 5)
+    comp.size.should eq 5
+    comp.default.should eq "foo"
+    comp = UniqueComp.new(size: 4, default: "bar")
+    comp.size.should eq 4
+    comp.default.should eq "bar"
   end
 end
