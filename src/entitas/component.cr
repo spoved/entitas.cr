@@ -5,13 +5,6 @@ end
 
 module Entitas
   abstract class Component
-    alias Property = NamedTuple(
-      type: Bool.class | Float64.class | Int32.class | Int64.class | String.class | Nil.class,
-      key: String,
-      has_default: Bool,
-      default: Bool | Float64 | Int32 | Int64 | String | Nil,
-    )
-
     macro inherited
 
       # TODO: Enable or remove
@@ -161,6 +154,12 @@ module Entitas
           {{sub_klass.name.id}} => ::Entitas::Component::Index::{{sub_klass.name.id}},
         {% end %}
       }
+
+      POOLS = [
+        {% for sub_klass in @type.subclasses %}
+          ::Entitas::ComponentPool.new,
+        {% end %}
+      ]
 
       # Make class functions on each sub-class to get the index easier
       {% for sub_klass in @type.subclasses %}

@@ -21,15 +21,6 @@ module Entitas
 
     @_components : Array(Entitas::Component?) = Array(Entitas::Component?).new(Entitas::Component::TOTAL_COMPONENTS, nil)
 
-    # component_pools is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.CreateComponent(index, type) to get a new or
-    # reusable component from the componentPool.
-    # Use entity.GetComponentPool(index) to get a componentPool for
-    # a specific component index.
-    @_component_pools : Array(ComponentPool)
-
     @_components_cache : Array(Entitas::Component) = Array(Entitas::Component).new
     @_component_indices_cache : Array(Int32) = Array(Int32).new
     @_to_string_cache : Array(String) = Array(String).new
@@ -101,7 +92,7 @@ module Entitas
     # a specific component index.
     #
     def component_pools : Array(ComponentPool)
-      @_component_pools
+      ::Entitas::Component::POOLS
     end
 
     # Returns the `ComponentPool` for the specified component index.
@@ -120,6 +111,11 @@ module Entitas
     end
 
     # TODO: Implement AERC?
+
+    def create_component(index : ::Entitas::Component::Index)
+      pool = component_pool(index)
+      pool.empty? ? nil : pool.pop
+    end
 
     # Will add the `Entitas::Component` at the provided index.
     # You can only have one component at an index.
@@ -300,7 +296,7 @@ module Entitas
           # TODO: trigger OnComponentRemoved event with (self, index, previousComponent)
         end
 
-        # TODO: GetComponentPool(index).Push(previousComponent);
+        component_pool(index) << prev_component unless prev_component.nil?
       else
         # TODO: trigger OnComponentReplaced event with (self, index, previousComponent, replacement)
       end
