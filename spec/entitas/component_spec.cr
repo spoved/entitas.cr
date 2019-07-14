@@ -2,7 +2,7 @@ require "../spec_helper"
 
 describe Entitas::Component do
   it "should add methods" do
-    entity = Entitas::Entity.new
+    entity = Entitas::Entity.new(1)
     entity.add_a
     entity.a.should be_a A
     entity.del_a

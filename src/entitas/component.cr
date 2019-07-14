@@ -26,6 +26,7 @@ module Entitas
         def is_unique?
           true
         end
+
         # Will return true if the class is a unique component for a context
         def self.is_unique?
           true
@@ -35,6 +36,7 @@ module Entitas
         def is_unique?
           false
         end
+
         # Will return true if the class is a unique component for a context
         def self.is_unique?
           false
@@ -63,12 +65,23 @@ module Entitas
       # Add methods to Entitas::Entity
       ##
 
-      # :no doc:
       class ::Entitas::Entity
-        # Will return the first component that is a `{{@type.name.id}}` or `nil`
-        def {{@type.name.id.downcase}} : {{@type.id}} | Nil
-          comp = @components.find { |%c| %c.is_a?(::{{@type.name.id}}) }
-          comp.nil? ? nil : comp.as({{@type.id}})
+
+        def replace_{{@type.name.id.downcase}}(component : {{@type.name.id}})
+          self.replace_component({{@type.name.id}}.index, component)
+        end
+
+        def has_{{@type.name.id.downcase}}?
+          self.has_component?({{@type.name.id}}.index)
+        end
+
+        # Will return the component that is a `{{@type.name.id}}` or `nil`
+        def {{@type.name.id.downcase}} : {{@type.id}}?
+          if self.has_component?({{@type.name.id}}.index)
+            self.get_component({{@type.name.id}}.index).as({{@type.name.id}})
+          else
+            nil
+          end
         end
 
         # Add a `{{@type.name.id}}` to the entity
@@ -77,8 +90,7 @@ module Entitas
         # ```
         def add_{{@type.name.id.downcase}}(**args)
           component = {{@type.name.id}}.new(**args)
-          check_unique_component(component) if component.component_is_unique?
-          @components << component
+          self.add_component({{@type.name.id}}.index, component)
         end
 
 
@@ -88,7 +100,7 @@ module Entitas
         # entity.{{@type.name.id.downcase}} # => nil
         # ```
         def del_{{@type.name.id.downcase}}
-          @components.reject! { |%c| %c.is_a?(::{{@type.name.id}}) }
+          self.remove_component({{@type.name.id}}.index)
         end
       end
     end
@@ -119,6 +131,61 @@ module Entitas
 
     # Component error class raised when an issue is encountered
     class Error < Exception
+    end
+
+    macro finished
+      {% i = 0 %}
+
+      enum Index
+        {% for sub_klass in @type.subclasses %}
+        {{sub_klass.name.id}} = {{i}}
+        {% i = i + 1 %}
+        {% end %}
+      end
+
+
+      # A hash to map of enum `Index` to class of `Component`
+      INDEX_MAP = {
+      {% for sub_klass in @type.subclasses %}
+        ::Entitas::Component::Index::{{sub_klass.name.id}} => {{sub_klass.name.id}},
+      {% end %}
+      }
+
+      # A hash to map of class of `Component` to enum `Index`
+      COMPONENT_MAP = {
+        {% for sub_klass in @type.subclasses %}
+          {{sub_klass.name.id}} => ::Entitas::Component::Index::{{sub_klass.name.id}},
+        {% end %}
+      }
+
+      # Make class functions on each sub-class to get the index easier
+      {% for sub_klass in @type.subclasses %}
+
+      class ::{{sub_klass.name.id}}
+
+        # Returns the `::Entitas::Component::Index` corresponding to this class
+        #
+        # ```
+        # entity.index # => ::Entitas::Component::Index::{{sub_klass.name.id}}
+        # ```
+        def self.index : ::Entitas::Component::Index
+          ::Entitas::Component::Index::{{sub_klass.name.id}}
+        end
+
+        # Returns the `::Entitas::Component::Index::{{sub_klass.name.id}}#value` corresponding to this class
+        #
+        # ```
+        # entity.index_value # => 1
+        # ```
+        def self.index_value : Int32
+          self.index.value
+        end
+      end
+
+      {% end %}
+
+      # The total number of `::Entitas::Component` subclases
+      TOTAL_COMPONENTS = {{i}}
     end
   end
 end
