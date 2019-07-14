@@ -6,13 +6,13 @@ module Entitas
     class Error < Exception
     end
 
-    class EntityIsNotEnabledException < Error
+    class IsNotEnabledException < Error
     end
 
-    class EntityDoesNotHaveComponentException < Error
+    class DoesNotHaveComponentException < Error
     end
 
-    class EntityAlreadyHasComponentException < Error
+    class AlreadyHasComponentException < Error
     end
   end
 end

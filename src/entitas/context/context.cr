@@ -1,4 +1,3 @@
-require "../stack"
 require "../component"
 require "../entity/index"
 require "../entity/aerc"
@@ -13,10 +12,10 @@ module Entitas
   #  from the code generator, e.g. var context = new GameContext();
   abstract class Context
     @_entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
-    @_reusable_entities : Stack(Entitas::Entity) = Stack(Entitas::Entity).new
+    @_reusable_entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
     @_retained_entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
-    @_total_components : Int32 = 0
-    @_component_pools : Stack(Entitas::Component) = Stack(Entitas::Component).new
+
+    @_component_pools : Array(ComponentPool) = Array(ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS)
     @_context_info : Context::Info
     @_aerc_factory : Proc(Entitas::Entity, Entitas::SafeAERC(Entitas::Entity))
 
@@ -32,14 +31,9 @@ module Entitas
     @_cached_entity_released : Proc(Entitas::Entity, Nil)
     @_cached_destroy_entity : Proc(Entitas::Entity, Nil)
 
-    def initialize(total_components : Int32)
-      initialize(total_components, 0, nil, nil)
-    end
-
-    def initialize(total_components : Int32, start_creation_index : Int32,
-                   context_info : Entitas::Context::Info | Nil,
-                   aerc_factory : Proc(Entitas::Entity, Entitas::AERC) | Nil)
-      @_total_components = total_components
+    def initialize(start_creation_index : Int32 = 0,
+                   context_info : Entitas::Context::Info | Nil = nil,
+                   aerc_factory : Proc(Entitas::Entity, Entitas::AERC) | Nil = nil)
       @_creation_index = start_creation_index
       @_context_info = context_info || create_default_context_info
       @_aerc_factory = aerc_factory.nil? ? ->(entity : Entitas::Entity) { SafeAERC(Entitas::Entity).new(entity) } : aerc_factory
@@ -62,10 +56,10 @@ module Entitas
     end
 
     def total_components : Int32
-      @_total_components
+      ::Entitas::Component::TOTAL_COMPONENTS
     end
 
-    def component_pools : Stack(Entitas::Component)
+    def component_pools : Array(ComponentPool)
       @_component_pools
     end
 

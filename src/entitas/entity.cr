@@ -1,8 +1,10 @@
 require "./component"
 require "./entity/*"
-require "./stack"
 
 module Entitas
+  alias ComponentPool = Array(Entitas::Component)
+  alias EntityPool = Array(Entitas::Entity)
+
   class Entity
     class Error < Exception
     end
@@ -19,23 +21,22 @@ module Entitas
 
     @_components : Array(Entitas::Component?) = Array(Entitas::Component?).new(Entitas::Component::TOTAL_COMPONENTS, nil)
 
-    # componentPools is set by the context which created the entity and
+    # component_pools is set by the context which created the entity and
     # is used to reuse removed components.
     # Removed components will be pushed to the componentPool.
     # Use entity.CreateComponent(index, type) to get a new or
     # reusable component from the componentPool.
     # Use entity.GetComponentPool(index) to get a componentPool for
     # a specific component index.
-    # @_component_pools : Stack(Entitas::Component)
+    @_component_pools : Array(ComponentPool)
 
     @_components_cache : Array(Entitas::Component) = Array(Entitas::Component).new
     @_component_indices_cache : Array(Int32) = Array(Int32).new
     @_to_string_cache : Array(String) = Array(String).new
 
-    # @_to_string_builder : String::Builder
-
     def initialize(
-      creation_index : Int32? = nil,
+      creation_index : Int32,
+      component_pools : Array(ComponentPool),
       context_info : Entitas::Context::Info? = nil
     )
       if context_info.nil?
@@ -44,20 +45,29 @@ module Entitas
         @_context_info = context_info.as(Entitas::Context::Info)
       end
 
+      @_creation_index = creation_index
+      @_component_pools = component_pools
+
       # Clear caches
       self.clear_caches!
 
-      # only set creation_index if we passed it
-      reactivate(creation_index) unless creation_index.nil?
-
-      # @_component_pools = component_pools
+      reactivate(creation_index)
     end
 
     # Re-enable the entity and set its creation index
-    def reactivate(creation_index)
+    def reactivate(creation_index : Int32)
       # Set our passed variables
       @_creation_index = creation_index
       @_is_enabled = true
+
+      # Clear caches
+      self.clear_caches!
+    end
+
+    # Re-enable the entity and set its creation index
+    def reactivate(creation_index : Int32, context_info : Entitas::Context::Info)
+      @_context_info = context_info
+      reactivate(creation_index)
     end
 
     # The total amount of components an entity can possibly have.
@@ -82,8 +92,7 @@ module Entitas
       @_is_enabled
     end
 
-    # TODO: implement component_pools
-    # componentPools is set by the context which created the entity and
+    # component_pools is set by the context which created the entity and
     # is used to reuse removed components.
     # Removed components will be pushed to the componentPool.
     # Use entity.CreateComponent(index, type) to get a new or
@@ -91,16 +100,24 @@ module Entitas
     # Use entity.GetComponentPool(index) to get a componentPool for
     # a specific component index.
     #
-    # def component_pools : Array(Stack(Entitas::Component))
-    # end
+    def component_pools : Array(ComponentPool)
+      @_component_pools
+    end
 
-    # TODO: impliment context_info
-    # The contextInfo is set by the context which created the entity and
-    # contains information about the context.
-    # It's used to provide better error messages.
-    #
-    # def context_info : Context::Info
-    # end
+    # Returns the `ComponentPool` for the specified component index.
+    # `component_pools` is set by the context which created the entity and
+    # is used to reuse removed components.
+    # Removed components will be pushed to the componentPool.
+    # Use entity.create_component(index, type) to get a new or
+    # reusable component from the `ComponentPool`.
+    def component_pool(index : Int32) : ComponentPool
+      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
+      self.component_pools[index]
+    end
+
+    def component_pool(index : ::Entitas::Component::Index) : ComponentPool
+      component_pool index.value
+    end
 
     # TODO: Implement AERC?
 
@@ -109,15 +126,15 @@ module Entitas
     # Each component type must have its own constant index.
     def add_component(index : Int32, component : Entitas::Component)
       if !enabled?
-        raise EntityIsNotEnabledException.new "Cannot add component " \
-                                              "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise IsNotEnabledException.new "Cannot add component " \
+                                        "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if has_component?(index)
-        raise EntityAlreadyHasComponentException.new "Cannot add component " \
-                                                     "'#{self.context_info.component_names[index]}' to #{self}! " \
-                                                     "You should check if an entity already has the component " \
-                                                     "before adding it or use entity.replace_component()."
+        raise AlreadyHasComponentException.new "Cannot add component " \
+                                               "'#{self.context_info.component_names[index]}' to #{self}! " \
+                                               "You should check if an entity already has the component " \
+                                               "before adding it or use entity.replace_component()."
       end
 
       self.components[index] = component
@@ -134,15 +151,15 @@ module Entitas
     # You can only remove a component at an index if it exists.
     def remove_component(index : Int32) : Nil
       if !enabled?
-        raise EntityIsNotEnabledException.new "Cannot remove component " \
-                                              "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise IsNotEnabledException.new "Cannot remove component " \
+                                        "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if !has_component?(index)
-        raise EntityDoesNotHaveComponentException.new "Cannot remove component " \
-                                                      "'#{self.context_info.component_names[index]}' from #{self}! " \
-                                                      "You should check if an entity has the component " \
-                                                      "before removing it."
+        raise DoesNotHaveComponentException.new "Cannot remove component " \
+                                                "'#{self.context_info.component_names[index]}' from #{self}! " \
+                                                "You should check if an entity has the component " \
+                                                "before removing it."
       end
 
       self._replace_component(index, nil)
@@ -156,8 +173,8 @@ module Entitas
     # or adds it if it doesn't exist yet.
     def replace_component(index : Int32, component : Entitas::Component)
       if !enabled?
-        raise EntityIsNotEnabledException.new "Cannot replace component " \
-                                              "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise IsNotEnabledException.new "Cannot replace component " \
+                                        "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if has_component?(index)
@@ -171,16 +188,20 @@ module Entitas
       replace_component index.value
     end
 
+    def replace_component(component : Entitas::Component)
+      replace_component(::Entitas::Component::COMPONENT_MAP[component.class].value, component)
+    end
+
     # Will return the `Entitas::Component` at the provided index.
     # You can only get a component at an index if it exists.
     def get_component(index : Int32) : Entitas::Component
       if has_component?(index)
         self.components[index].as(Entitas::Component)
       else
-        raise EntityDoesNotHaveComponentException.new "Cannot get component " \
-                                                      "'#{self.context_info.component_names[index]}' from #{self}!" \
-                                                      "You should check if an entity has the component " \
-                                                      "before getting it."
+        raise DoesNotHaveComponentException.new "Cannot get component " \
+                                                "'#{self.context_info.component_names[index]}' from #{self}!" \
+                                                "You should check if an entity has the component " \
+                                                "before getting it."
       end
     end
 
@@ -200,7 +221,7 @@ module Entitas
     # Returns all indices of added components.
     def get_component_indices : Array(Int32)
       if @_component_indices_cache.empty?
-        @_component_indices_cache = self.components.each_index { |c, i| c.nil? ? nil : i }.reject(Nil)
+        @_component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
       end
       @_component_indices_cache
     end
@@ -243,7 +264,7 @@ module Entitas
 
     # Removes all components.
     def remove_all_components! : Nil
-      self.components.each_index do |_, i|
+      self.components.each_index do |i|
         self._replace_component(i, nil)
       end
       # TODO: Do we need to clear_caches! ?
@@ -252,7 +273,7 @@ module Entitas
     # Dispatches OnDestroyEntity which will start the destroy process.
     def destroy : Nil
       if !self.enabled?
-        raise EntityIsNotEnabledException.new "Cannot destroy #{self}!"
+        raise IsNotEnabledException.new "Cannot destroy #{self}!"
       end
 
       # TODO: Call OnDestroyEntity event with (self)
@@ -293,7 +314,7 @@ module Entitas
     # The `context_info` is set by the context which created the entity and
     # contains information about the context.
     # It's used to provide better error messages.
-    private def context_info : Entitas::Context::Info
+    def context_info : Entitas::Context::Info
       @_context_info
     end
 

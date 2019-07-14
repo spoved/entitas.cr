@@ -68,20 +68,24 @@ module Entitas
       class ::Entitas::Entity
 
         def replace_{{@type.name.id.downcase}}(component : {{@type.name.id}})
-          self.replace_component({{@type.name.id}}.index, component)
+          self.replace_component(component)
         end
 
         def has_{{@type.name.id.downcase}}?
+          self.has_component_{{@type.name.id.downcase}}?
+        end
+
+        def has_component_{{@type.name.id.downcase}}?
           self.has_component?({{@type.name.id}}.index)
         end
 
-        # Will return the component that is a `{{@type.name.id}}` or `nil`
-        def {{@type.name.id.downcase}} : {{@type.id}}?
-          if self.has_component?({{@type.name.id}}.index)
-            self.get_component({{@type.name.id}}.index).as({{@type.name.id}})
-          else
-            nil
-          end
+        # Will return the component that is a `{{@type.name.id}}` or raise
+        def {{@type.name.id.downcase}} : {{@type.id}}
+          self.get_component_{{@type.name.id.downcase}}
+        end
+
+        def get_component_{{@type.name.id.downcase}} : {{@type.id}}
+          self.get_component({{@type.name.id}}.index).as({{@type.name.id}})
         end
 
         # Add a `{{@type.name.id}}` to the entity
