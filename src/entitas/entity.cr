@@ -23,11 +23,10 @@ module Entitas
 
     @_components_cache : Array(Entitas::Component) = Array(Entitas::Component).new
     @_component_indices_cache : Array(Int32) = Array(Int32).new
-    @_to_string_cache : Array(String) = Array(String).new
+    @_to_string_cache : String? = nil
 
     def initialize(
       creation_index : Int32,
-      component_pools : Array(ComponentPool),
       context_info : Entitas::Context::Info? = nil
     )
       if context_info.nil?
@@ -37,7 +36,6 @@ module Entitas
       end
 
       @_creation_index = creation_index
-      @_component_pools = component_pools
 
       # Clear caches
       self.clear_caches!
@@ -112,9 +110,10 @@ module Entitas
 
     # TODO: Implement AERC?
 
-    def create_component(index : ::Entitas::Component::Index)
+    def create_component(index : ::Entitas::Component::Index, **args)
       pool = component_pool(index)
-      pool.empty? ? nil : pool.pop
+      # FIXME: This should also clear the component
+      pool.empty? ? ::Entitas::Component::INDEX_MAP[index].new : pool.pop.init
     end
 
     # Will add the `Entitas::Component` at the provided index.
@@ -137,6 +136,7 @@ module Entitas
       self.clear_caches!
 
       # TODO: trigger OnComponentAdded event with (self, index, component)
+      component
     end
 
     def add_component(index : ::Entitas::Component::Index, component : Entitas::Component)
@@ -181,7 +181,15 @@ module Entitas
     end
 
     def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component)
-      replace_component index.value
+      replace_component index.value, component
+    end
+
+    def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
+      if component.nil?
+        self._replace_component(index.value, component)
+      else
+        replace_component index.value, component
+      end
     end
 
     def replace_component(component : Entitas::Component)
@@ -288,7 +296,7 @@ module Entitas
         self.components[index] = replacement
         self.clear_cache :components
 
-        if replacement.nil?
+        if !replacement.nil?
           # TODO: trigger OnComponentReplaced event with (self, index, previousComponent, replacement)
         else
           self.clear_cache(:indicies)
@@ -325,11 +333,11 @@ module Entitas
     private def clear_cache(cache : Symbol)
       case cache
       when :components
-        @_components_cache.clear
+        @_components_cache = Array(Entitas::Component).new
       when :indicies
-        @_component_indices_cache.clear
+        @_component_indices_cache = Array(Int32).new
       when :strings
-        @_to_string_cache.clear
+        @_to_string_cache = nil
       else
         raise Error.new "Unknown cache: #{cache} to clear"
       end
@@ -338,9 +346,9 @@ module Entitas
     # Will clear all the caches by default. Pass the corresponding `true`/`false` options to
     # enable/disable clearing of specific ones
     private def clear_caches!(clear_components = true, clear_indices = true, clear_strings = true)
-      @_components_cache.clear if clear_components
-      @_component_indices_cache.clear if clear_indices
-      @_to_string_cache.clear if clear_strings
+      clear_cache(:components) if clear_components
+      clear_cache(:indicies) if clear_indices
+      clear_cache(:strings) if clear_strings
     end
 
     # This will create a default `Entitas::Context::Info`
@@ -351,6 +359,18 @@ module Entitas
       end
 
       Entitas::Context::Info.new("No Context", component_names, nil)
+    end
+
+    def to_s
+      if @_to_string_cache.nil?
+        @_to_string_cache = String::Builder.build do |builder|
+          builder << "Entity_#{@_creation_index}("
+          builder << get_components.map { |c| c.class.to_s }.join(",")
+          builder << ")"
+        end
+      end
+
+      @_to_string_cache
     end
   end
 end

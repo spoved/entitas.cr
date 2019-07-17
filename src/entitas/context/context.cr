@@ -15,7 +15,7 @@ module Entitas
     @_reusable_entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
     @_retained_entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
 
-    @_component_pools : Array(ComponentPool) = Array(ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS)
+    # @_component_pools : Array(ComponentPool) = Array(ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS)
     @_context_info : Context::Info
     @_aerc_factory : Proc(Entitas::Entity, Entitas::SafeAERC(Entitas::Entity))
 
@@ -60,7 +60,7 @@ module Entitas
     end
 
     def component_pools : Array(ComponentPool)
-      @_component_pools
+      ::Entitas::Component::POOLS
     end
 
     def context_info : Context::Info
@@ -89,7 +89,7 @@ module Entitas
       else
         entity = Entitas::Entity.new
         @_creation_index += 1
-        entity.init(@_creation_index, @_total_components, @_component_pools, @_context_info, @_aerc_factory.call(entity))
+        entity.init(@_creation_index, @_context_info, @_aerc_factory.call(entity))
       end
     end
 
@@ -140,12 +140,12 @@ module Entitas
 
     # Clears the componentPool at the specified index.
     def clear_component_pool(index : Int32)
-      @_component_pools[index].clear if @_component_pools[index]?
+      component_pools[index].clear
     end
 
     # Clears all component pools.
     def clear_component_pools
-      @_component_pools.each do |pool|
+      component_pools.each do |pool|
         pool.clear
       end
     end

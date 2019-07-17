@@ -44,13 +44,30 @@ module Entitas
         \{% if meth.name =~ /^_entitas_set_(.*)$/ %}
         \{% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
         \{% if meth.args[0].default_value %}
-          @\{{var_name}} : \{{meth.args[0].restriction}} = \{{meth.args[0].default_value}},
+          @\{{var_name}} : \{{meth.args[0].restriction}}? = \{{meth.args[0].default_value}},
         \{% else %}
-          @\{{var_name}} : \{{meth.args[0].restriction}},
+          @\{{var_name}} : \{{meth.args[0].restriction}}? = nil,
         \{% end %}
         \{% end %}
         \{% end %}
           )
+        end
+
+
+        # Will reset all instance variables to nil or their default value
+        def init
+          \{% for meth in @type.methods %}
+          \{% if meth.name =~ /^_entitas_set_(.*)$/ %}
+          \{% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
+          \{% if meth.args[0].default_value %}
+            @\{{var_name}} = \{{meth.args[0].default_value}}
+          \{% else %}
+            @\{{var_name}} = nil
+          \{% end %}
+          \{% end %}
+          \{% end %}
+
+          self
         end
       end
 
@@ -62,6 +79,10 @@ module Entitas
 
         def replace_{{@type.name.id.downcase}}(component : {{@type.name.id}})
           self.replace_component(component)
+        end
+
+        def replace_component_{{@type.name.id.downcase}}(component : {{@type.name.id}})
+          self.replace_{{@type.name.id.downcase}}(component)
         end
 
         def has_{{@type.name.id.downcase}}?
@@ -112,7 +133,7 @@ module Entitas
           @{{ var.id }} = value
         end
       {% else %}
-        property {{ var.id }} : {{kype}}
+        property {{ var.id }} : {{kype}}? = nil
 
         # This is a private methods used for code generation
         private def _entitas_set_{{ var.id }}(value : {{kype}})
