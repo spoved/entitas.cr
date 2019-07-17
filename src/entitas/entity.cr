@@ -116,6 +116,10 @@ module Entitas
       pool.empty? ? ::Entitas::Component::INDEX_MAP[index].new : pool.pop.init
     end
 
+    def create_component(_type, **args)
+      create_component(::Entitas::Component::COMPONENT_MAP[_type], **args)
+    end
+
     # Will add the `Entitas::Component` at the provided index.
     # You can only have one component at an index.
     # Each component type must have its own constant index.
@@ -135,12 +139,17 @@ module Entitas
       self.components[index] = component
       self.clear_caches!
 
-      # TODO: trigger OnComponentAdded event with (self, index, component)
+      emit_event OnComponentAdded.new(self, index, component)
+
       component
     end
 
     def add_component(index : ::Entitas::Component::Index, component : Entitas::Component)
       add_component(index.value, component)
+    end
+
+    def add_component(component : Entitas::Component)
+      add_component(::Entitas::Component::COMPONENT_MAP[component.class], component)
     end
 
     # Removes a component at the specified index.
@@ -167,7 +176,7 @@ module Entitas
 
     # Replaces an existing component at the specified index
     # or adds it if it doesn't exist yet.
-    def replace_component(index : Int32, component : Entitas::Component)
+    def replace_component(index : Int32, component : Entitas::Component?)
       if !enabled?
         raise IsNotEnabledException.new "Cannot replace component " \
                                         "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -175,24 +184,16 @@ module Entitas
 
       if has_component?(index)
         self._replace_component(index, component)
-      else
+      elsif component.is_a? Entitas::Component
         self.add_component(index, component)
       end
     end
 
-    def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component)
+    def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
       replace_component index.value, component
     end
 
-    def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
-      if component.nil?
-        self._replace_component(index.value, component)
-      else
-        replace_component index.value, component
-      end
-    end
-
-    def replace_component(component : Entitas::Component)
+    def replace_component(component : Entitas::Component?)
       replace_component(::Entitas::Component::COMPONENT_MAP[component.class].value, component)
     end
 
@@ -271,20 +272,32 @@ module Entitas
       self.components.each_index do |i|
         self._replace_component(i, nil)
       end
-      # TODO: Do we need to clear_caches! ?
     end
 
-    # Dispatches OnDestroyEntity which will start the destroy process.
+    # Retains the entity. An owner can only retain the same entity once.
+    # Retain/Release is part of AERC (Automatic Entity Reference Counting)
+    # and is used internally to prevent pooling retained entities.
+    # If you use retain manually you also have to
+    # release it manually at some point.
+    def release
+      emit_event OnEntityReleased.new(self)
+    end
+
+    # Dispatches `OnDestroyEntity` which will start the destroy process.
     def destroy : Nil
+      self.destroy!
+    end
+
+    def destroy! : Nil
       if !self.enabled?
         raise IsNotEnabledException.new "Cannot destroy #{self}!"
       end
 
-      # TODO: Call OnDestroyEntity event with (self)
+      emit_event OnDestroyEntity.new(self)
     end
 
     # This method is used internally. Don't call it yourself. use `destroy`
-    def destroy!
+    def _destroy!
       @_is_enabled = false
       self.remove_all_components!
     end
@@ -297,16 +310,16 @@ module Entitas
         self.clear_cache :components
 
         if !replacement.nil?
-          # TODO: trigger OnComponentReplaced event with (self, index, previousComponent, replacement)
+          emit_event OnComponentReplaced.new(self, index, prev_component, replacement)
         else
           self.clear_cache(:indicies)
           self.clear_cache(:strings)
-          # TODO: trigger OnComponentRemoved event with (self, index, previousComponent)
+          emit_event OnComponentRemoved.new(self, index, prev_component)
         end
 
         component_pool(index) << prev_component unless prev_component.nil?
       else
-        # TODO: trigger OnComponentReplaced event with (self, index, previousComponent, replacement)
+        emit_event OnComponentReplaced.new(self, index, prev_component, replacement)
       end
     end
 

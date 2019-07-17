@@ -4,7 +4,7 @@ describe Entitas::Entity do
   describe "destroyed" do
     it "raises IsNotEnabledException when adding a component" do
       entity = new_entity
-      entity.destroy!
+      entity._destroy!
       expect_raises Entitas::Entity::IsNotEnabledException do
         entity.add_a
       end
@@ -28,7 +28,7 @@ describe Entitas::Entity do
         entity = new_entity
         entity.enabled?.should be_truthy
 
-        entity.destroy!
+        entity._destroy!
         entity.enabled?.should be_falsey
 
         entity.reactivate(42)
@@ -186,7 +186,7 @@ describe Entitas::Entity do
         clear_pools
 
         entity = new_entity
-        component = entity.create_component(Entitas::Component::Index::A)
+        component = entity.create_component(A)
         component.should be_a A
       end
 
@@ -200,12 +200,185 @@ describe Entitas::Entity do
         entity.del_a
         entity.component_pool(Entitas::Component::Index::A).should_not be_empty
 
-        new_component = entity.create_component(Entitas::Component::Index::A)
+        new_component = entity.create_component(A)
         new_component.should be component
       end
     end
 
-    # TODO: describe "events" do
+    describe "events" do
+      it "dispatches OnComponentAdded when adding a component" do
+        entity = new_entity
+        did_dispatch = 0
+        component = A.new
+
+        entity.on_component_added_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.component.should be component
+        end
+
+        entity.on_component_removed_event { true.should eq false }
+        entity.on_component_replaced_event { true.should eq false }
+
+        entity.add_component(component)
+        did_dispatch.should eq 1
+      end
+
+      it "dispatches OnComponentRemoved when removing a component" do
+        entity = new_entity_with_a
+        did_dispatch = 0
+        component = entity.a
+
+        entity.on_component_removed_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.component.should be component
+        end
+
+        entity.on_component_added_event { true.should eq false }
+        entity.on_component_replaced_event { true.should eq false }
+
+        entity.del_a
+        did_dispatch.should eq 1
+      end
+
+      it "dispatches OnComponentRemoved before pushing component to context" do
+        entity = new_entity_with_a
+        component = entity.a
+
+        entity.on_component_removed_event do |event|
+          new_component = entity.create_component(A)
+          component.should_not be new_component
+        end
+
+        entity.del_a
+      end
+
+      it "dispatches OnComponentReplaced when replacing a component" do
+        entity = new_entity_with_a
+        did_dispatch = 0
+        component = entity.a
+        new_component = A.new
+
+        entity.on_component_replaced_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.prev_component.should be component
+          event.new_component.should be new_component
+        end
+
+        entity.replace_a(new_component)
+        did_dispatch.should eq 1
+      end
+
+      it "provides previous and new component OnComponentReplaced when replacing with different component" do
+        entity = new_entity
+        did_dispatch = 0
+        prev_component = A.new
+        new_component = A.new
+
+        entity.on_component_replaced_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.prev_component.should be prev_component
+          event.new_component.should be new_component
+        end
+
+        entity.add_component(prev_component)
+        entity.replace_a(new_component)
+        did_dispatch.should eq 1
+      end
+
+      it "provides previous and new component OnComponentReplaced when replacing with same component" do
+        entity = new_entity
+        did_dispatch = 0
+        component = A.new
+
+        entity.on_component_replaced_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.prev_component.should be component
+          event.new_component.should be component
+        end
+
+        entity.add_component(component)
+        entity.replace_a(component)
+        did_dispatch.should eq 1
+      end
+
+      it "doesn't dispatch anything when replacing a non existing component with null" do
+        entity = new_entity
+
+        entity.on_component_added_event { true.should eq false }
+        entity.on_component_replaced_event { true.should eq false }
+        entity.on_component_removed_event { true.should eq false }
+
+        entity.replace_component(::Entitas::Component::Index::A, nil)
+      end
+
+      it "dispatches OnComponentAdded when attempting to replace a component which hasn't been added" do
+        entity = new_entity
+        did_dispatch = 0
+        new_component = A.new
+
+        entity.on_component_added_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.component.should be new_component
+        end
+
+        entity.on_component_replaced_event { true.should eq false }
+        entity.on_component_removed_event { true.should eq false }
+
+        entity.replace_a(new_component)
+        did_dispatch.should eq 1
+      end
+
+      it "dispatches OnComponentRemoved when replacing a component with null" do
+        entity = new_entity_with_a
+        did_dispatch = 0
+        component = entity.a
+
+        entity.on_component_added_event { true.should eq false }
+        entity.on_component_replaced_event { true.should eq false }
+        entity.on_component_removed_event do |event|
+          did_dispatch += 1
+          event.entity.should be entity
+          event.index.should eq ::Entitas::Component::Index::A.value
+          event.component.should be component
+        end
+
+        entity.replace_component(::Entitas::Component::Index::A, nil)
+        did_dispatch.should eq 1
+      end
+
+      it "dispatches OnComponentRemoved when removing all components" do
+        entity = new_entity_with_ab
+        did_dispatch = 0
+
+        entity.on_component_removed_event do |event|
+          did_dispatch += 1
+        end
+
+        entity.remove_all_components!
+        did_dispatch.should eq 2
+      end
+
+      it "dispatches OnDestroy when calling Destroy" do
+        entity = new_entity_with_a
+        did_dispatch = 0
+
+        entity.on_destroy_entity_event { did_dispatch += 1 }
+
+        entity.destroy
+      end
+    end
 
     # TODO: describe "reference counting" do
 
