@@ -17,11 +17,11 @@ build: ''
 build_args: ''
 
 # The command used to run the compiled application.
-# run: /usr/local/bin/crystal
-run: ./build.sh
+run: /usr/local/bin/crystal
+# run: ./build.sh
 # Any additional arguments to pass to the run command. Run args may only be
 # given if the run command is a single argument.
-# run_args: spec --error-trace
+run_args: spec --error-trace
 
 # The list of patterns of files for sentry to watch.
 watch:
