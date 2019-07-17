@@ -10,17 +10,28 @@ module Entitas
     end
 
     def retain(obj)
-      raise Entitas::MethodNotImplementedError
+      raise Entitas::MethodNotImplementedError.new
     end
 
     def release(obj)
-      raise Entitas::MethodNotImplementedError
+      raise Entitas::MethodNotImplementedError.new
     end
   end
 
-  class SafeAERC(T) < Entitas::AERC
-    @_owners = Array(T).new
+  # Automatic Entity Reference Counting (AERC)
+  # is used internally to prevent pooling retained entities.
+  # If you use retain manually you also have to
+  # release it manually at some point.
+  # SafeAERC checks if the entity has already been
+  # retained or released. It's slower, but you keep the information
+  # about the owners.
+  class SafeAERC < Entitas::AERC
+    @_owners = Array(UInt64).new
     @_entity : Entitas::Entity
+
+    private def entity
+      @_entity
+    end
 
     def retain_count : Int32
       @_owners.size
@@ -34,20 +45,24 @@ module Entitas
       @_entity = entity
     end
 
-    def retain(owner : T)
-      if owners.includes(owner)
-        raise new Entitas::EntityIsAlreadyRetainedByOwnerException.new(@_entity, owner)
+    def retain(owner)
+      if includes?(owner)
+        raise Entitas::Entity::IsAlreadyRetainedByOwnerException.new "entity: #{entity} owner: #{owner}"
       else
-        owners.push owner
+        owners.push owner.object_id
       end
     end
 
-    def release(owner : T)
-      if !owners.includes(owner)
-        raise new Entitas::EntityIsNotRetainedByOwnerException.new(@_entity, owner)
+    def release(owner)
+      if !includes?(owner)
+        raise Entitas::Entity::IsNotRetainedByOwnerException.new "entity: #{entity} owner: #{owner}"
       else
-        owners.delete owner
+        owners.delete owner.object_id
       end
+    end
+
+    def includes?(owner)
+      owners.includes?(owner.object_id)
     end
   end
 
