@@ -1,8 +1,10 @@
-require "../error"
-require "../entity"
+require "./error"
+require "./entity"
 
 module Entitas
-  module AERC
+  abstract class AERC
+    @_retain_count = 0
+
     def retain_count : Int32
       @_retain_count
     end
@@ -16,9 +18,7 @@ module Entitas
     end
   end
 
-  class SafeAERC(T)
-    include Entitas::AERC
-
+  class SafeAERC(T) < Entitas::AERC
     @_owners = Array(T).new
     @_entity : Entitas::Entity
 
@@ -51,9 +51,7 @@ module Entitas
     end
   end
 
-  class UnsafeAERC
-    include Entitas::AERC
-
+  class UnsafeAERC < Entitas::AERC
     def retain(obj)
       @_retain_count += 1
     end

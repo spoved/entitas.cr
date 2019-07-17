@@ -14,5 +14,11 @@ module Entitas
 
     class AlreadyHasComponentException < Error
     end
+
+    class IsAlreadyRetainedByOwnerException < Error
+    end
+
+    class IsNotRetainedByOwnerException < Error
+    end
   end
 end

@@ -7,3 +7,13 @@ authors:
 crystal: 0.25.0
 
 license: MIT
+
+development_dependencies:
+  sentry:
+    github: samueleaton/sentry
+    branch: master
+  coverage:
+    github: anykeyh/crystal-coverage
+  ameba:
+    github: veelenga/ameba
+    version: ~> 0.10.0

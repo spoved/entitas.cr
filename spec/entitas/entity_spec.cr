@@ -248,7 +248,7 @@ describe Entitas::Entity do
         entity = new_entity_with_a
         component = entity.a
 
-        entity.on_component_removed_event do |event|
+        entity.on_component_removed_event do
           new_component = entity.create_component(A)
           component.should_not be new_component
         end
@@ -362,9 +362,7 @@ describe Entitas::Entity do
         entity = new_entity_with_ab
         did_dispatch = 0
 
-        entity.on_component_removed_event do |event|
-          did_dispatch += 1
-        end
+        entity.on_component_removed_event { did_dispatch += 1 }
 
         entity.remove_all_components!
         did_dispatch.should eq 2
@@ -380,7 +378,87 @@ describe Entitas::Entity do
       end
     end
 
-    # TODO: describe "reference counting" do
+    describe "reference counting" do
+      owner = new_entity
+
+      it "retains entity" do
+        entity = new_entity
+        entity.retain_count.should eq 0
+        entity.retain(owner)
+        entity.retain_count.should eq 1
+        entity.aerc.should be_a(Entitas::SafeAERC)
+        entity.aerc.as(Entitas::SafeAERC).includes?(owner).should be_true
+      end
+
+      it "releases entity" do
+        entity = new_entity
+        entity.retain(owner)
+        entity.release(owner)
+
+        entity.aerc.as(Entitas::SafeAERC).includes?(owner).should be_false
+      end
+
+      it "throws when releasing more than it has been retained" do
+        entity = new_entity
+        entity.retain(owner)
+        entity.release(owner)
+
+        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+          entity.release(owner)
+        end
+      end
+
+      it "throws when retaining twice with same owner" do
+        entity = new_entity
+        entity.retain(owner)
+        expect_raises Entitas::Entity::IsAlreadyRetainedByOwnerException do
+          entity.retain(owner)
+        end
+      end
+
+      it "throws when releasing with unknown owner" do
+        entity = new_entity
+        entity.retain(owner)
+        unknown_owner = "You dont know me!"
+        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+          entity.release(unknown_owner)
+        end
+      end
+
+      it "throws when releasing with owner which doesn't retain entity anymore" do
+        owner2 = "second owner"
+        entity = new_entity
+        entity.retain(owner)
+        entity.retain(owner2)
+        entity.release(owner2)
+
+        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+          entity.release(owner2)
+        end
+      end
+
+      describe "events" do
+        it "doesn't dispatch OnEntityReleased when retaining" do
+          entity = new_entity
+          entity.on_entity_released_event { true.should eq false }
+          entity.retain(owner)
+        end
+
+        it "dispatches OnEntityReleased when retain and release" do
+          did_dispatch = 0
+          entity = new_entity
+          entity.on_entity_released_event do |event|
+            did_dispatch += 1
+            event.entity.should be entity
+          end
+
+          entity.retain(owner)
+          entity.release(owner)
+
+          did_dispatch.should eq 1
+        end
+      end
+    end
 
     describe "internal caching" do
       describe "components" do

@@ -1,5 +1,3 @@
-require "./context"
-
 annotation ::Component::Unique
 end
 
