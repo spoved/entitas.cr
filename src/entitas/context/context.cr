@@ -2,7 +2,6 @@ require "../component"
 require "../entity/index"
 require "../entity/aerc"
 require "./info"
-require "graphite"
 require "../events/context"
 
 module Entitas

@@ -26,6 +26,10 @@ module Entitas
       @_on_destroy_entity_event << block
     end
 
+    def remove_all_on_entity_released_handlers
+      @_on_entity_released_event.clear
+    end
+
     def emit_event(event)
       case event
       when OnComponentAdded
