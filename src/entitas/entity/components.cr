@@ -37,7 +37,7 @@ module Entitas
       self.components[index] = component
       self.clear_caches!
 
-      emit_event OnComponentAdded.new(self, index, component)
+      emit_event OnComponentAdded, self, index, component
 
       component
     end
@@ -180,16 +180,16 @@ module Entitas
         self.clear_cache :components
 
         if !replacement.nil?
-          emit_event OnComponentReplaced.new(self, index, prev_component, replacement)
+          emit_event OnComponentReplaced, self, index, prev_component, replacement
         else
           self.clear_cache(:indicies)
           self.clear_cache(:strings)
-          emit_event OnComponentRemoved.new(self, index, prev_component)
+          emit_event OnComponentRemoved, self, index, prev_component
         end
 
         component_pool(index) << prev_component unless prev_component.nil?
       else
-        emit_event OnComponentReplaced.new(self, index, prev_component, replacement)
+        emit_event OnComponentReplaced, self, index, prev_component, replacement
       end
     end
   end

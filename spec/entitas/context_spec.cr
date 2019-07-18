@@ -15,7 +15,7 @@ describe Entitas::Context do
     end
 
     it "has no entities when no entities were created" do
-      new_context.entities.should be_empty
+      new_context.get_entities.should be_empty
     end
 
     it "gets total entity count" do
@@ -90,7 +90,7 @@ describe Entitas::Context do
       it "returns all created entities" do
         ctx, e = context_with_entity
         e_two = ctx.create_entity
-        entities = ctx.entities
+        entities = ctx.get_entities
         entities.size.should eq 2
         entities.includes?(e)
         entities.includes?(e_two)
@@ -101,7 +101,7 @@ describe Entitas::Context do
         e.destroy!
         ctx.has_entity?(e)
         ctx.count.should eq 0
-        ctx.entities.should be_empty
+        ctx.get_entities.should be_empty
       end
 
       it "destroys an entity and removes all its components" do
@@ -118,6 +118,28 @@ describe Entitas::Context do
 
         ctx.create_entity.destroy!
         did_destroy.should eq 2
+      end
+
+      it "destroys all entities" do
+        ctx, e = context_with_entity
+        ctx.create_entity
+        ctx.destroy_all_entities
+      end
+
+      it "throws when destroying all entities and there are still entities retained" do
+        ctx = new_context
+        ctx.create_entity.retain("something")
+        expect_raises Entitas::Context::Error::StillHasRetainedEntities do
+          ctx.destroy_all_entities
+        end
+      end
+    end
+
+    describe "internal caching" do
+      it "caches entities" do
+        ctx, _ = context_with_entity
+        entities = ctx.get_entities
+        ctx.get_entities.should eq entities
       end
     end
   end

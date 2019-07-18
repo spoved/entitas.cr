@@ -1,8 +1,6 @@
-require "./component"
+require "./*"
 require "./entity/*"
-require "./aerc"
 require "./context/info"
-require "./aliases"
 
 module Entitas
   class Entity
@@ -10,8 +8,6 @@ module Entitas
 
     class Error < Exception
     end
-
-    include Entitas::Entity::Events
 
     # Each entity has its own unique `creation_index` which will be set by
     # the context when you create the entity.
@@ -31,11 +27,20 @@ module Entitas
 
     protected getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
 
+    emits_events OnComponentAdded, OnComponentRemoved, OnComponentReplaced, OnDestroyEntity, OnEntityReleased, OnEntityChanged
+
     def initialize(
       @creation_index : Int32 = 0,
       @context_info : Entitas::Context::Info? = nil,
       @aerc : SafeAERC? = nil
     )
+      @on_component_added_event_cache = ->on_component_added_event(Events::OnComponentAdded)
+      @on_component_removed_event_cache = ->on_component_removed_event(Events::OnComponentRemoved)
+      @on_component_replaced_event_cache = ->on_component_replaced_event(Events::OnComponentReplaced)
+      @on_entity_released_event_cache = ->on_entity_released_event(Events::OnEntityReleased)
+      @on_entity_changed_event_cache = ->on_entity_changed_event(Events::OnEntityChanged)
+      @on_destroy_entity_event_cache = ->on_destroy_entity_event(Events::OnDestroyEntity)
+
       reactivate(@creation_index)
     end
 
@@ -94,7 +99,7 @@ module Entitas
         raise Error::IsNotEnabled.new "Cannot destroy #{self}!"
       end
 
-      emit_event OnDestroyEntity.new(self)
+      emit_event OnDestroyEntity, self
     end
 
     # This method is used internally. Don't call it yourself. use `destroy`
@@ -145,7 +150,7 @@ module Entitas
       aerc.release(owner)
 
       if self.retain_count.zero?
-        emit_event OnEntityReleased.new(self)
+        emit_event OnEntityReleased, self
       end
     end
 
@@ -208,6 +213,10 @@ module Entitas
     ############################
     # Misc functions
     ############################
+
+    def remove_all_on_entity_released_handlers
+      self.on_entity_released_events.clear
+    end
 
     def to_s
       if self.to_string_cache.nil?

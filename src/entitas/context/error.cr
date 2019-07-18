@@ -16,6 +16,14 @@ module Entitas
           "#{context_info.component_names.size}:#{context_info.component_names.join("\n")}"
         end
       end
+
+      class StillHasRetainedEntities < Error
+        getter context : Context
+        getter retained_entities : Array(Entity)
+
+        def initialize(@context, @retained_entities)
+        end
+      end
     end
   end
 end
