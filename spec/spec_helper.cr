@@ -2,6 +2,8 @@ require "spec"
 require "../src/entitas"
 require "./fixtures/*"
 
+Spoved.logger.level = Logger::DEBUG
+
 def clear_pools
   ::Entitas::Component::POOLS.each { |p| p.clear }
 end

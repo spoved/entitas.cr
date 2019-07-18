@@ -1,8 +1,11 @@
 require "./error"
 require "./entity"
+require "spoved/logger"
 
 module Entitas
   abstract class AERC
+    spoved_logger
+
     @_retain_count = 0
 
     def retain_count : Int32
@@ -49,6 +52,7 @@ module Entitas
       if includes?(owner)
         raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
+        logger.debug "Retaining #{entity} for #{owner}", "SafeAERC"
         owners.push owner.object_id
       end
     end
@@ -57,6 +61,7 @@ module Entitas
       if !includes?(owner)
         raise Entitas::Entity::Error::IsNotRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
+        logger.debug "Releasing #{entity} from #{owner}", "SafeAERC"
         owners.delete owner.object_id
       end
     end

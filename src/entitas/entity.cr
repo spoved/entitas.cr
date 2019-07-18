@@ -6,6 +6,8 @@ require "./aliases"
 
 module Entitas
   class Entity
+    spoved_logger
+
     class Error < Exception
     end
 
@@ -40,6 +42,8 @@ module Entitas
     def init(creation_index ct_index : Int32 = 0,
              context_info ctx_info : Entitas::Context::Info? = nil,
              aerc _aerc : SafeAERC? = nil)
+      logger.debug "Calling init", self.to_s
+
       self.aerc = _aerc
       self.context_info = ctx_info
       self.creation_index = ct_index
@@ -63,6 +67,7 @@ module Entitas
 
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32) : Entity
+      logger.info "Reactivating Entity: #{self}", self.to_s
       # Set our passed variables
       self.creation_index = creation_index
       self.is_enabled = true
@@ -84,6 +89,7 @@ module Entitas
     end
 
     def destroy! : Nil
+      logger.info "Starting to destroy entity: #{self}", self.to_s
       if !self.enabled?
         raise Error::IsNotEnabled.new "Cannot destroy #{self}!"
       end
@@ -93,8 +99,14 @@ module Entitas
 
     # This method is used internally. Don't call it yourself. use `destroy`
     def _destroy!
+      logger.info "Destroying entity: #{self}", self.to_s
       self.is_enabled = false
       self.remove_all_components!
+
+      self.clear_on_component_added_event_hooks
+      self.clear_on_component_removed_event_hooks
+      self.clear_on_component_replaced_event_hooks
+      self.clear_on_destroy_entity_event_hooks
     end
 
     ############################
@@ -161,6 +173,8 @@ module Entitas
     # @_components_cache.size # => 0
     # ```
     private def clear_cache(cache : Symbol)
+      logger.debug "Clearing cache: #{cache}", self.to_s
+
       case cache
       when :components
         self.components_cache = Array(Entitas::Component).new

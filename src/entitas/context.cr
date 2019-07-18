@@ -2,6 +2,7 @@ require "./component"
 require "./component/helper"
 require "./entity"
 require "./context/*"
+require "spoved/logger"
 
 module Entitas
   # A context manages the lifecycle of entities and groups.
@@ -9,8 +10,11 @@ module Entitas
   #  The prefered way to create a context is to use the generated methods
   #  from the code generator, e.g. var context = new GameContext();
   abstract class Context
+    spoved_logger
+
     # include Entitas::Entity::Events
     include Entitas::Component::Helper
+    include Entitas::Context::Events
 
     protected property creation_index : Int32
     protected property aerc_factory : AERCFactory
@@ -23,6 +27,11 @@ module Entitas
 
     protected property entities_cache = Array(Entity).new
 
+    getter on_entity_changed_cache : Proc(Entitas::Entity::OnEntityChanged, Nil)
+    getter on_component_replaced_cache : Proc(Entitas::Entity::OnComponentReplaced, Nil)
+    getter on_entity_released_cache : Proc(Entitas::Entity::OnEntityReleased, Nil)
+    getter on_destroy_entity_cache : Proc(Entitas::Entity::OnDestroyEntity, Nil)
+
     def initialize(
       # @total_components : Int32 = ::Entitas::Component::TOTAL_COMPONENTS,
       @creation_index : Int32 = 0,
@@ -30,6 +39,11 @@ module Entitas
       @aerc_factory : AERCFactory = AERCFactory.new { |entity| Entitas::SafeAERC.new(entity) },
       @entity_factory : EntityFactory = EntityFactory.new { Entitas::Entity.new }
     )
+      @on_entity_changed_cache = ->on_entity_changed(Entitas::Entity::Events::OnEntityChanged)
+      @on_component_replaced_cache = ->on_component_replaced(Entitas::Entity::Events::OnComponentReplaced)
+      @on_entity_released_cache = ->on_entity_released(Entitas::Entity::Events::OnEntityReleased)
+      @on_destroy_entity_cache = ->on_destroy_entity(Entitas::Entity::Events::OnDestroyEntity)
+
       @context_info = context_info || create_default_context_info
       # @component_pools = Array(ComponentPool).new(total_components)
 
@@ -54,6 +68,8 @@ module Entitas
     ############################
 
     private def create_default_context_info : Entitas::Context::Info
+      logger.debug "Creating default context", "Context"
+
       component_names = Array(String).new
       prefix = "Index "
       total_components.times do |i|
@@ -89,19 +105,23 @@ module Entitas
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
     def create_entity : Entitas::Entity
+      logger.debug "Creating new entity", self.class
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
+                 logger.debug "Reusing entity: #{e}", self.to_s
                  e.reactivate(self.creation_index)
                  self.creation_index += 1
                  e
                else
                  e = self.entity_factory.call
+                 logger.debug "Created new entity: #{e}", self.to_s
                  e.init(self.creation_index, self.context_info, self.aerc_factory.call(e))
                  self.creation_index += 1
                  e
                end
 
       self.entities << entity
+
       entity.retain(self)
       self.entities_cache.clear
 
@@ -110,8 +130,8 @@ module Entitas
       # entity.on_component_removed_event
       # entity.on_component_replaced_event
 
-      entity.on_entity_released_event &->on_entity_released(Entitas::Entity::Events::OnEntityReleased)
-      entity.on_destroy_entity_event &->on_destroy_entity(Entitas::Entity::Events::OnDestroyEntity)
+      entity.on_entity_released &on_entity_released_cache.as(Proc(Entitas::Entity::OnEntityReleased, Nil))
+      entity.on_destroy_entity &on_destroy_entity_cache.as(Proc(Entitas::Entity::OnDestroyEntity, Nil))
 
       entity
     end
@@ -124,6 +144,12 @@ module Entitas
     ############################
     # Event functions
     ############################
+
+    def on_entity_changed(event : Entitas::Entity::Events::OnEntityChanged)
+    end
+
+    def on_component_replaced(event : Entitas::Entity::Events::OnComponentReplaced)
+    end
 
     def on_entity_released(event : Entitas::Entity::Events::OnEntityReleased)
       entity = event.entity
@@ -141,17 +167,15 @@ module Entitas
       self.entities.delete(entity)
       self.entities_cache.clear
 
-      # TODO: OnEntityWillBeDestroyed
-
+      emit_event OnEntityWillBeDestroyed.new(self, entity)
       entity._destroy!
-
-      # TODO: OnEntityDestroyed
+      emit_event OnEntityDestroyed.new(self, entity)
 
       if entity.retain_count == 1
         # Can be released immediately without
         # adding to retained_entities
 
-        # TODO: tEntity.OnEntityReleased -= _cachedEntityReleased;
+        entity.on_entity_released_events.delete(on_entity_released_cache)
 
         self.reusable_entities << entity
         entity.release(self)
@@ -160,6 +184,9 @@ module Entitas
         self.retained_entities << entity
         entity.release(self)
       end
+    end
+
+    def remove_all_event_handlers
     end
 
     ############################

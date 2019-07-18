@@ -3,6 +3,8 @@ end
 
 module Entitas
   abstract class Component
+    spoved_logger
+
     macro inherited
 
       # TODO: Enable or remove

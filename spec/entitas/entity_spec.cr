@@ -211,15 +211,15 @@ describe Entitas::Entity do
         did_dispatch = 0
         component = A.new
 
-        entity.on_component_added_event do |event|
+        entity.on_component_added do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
           event.component.should be component
         end
 
-        entity.on_component_removed_event { true.should eq false }
-        entity.on_component_replaced_event { true.should eq false }
+        entity.on_component_removed { true.should eq false }
+        entity.on_component_replaced { true.should eq false }
 
         entity.add_component(component)
         did_dispatch.should eq 1
@@ -230,15 +230,15 @@ describe Entitas::Entity do
         did_dispatch = 0
         component = entity.a
 
-        entity.on_component_removed_event do |event|
+        entity.on_component_removed do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
           event.component.should be component
         end
 
-        entity.on_component_added_event { true.should eq false }
-        entity.on_component_replaced_event { true.should eq false }
+        entity.on_component_added { true.should eq false }
+        entity.on_component_replaced { true.should eq false }
 
         entity.del_a
         did_dispatch.should eq 1
@@ -248,7 +248,7 @@ describe Entitas::Entity do
         entity = new_entity_with_a
         component = entity.a
 
-        entity.on_component_removed_event do
+        entity.on_component_removed do
           new_component = entity.create_component(A)
           component.should_not be new_component
         end
@@ -262,7 +262,7 @@ describe Entitas::Entity do
         component = entity.a
         new_component = A.new
 
-        entity.on_component_replaced_event do |event|
+        entity.on_component_replaced do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
@@ -280,7 +280,7 @@ describe Entitas::Entity do
         prev_component = A.new
         new_component = A.new
 
-        entity.on_component_replaced_event do |event|
+        entity.on_component_replaced do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
@@ -298,7 +298,7 @@ describe Entitas::Entity do
         did_dispatch = 0
         component = A.new
 
-        entity.on_component_replaced_event do |event|
+        entity.on_component_replaced do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
@@ -314,9 +314,9 @@ describe Entitas::Entity do
       it "doesn't dispatch anything when replacing a non existing component with null" do
         entity = new_entity
 
-        entity.on_component_added_event { true.should eq false }
-        entity.on_component_replaced_event { true.should eq false }
-        entity.on_component_removed_event { true.should eq false }
+        entity.on_component_added { true.should eq false }
+        entity.on_component_replaced { true.should eq false }
+        entity.on_component_removed { true.should eq false }
 
         entity.replace_component(::Entitas::Component::Index::A, nil)
       end
@@ -326,15 +326,15 @@ describe Entitas::Entity do
         did_dispatch = 0
         new_component = A.new
 
-        entity.on_component_added_event do |event|
+        entity.on_component_added do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
           event.component.should be new_component
         end
 
-        entity.on_component_replaced_event { true.should eq false }
-        entity.on_component_removed_event { true.should eq false }
+        entity.on_component_replaced { true.should eq false }
+        entity.on_component_removed { true.should eq false }
 
         entity.replace_a(new_component)
         did_dispatch.should eq 1
@@ -345,9 +345,9 @@ describe Entitas::Entity do
         did_dispatch = 0
         component = entity.a
 
-        entity.on_component_added_event { true.should eq false }
-        entity.on_component_replaced_event { true.should eq false }
-        entity.on_component_removed_event do |event|
+        entity.on_component_added { true.should eq false }
+        entity.on_component_replaced { true.should eq false }
+        entity.on_component_removed do |event|
           did_dispatch += 1
           event.entity.should be entity
           event.index.should eq ::Entitas::Component::Index::A.value
@@ -362,7 +362,7 @@ describe Entitas::Entity do
         entity = new_entity_with_ab
         did_dispatch = 0
 
-        entity.on_component_removed_event { did_dispatch += 1 }
+        entity.on_component_removed { did_dispatch += 1 }
 
         entity.remove_all_components!
         did_dispatch.should eq 2
@@ -372,7 +372,7 @@ describe Entitas::Entity do
         entity = new_entity_with_a
         did_dispatch = 0
 
-        entity.on_destroy_entity_event { did_dispatch += 1 }
+        entity.on_destroy_entity { did_dispatch += 1 }
 
         entity.destroy
       end
@@ -440,14 +440,14 @@ describe Entitas::Entity do
       describe "events" do
         it "doesn't dispatch OnEntityReleased when retaining" do
           entity = new_entity
-          entity.on_entity_released_event { true.should eq false }
+          entity.on_entity_released { true.should eq false }
           entity.retain(owner)
         end
 
         it "dispatches OnEntityReleased when retain and release" do
           did_dispatch = 0
           entity = new_entity
-          entity.on_entity_released_event do |event|
+          entity.on_entity_released do |event|
             did_dispatch += 1
             event.entity.should be entity
           end

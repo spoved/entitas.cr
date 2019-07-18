@@ -8,6 +8,10 @@ crystal: 0.25.0
 
 license: MIT
 
+dependencies:
+  spoved:
+    github: spoved/spoved.cr
+
 development_dependencies:
   sentry:
     github: samueleaton/sentry

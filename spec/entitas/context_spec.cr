@@ -109,6 +109,16 @@ describe Entitas::Context do
         e.destroy!
         e.get_components.should be_empty
       end
+
+      it "removes OnDestroyEntity handler" do
+        did_destroy = 0
+        ctx, e = context_with_entity
+        ctx.on_entity_will_be_destroyed { did_destroy += 1 }
+        e.destroy!
+
+        ctx.create_entity.destroy!
+        did_destroy.should eq 2
+      end
     end
   end
 end
