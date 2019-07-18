@@ -22,7 +22,11 @@ TODO: Write usage instructions here
 
 ## Development
 
-TODO: Write development instructions here
+Dont forget to add your pre-commit hooks!
+
+```
+ln ./pre-commit .git/hooks/pre-commit
+```
 
 ## Contributing
 

@@ -78,7 +78,7 @@ describe Entitas::Context do
 
     describe "when entity created" do
       it "gets total entity count" do
-        ctx, e = context_with_entity
+        ctx, _ = context_with_entity
         ctx.size.should eq 1
       end
 
@@ -105,7 +105,7 @@ describe Entitas::Context do
       end
 
       it "destroys an entity and removes all its components" do
-        ctx, e = context_with_entity
+        _, e = context_with_entity
         e.destroy!
         e.get_components.should be_empty
       end
