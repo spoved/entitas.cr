@@ -25,3 +25,14 @@ def new_entity_with_ab
   entity.add_b
   entity
 end
+
+def new_context_info
+  Entitas::Context::Info.new("TestContext")
+end
+
+def new_context
+  TestContext.new(context_info: new_context_info,
+    aerc_factory: Entitas::AERCFactory.new { |entity| Entitas::SafeAERC.new(entity) },
+    entity_factory: Entitas::EntityFactory.new { TestEntity.new },
+  )
+end

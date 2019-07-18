@@ -1,45 +1,12 @@
+require "../component/helper"
+
 module Entitas
   class Entity
     ############################
     # Component functions
     ############################
 
-    # The total amount of components an entity can possibly have.
-    def self.total_components : Int32
-      Entitas::Component::TOTAL_COMPONENTS
-    end
-
-    # The total amount of components an entity can possibly have.
-    def total_components : Int32
-      Entitas::Component::TOTAL_COMPONENTS
-    end
-
-    # component_pools is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.CreateComponent(index, type) to get a new or
-    # reusable component from the componentPool.
-    # Use entity.GetComponentPool(index) to get a componentPool for
-    # a specific component index.
-    #
-    def component_pools : Array(ComponentPool)
-      ::Entitas::Component::POOLS
-    end
-
-    # Returns the `ComponentPool` for the specified component index.
-    # `component_pools` is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.create_component(index, type) to get a new or
-    # reusable component from the `ComponentPool`.
-    def component_pool(index : Int32) : ComponentPool
-      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
-      self.component_pools[index]
-    end
-
-    def component_pool(index : ::Entitas::Component::Index) : ComponentPool
-      component_pool index.value
-    end
+    include Entitas::Component::Helper
 
     def create_component(index : ::Entitas::Component::Index, **args)
       pool = component_pool(index)
@@ -148,18 +115,18 @@ module Entitas
     # Returns all added components.
     def get_components : Array(Entitas::Component)
       # if the cache is empty, repopulate it
-      if @_components_cache.empty?
-        @_components_cache = self.components.reject(Nil)
+      if components_cache.empty?
+        @components_cache = self.components.reject(Nil)
       end
-      @_components_cache
+      components_cache
     end
 
     # Returns all indices of added components.
     def get_component_indices : Array(Int32)
-      if @_component_indices_cache.empty?
-        @_component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
+      if component_indices_cache.empty?
+        @component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
       end
-      @_component_indices_cache
+      component_indices_cache
     end
 
     # Determines whether this entity has a component
@@ -224,11 +191,6 @@ module Entitas
       else
         emit_event OnComponentReplaced.new(self, index, prev_component, replacement)
       end
-    end
-
-    # Returns the entities array of `Entitas::Component`
-    private def components
-      @_components
     end
   end
 end

@@ -2,45 +2,52 @@ require "./component"
 require "./entity/*"
 require "./aerc"
 require "./context/info"
+require "./aliases"
 
 module Entitas
-  alias ComponentPool = Array(Entitas::Component)
-  alias EntityPool = Array(Entitas::Entity)
-
   class Entity
     class Error < Exception
     end
 
+    include Entitas::Entity::Events
+
     # Each entity has its own unique `creation_index` which will be set by
     # the context when you create the entity.
-    @_creation_index : Int32 = -1
+    getter creation_index : Int32 = -1
+
+    @context_info : Entitas::Context::Info? = nil
+    @aerc : AERC? = nil
 
     # The context manages the state of an entity.
     # Active entities are enabled, destroyed entities are not.
-    @_is_enabled : Bool = false
+    getter is_enabled : Bool = false
 
-    @_components_cache : Array(Entitas::Component) = Array(Entitas::Component).new
-    @_component_indices_cache : Array(Int32) = Array(Int32).new
-    @_to_string_cache : String? = nil
+    getter components_cache = Array(Entitas::Component).new
+    getter component_indices_cache = Array(Int32).new
+    getter to_string_cache : String? = nil
 
-    @_aerc : AERC? = nil
-    @_components : Array(Entitas::Component?) = Array(Entitas::Component?).new(Entitas::Component::TOTAL_COMPONENTS, nil)
+    getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
 
-    def initialize(creation_index : Int32, aerc : SafeAERC? = nil, context_info : Entitas::Context::Info? = nil)
-      @_aerc = aerc
+    def initialize(
+      @creation_index : Int32 = 0,
+      @context_info : Entitas::Context::Info? = nil,
+      @aerc : SafeAERC? = nil
+    )
+      reactivate(@creation_index)
+    end
 
-      if context_info.nil?
-        @_context_info = create_default_context_info
-      else
-        @_context_info = context_info.as(Entitas::Context::Info)
-      end
-
-      @_creation_index = creation_index
+    def init(creation_index ct_index : Int32 = 0,
+             context_info ctx_info : Entitas::Context::Info? = nil,
+             aerc _aerc : SafeAERC? = nil)
+      @aerc = _aerc
+      @context_info = ctx_info
+      @creation_index = ct_index
 
       # Clear caches
       self.clear_caches!
 
-      reactivate(creation_index)
+      self.reactivate(ct_index)
+      self
     end
 
     ############################
@@ -50,29 +57,24 @@ module Entitas
     # The context manages the state of an entity.
     # Active entities are enabled, destroyed entities are not.
     def enabled?
-      @_is_enabled
+      self.is_enabled
     end
 
     # Re-enable the entity and set its creation index
-    def reactivate(creation_index : Int32)
+    def reactivate(creation_index : Int32) : Entity
       # Set our passed variables
-      @_creation_index = creation_index
-      @_is_enabled = true
+      @creation_index = creation_index
+      @is_enabled = true
 
       # Clear caches
       self.clear_caches!
+      self
     end
 
     # Re-enable the entity and set its creation index
-    def reactivate(creation_index : Int32, context_info : Entitas::Context::Info)
-      @_context_info = context_info
+    def reactivate(creation_index : Int32, context_info : Entitas::Context::Info) : Entity
+      @context_info = context_info
       reactivate(creation_index)
-    end
-
-    # Each entity has its own unique creationIndex which will be set by
-    # the context when you create the entity.
-    def creation_index : Int32
-      @_creation_index
     end
 
     # Dispatches `OnDestroyEntity` which will start the destroy process.
@@ -90,7 +92,7 @@ module Entitas
 
     # This method is used internally. Don't call it yourself. use `destroy`
     def _destroy!
-      @_is_enabled = false
+      @is_enabled = false
       self.remove_all_components!
     end
 
@@ -103,7 +105,7 @@ module Entitas
     # If you use retain manually you also have to
     # release it manually at some point.
     def aerc : AERC
-      @_aerc ||= SafeAERC.new(self)
+      @aerc ||= SafeAERC.new(self)
     end
 
     # Returns the number of objects that retain this entity.
@@ -142,7 +144,7 @@ module Entitas
     # contains information about the context.
     # It's used to provide better error messages.
     def context_info : Entitas::Context::Info
-      @_context_info
+      @context_info ||= self.create_default_context_info
     end
 
     ############################
@@ -160,11 +162,11 @@ module Entitas
     private def clear_cache(cache : Symbol)
       case cache
       when :components
-        @_components_cache = Array(Entitas::Component).new
+        @components_cache = Array(Entitas::Component).new
       when :indicies
-        @_component_indices_cache = Array(Int32).new
+        @component_indices_cache = Array(Int32).new
       when :strings
-        @_to_string_cache = nil
+        @to_string_cache = nil
       else
         raise Error.new "Unknown cache: #{cache} to clear"
       end
@@ -182,7 +184,7 @@ module Entitas
     private def create_default_context_info : Entitas::Context::Info
       component_names = Array(String).new
       0..Entitas::Component::TOTAL_COMPONENTS.times do |i|
-        component_names << i.to_s
+        component_names << "Index #{i}"
       end
 
       Entitas::Context::Info.new("No Context", component_names, nil)
@@ -193,15 +195,15 @@ module Entitas
     ############################
 
     def to_s
-      if @_to_string_cache.nil?
-        @_to_string_cache = String::Builder.build do |builder|
-          builder << "Entity_#{@_creation_index}("
+      if @to_string_cache.nil?
+        @to_string_cache = String::Builder.build do |builder|
+          builder << "Entity_#{@creation_index}("
           builder << get_components.map { |c| c.class.to_s }.join(",")
           builder << ")"
         end
       end
 
-      @_to_string_cache
+      @to_string_cache
     end
   end
 end
