@@ -1,12 +1,14 @@
 require "./entity/error"
 
 module Entitas
-  class MethodNotImplementedError < Exception
-  end
+  class Error < Exception
+    class MethodNotImplemented < Error
+    end
 
-  class ContextInfoException < Exception
-  end
+    class ContextInfo < Error
+    end
 
-  class MatcherException < Exception
+    class Matcher < Error
+    end
   end
 end

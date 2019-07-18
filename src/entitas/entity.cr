@@ -14,17 +14,18 @@ module Entitas
     # Each entity has its own unique `creation_index` which will be set by
     # the context when you create the entity.
     getter creation_index : Int32 = -1
+    protected setter creation_index
 
-    @context_info : Entitas::Context::Info? = nil
-    @aerc : AERC? = nil
+    protected setter context_info : Entitas::Context::Info? = nil
+    protected setter aerc : AERC? = nil
 
     # The context manages the state of an entity.
     # Active entities are enabled, destroyed entities are not.
-    getter is_enabled : Bool = false
+    protected property is_enabled : Bool = false
 
-    getter components_cache = Array(Entitas::Component).new
-    getter component_indices_cache = Array(Int32).new
-    getter to_string_cache : String? = nil
+    protected property components_cache = Array(Entitas::Component).new
+    protected property component_indices_cache = Array(Int32).new
+    protected property to_string_cache : String? = nil
 
     getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
 
@@ -39,9 +40,9 @@ module Entitas
     def init(creation_index ct_index : Int32 = 0,
              context_info ctx_info : Entitas::Context::Info? = nil,
              aerc _aerc : SafeAERC? = nil)
-      @aerc = _aerc
-      @context_info = ctx_info
-      @creation_index = ct_index
+      self.aerc = _aerc
+      self.context_info = ctx_info
+      self.creation_index = ct_index
 
       # Clear caches
       self.clear_caches!
@@ -63,8 +64,8 @@ module Entitas
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32) : Entity
       # Set our passed variables
-      @creation_index = creation_index
-      @is_enabled = true
+      self.creation_index = creation_index
+      self.is_enabled = true
 
       # Clear caches
       self.clear_caches!
@@ -73,7 +74,7 @@ module Entitas
 
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32, context_info : Entitas::Context::Info) : Entity
-      @context_info = context_info
+      self.context_info = context_info
       reactivate(creation_index)
     end
 
@@ -84,7 +85,7 @@ module Entitas
 
     def destroy! : Nil
       if !self.enabled?
-        raise IsNotEnabledException.new "Cannot destroy #{self}!"
+        raise Error::IsNotEnabled.new "Cannot destroy #{self}!"
       end
 
       emit_event OnDestroyEntity.new(self)
@@ -92,7 +93,7 @@ module Entitas
 
     # This method is used internally. Don't call it yourself. use `destroy`
     def _destroy!
-      @is_enabled = false
+      self.is_enabled = false
       self.remove_all_components!
     end
 
@@ -162,11 +163,11 @@ module Entitas
     private def clear_cache(cache : Symbol)
       case cache
       when :components
-        @components_cache = Array(Entitas::Component).new
+        self.components_cache = Array(Entitas::Component).new
       when :indicies
-        @component_indices_cache = Array(Int32).new
+        self.component_indices_cache = Array(Int32).new
       when :strings
-        @to_string_cache = nil
+        self.to_string_cache = nil
       else
         raise Error.new "Unknown cache: #{cache} to clear"
       end
@@ -195,15 +196,15 @@ module Entitas
     ############################
 
     def to_s
-      if @to_string_cache.nil?
-        @to_string_cache = String::Builder.build do |builder|
-          builder << "Entity_#{@creation_index}("
+      if self.to_string_cache.nil?
+        self.to_string_cache = String::Builder.build do |builder|
+          builder << "Entity_#{self.creation_index}("
           builder << get_components.map { |c| c.class.to_s }.join(",")
           builder << ")"
         end
       end
 
-      @to_string_cache
+      self.to_string_cache
     end
   end
 end

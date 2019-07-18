@@ -10,11 +10,11 @@ module Entitas
     end
 
     def retain(obj)
-      raise Entitas::MethodNotImplementedError.new
+      raise Entitas::Error::MethodNotImplemented.new
     end
 
     def release(obj)
-      raise Entitas::MethodNotImplementedError.new
+      raise Entitas::Error::MethodNotImplemented.new
     end
   end
 
@@ -47,7 +47,7 @@ module Entitas
 
     def retain(owner)
       if includes?(owner)
-        raise Entitas::Entity::IsAlreadyRetainedByOwnerException.new "entity: #{entity} owner: #{owner}"
+        raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
         owners.push owner.object_id
       end
@@ -55,7 +55,7 @@ module Entitas
 
     def release(owner)
       if !includes?(owner)
-        raise Entitas::Entity::IsNotRetainedByOwnerException.new "entity: #{entity} owner: #{owner}"
+        raise Entitas::Entity::Error::IsNotRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
         owners.delete owner.object_id
       end

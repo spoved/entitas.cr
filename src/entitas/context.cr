@@ -12,14 +12,16 @@ module Entitas
     include Entitas::Entity::Events
     include Entitas::Component::Helper
 
-    property creation_index : Int32
-    getter aerc_factory : AERCFactory
-    getter entity_factory : EntityFactory
-    @context_info : Context::Info
+    protected property creation_index : Int32
+    protected property aerc_factory : AERCFactory
+    protected property entity_factory : EntityFactory
+    protected setter context_info : Context::Info
 
     getter entities = Array(Entity).new
-    getter reusable_entities = Array(Entity).new
-    getter retained_entities = Array(Entity).new
+    protected property reusable_entities = Array(Entity).new
+    protected property retained_entities = Array(Entity).new
+
+    protected property entities_cache = Array(Entity).new
 
     def initialize(
       # @total_components : Int32 = ::Entitas::Component::TOTAL_COMPONENTS,
@@ -31,8 +33,8 @@ module Entitas
       @context_info = context_info || create_default_context_info
       # @component_pools = Array(ComponentPool).new(total_components)
 
-      if @context_info.component_names.size != self.total_components
-        raise InfoException.new(self, @context_info)
+      if self.context_info.component_names.size != self.total_components
+        raise InfoException.new(self, self.context_info)
       end
     end
 
@@ -61,13 +63,12 @@ module Entitas
       Entitas::Context::Info.new("Unnamed Context", component_names, ::Entitas::Component::COMPONENT_MAP.keys)
     end
 
-    # The contextInfo contains information about the context.
-    # It's used to provide better error messages.
     def context_info : Context::Info
-      @context_info
+      @context_info ||= create_default_context_info
     end
 
-    # See `context_info`
+    # The contextInfo contains information about the context.
+    # It's used to provide better error messages.
     def info : Context::Info
       self.context_info
     end
@@ -83,17 +84,21 @@ module Entitas
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
     def create_entity : Entitas::Entity
-      if self.reusable_entities.size > 0
-        entity = self.reusable_entities.pop
-        entity.reactivate(self.creation_index)
-        self.creation_index += 1
-        entity
-      else
-        entity = self.entity_factory.call
-        entity.init(self.creation_index, self.context_info, self.aerc_factory.call(entity))
-        self.creation_index += 1
-        entity
-      end
+      entity = if self.reusable_entities.size > 0
+                 e = self.reusable_entities.pop
+                 e.reactivate(self.creation_index)
+                 self.creation_index += 1
+                 e
+               else
+                 e = self.entity_factory.call
+                 e.init(self.creation_index, self.context_info, self.aerc_factory.call(e))
+                 self.creation_index += 1
+                 e
+               end
+      self.entities << entity
+      entity.retain(self)
+
+      entity
     end
 
     ############################

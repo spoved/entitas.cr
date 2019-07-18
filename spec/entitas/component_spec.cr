@@ -12,7 +12,7 @@ describe Entitas::Component do
     entity.a.should be_a A
     entity.del_a
     entity.has_a?.should be_falsey
-    expect_raises Entitas::Entity::DoesNotHaveComponentException do
+    expect_raises Entitas::Entity::Error::DoesNotHaveComponent do
       entity.a
     end
   end

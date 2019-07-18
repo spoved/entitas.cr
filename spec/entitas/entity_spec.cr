@@ -2,15 +2,15 @@ require "../spec_helper"
 
 describe Entitas::Entity do
   describe "destroyed" do
-    it "raises IsNotEnabledException when adding a component" do
+    it "raises IsNotEnabled when adding a component" do
       entity = new_entity
       entity._destroy!
-      expect_raises Entitas::Entity::IsNotEnabledException do
+      expect_raises Entitas::Entity::Error::IsNotEnabled do
         entity.add_a
       end
     end
 
-    it "wont raise IsNotEnabledException with context index" do
+    it "wont raise IsNotEnabled with context index" do
       entity = new_entity
       entity.add_a
     end
@@ -37,7 +37,7 @@ describe Entitas::Entity do
 
       it "throws when attempting to get component at index which hasn't been added" do
         entity = new_entity
-        expect_raises Entitas::Entity::DoesNotHaveComponentException do
+        expect_raises Entitas::Entity::Error::DoesNotHaveComponent do
           entity.a
         end
       end
@@ -74,7 +74,7 @@ describe Entitas::Entity do
       end
 
       it "throws when attempting to remove a component at index which hasn't been added" do
-        expect_raises Entitas::Entity::DoesNotHaveComponentException do
+        expect_raises Entitas::Entity::Error::DoesNotHaveComponent do
           new_entity.del_a
         end
       end
@@ -92,7 +92,7 @@ describe Entitas::Entity do
     describe "when component added" do
       it "throws when adding a component at the same index twice" do
         entity = new_entity_with_a
-        expect_raises Entitas::Entity::AlreadyHasComponentException do
+        expect_raises Entitas::Entity::Error::AlreadyHasComponent do
           entity.add_a
         end
       end
@@ -403,7 +403,7 @@ describe Entitas::Entity do
         entity.retain(owner)
         entity.release(owner)
 
-        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+        expect_raises Entitas::Entity::Error::IsNotRetainedByOwner do
           entity.release(owner)
         end
       end
@@ -411,7 +411,7 @@ describe Entitas::Entity do
       it "throws when retaining twice with same owner" do
         entity = new_entity
         entity.retain(owner)
-        expect_raises Entitas::Entity::IsAlreadyRetainedByOwnerException do
+        expect_raises Entitas::Entity::Error::IsAlreadyRetainedByOwner do
           entity.retain(owner)
         end
       end
@@ -420,7 +420,7 @@ describe Entitas::Entity do
         entity = new_entity
         entity.retain(owner)
         unknown_owner = "You dont know me!"
-        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+        expect_raises Entitas::Entity::Error::IsNotRetainedByOwner do
           entity.release(unknown_owner)
         end
       end
@@ -432,7 +432,7 @@ describe Entitas::Entity do
         entity.retain(owner2)
         entity.release(owner2)
 
-        expect_raises Entitas::Entity::IsNotRetainedByOwnerException do
+        expect_raises Entitas::Entity::Error::IsNotRetainedByOwner do
           entity.release(owner2)
         end
       end

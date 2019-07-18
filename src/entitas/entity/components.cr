@@ -23,15 +23,15 @@ module Entitas
     # Each component type must have its own constant index.
     def add_component(index : Int32, component : Entitas::Component)
       if !enabled?
-        raise IsNotEnabledException.new "Cannot add component " \
-                                        "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise Error::IsNotEnabled.new "Cannot add component " \
+                                      "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if has_component?(index)
-        raise AlreadyHasComponentException.new "Cannot add component " \
-                                               "'#{self.context_info.component_names[index]}' to #{self}! " \
-                                               "You should check if an entity already has the component " \
-                                               "before adding it or use entity.replace_component()."
+        raise Error::AlreadyHasComponent.new "Cannot add component " \
+                                             "'#{self.context_info.component_names[index]}' to #{self}! " \
+                                             "You should check if an entity already has the component " \
+                                             "before adding it or use entity.replace_component()."
       end
 
       self.components[index] = component
@@ -54,15 +54,15 @@ module Entitas
     # You can only remove a component at an index if it exists.
     def remove_component(index : Int32) : Nil
       if !enabled?
-        raise IsNotEnabledException.new "Cannot remove component " \
-                                        "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise Error::IsNotEnabled.new "Cannot remove component " \
+                                      "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if !has_component?(index)
-        raise DoesNotHaveComponentException.new "Cannot remove component " \
-                                                "'#{self.context_info.component_names[index]}' from #{self}! " \
-                                                "You should check if an entity has the component " \
-                                                "before removing it."
+        raise Error::DoesNotHaveComponent.new "Cannot remove component " \
+                                              "'#{self.context_info.component_names[index]}' from #{self}! " \
+                                              "You should check if an entity has the component " \
+                                              "before removing it."
       end
 
       self._replace_component(index, nil)
@@ -76,8 +76,8 @@ module Entitas
     # or adds it if it doesn't exist yet.
     def replace_component(index : Int32, component : Entitas::Component?)
       if !enabled?
-        raise IsNotEnabledException.new "Cannot replace component " \
-                                        "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise Error::IsNotEnabled.new "Cannot replace component " \
+                                      "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if has_component?(index)
@@ -101,10 +101,10 @@ module Entitas
       if has_component?(index)
         self.components[index].as(Entitas::Component)
       else
-        raise DoesNotHaveComponentException.new "Cannot get component " \
-                                                "'#{self.context_info.component_names[index]}' from #{self}!" \
-                                                "You should check if an entity has the component " \
-                                                "before getting it."
+        raise Error::DoesNotHaveComponent.new "Cannot get component " \
+                                              "'#{self.context_info.component_names[index]}' from #{self}!" \
+                                              "You should check if an entity has the component " \
+                                              "before getting it."
       end
     end
 
@@ -116,7 +116,7 @@ module Entitas
     def get_components : Array(Entitas::Component)
       # if the cache is empty, repopulate it
       if components_cache.empty?
-        @components_cache = self.components.reject(Nil)
+        self.components_cache = self.components.reject(Nil)
       end
       components_cache
     end
@@ -124,7 +124,7 @@ module Entitas
     # Returns all indices of added components.
     def get_component_indices : Array(Int32)
       if component_indices_cache.empty?
-        @component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
+        self.component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
       end
       component_indices_cache
     end

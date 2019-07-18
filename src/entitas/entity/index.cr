@@ -6,11 +6,11 @@ module Entitas
       getter name : String | Nil
 
       def activate : Nil
-        raise Entitas::MethodNotImplementedError
+        raise Entitas::MethodNotImplemented
       end
 
       def deactivate : Nil
-        raise Entitas::MethodNotImplementedError
+        raise Entitas::MethodNotImplemented
       end
     end
   end

@@ -4,21 +4,20 @@ require "../component"
 module Entitas
   class Entity
     class Error < Exception
-    end
+      class IsNotEnabled < Error
+      end
 
-    class IsNotEnabledException < Error
-    end
+      class DoesNotHaveComponent < Error
+      end
 
-    class DoesNotHaveComponentException < Error
-    end
+      class AlreadyHasComponent < Error
+      end
 
-    class AlreadyHasComponentException < Error
-    end
+      class IsAlreadyRetainedByOwner < Error
+      end
 
-    class IsAlreadyRetainedByOwnerException < Error
-    end
-
-    class IsNotRetainedByOwnerException < Error
+      class IsNotRetainedByOwner < Error
+      end
     end
   end
 end
