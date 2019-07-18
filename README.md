@@ -1,6 +1,6 @@
 # entitas
 
-TODO: Write a description here
+[![Build Status](https://travis-ci.com/kalinon/entitas.cr.svg?token=Shp7EsY9qyrwFK1NgezB&branch=master)](https://travis-ci.com/kalinon/entitas.cr)
 
 ## Installation
 
@@ -38,4 +38,4 @@ ln ./pre-commit .git/hooks/pre-commit
 
 ## Contributors
 
-- [your-github-user](https://github.com/your-github-user) Holden Omans - creator, maintainer
+- [Holden Omans](https://github.com/kalinon) Holden Omans - creator, maintainer
