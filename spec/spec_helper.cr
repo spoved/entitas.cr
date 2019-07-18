@@ -36,3 +36,11 @@ def new_context
     entity_factory: Entitas::EntityFactory.new { TestEntity.new },
   )
 end
+
+def context_with_entity
+  ctx = new_context
+  e = ctx.create_entity
+  e.add_a
+
+  {ctx, e}
+end

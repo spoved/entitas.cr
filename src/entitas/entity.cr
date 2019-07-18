@@ -27,7 +27,7 @@ module Entitas
     protected property component_indices_cache = Array(Int32).new
     protected property to_string_cache : String? = nil
 
-    getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
+    protected getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
 
     def initialize(
       @creation_index : Int32 = 0,

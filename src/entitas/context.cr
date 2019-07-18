@@ -34,7 +34,7 @@ module Entitas
       # @component_pools = Array(ComponentPool).new(total_components)
 
       if self.context_info.component_names.size != self.total_components
-        raise InfoException.new(self, self.context_info)
+        raise Error::Info.new(self, self.context_info)
       end
     end
 
@@ -82,6 +82,11 @@ module Entitas
       self.entities.size
     end
 
+    # See `size`
+    def count
+      self.size
+    end
+
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
     def create_entity : Entitas::Entity
       entity = if self.reusable_entities.size > 0
@@ -95,6 +100,7 @@ module Entitas
                  self.creation_index += 1
                  e
                end
+
       self.entities << entity
       entity.retain(self)
       self.entities_cache.clear
@@ -103,11 +109,16 @@ module Entitas
       # entity.on_component_added_event
       # entity.on_component_removed_event
       # entity.on_component_replaced_event
-      #
+
       entity.on_entity_released_event &->on_entity_released(Entitas::Entity::Events::OnEntityReleased)
       entity.on_destroy_entity_event &->on_destroy_entity(Entitas::Entity::Events::OnDestroyEntity)
 
       entity
+    end
+
+    # Determines whether the context has the specified entity.
+    def has_entity?(entity : Entitas::Entity) : Bool
+      self.entities.includes?(entity)
     end
 
     ############################
@@ -138,7 +149,7 @@ module Entitas
 
       if entity.retain_count == 1
         # Can be released immediately without
-        # adding to _retainedEntities
+        # adding to retained_entities
 
         # TODO: tEntity.OnEntityReleased -= _cachedEntityReleased;
 

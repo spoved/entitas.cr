@@ -57,6 +57,58 @@ describe Entitas::Context do
     end
 
     describe "when Context::Info set" do
+      context_info = new_context_info
+      ctx = TestContext.new(context_info: context_info)
+
+      it "has custom context info" do
+        ctx.context_info.should be context_info
+      end
+
+      it "creates entity with same Context::Info" do
+        ctx.create_entity.context_info.should be context_info
+      end
+
+      it "throws when component_names is not same length as total_components" do
+        context = Entitas::Context::Info.new("TestContext", ["A", "B"])
+        expect_raises Entitas::Context::Error::Info do
+          TestContext.new(context_info: context)
+        end
+      end
+    end
+
+    describe "when entity created" do
+      it "gets total entity count" do
+        ctx, e = context_with_entity
+        ctx.size.should eq 1
+      end
+
+      it "has entities that were created with #create_entity" do
+        ctx, e = context_with_entity
+        ctx.has_entity?(e).should be_true
+      end
+
+      it "returns all created entities" do
+        ctx, e = context_with_entity
+        e_two = ctx.create_entity
+        entities = ctx.entities
+        entities.size.should eq 2
+        entities.includes?(e)
+        entities.includes?(e_two)
+      end
+
+      it "destroys entity and removes it" do
+        ctx, e = context_with_entity
+        e.destroy!
+        ctx.has_entity?(e)
+        ctx.count.should eq 0
+        ctx.entities.should be_empty
+      end
+
+      it "destroys an entity and removes all its components" do
+        ctx, e = context_with_entity
+        e.destroy!
+        e.get_components.should be_empty
+      end
     end
   end
 end
