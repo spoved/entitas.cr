@@ -9,7 +9,7 @@ module Entitas
   #  The prefered way to create a context is to use the generated methods
   #  from the code generator, e.g. var context = new GameContext();
   abstract class Context
-    include Entitas::Entity::Events
+    # include Entitas::Entity::Events
     include Entitas::Component::Helper
 
     protected property creation_index : Int32
@@ -97,8 +97,58 @@ module Entitas
                end
       self.entities << entity
       entity.retain(self)
+      self.entities_cache.clear
+
+      # TODO: Finish rest of hooks
+      # entity.on_component_added_event
+      # entity.on_component_removed_event
+      # entity.on_component_replaced_event
+      #
+      entity.on_entity_released_event &->on_entity_released(Entitas::Entity::Events::OnEntityReleased)
+      entity.on_destroy_entity_event &->on_destroy_entity(Entitas::Entity::Events::OnDestroyEntity)
 
       entity
+    end
+
+    ############################
+    # Event functions
+    ############################
+
+    def on_entity_released(event : Entitas::Entity::Events::OnEntityReleased)
+      entity = event.entity
+      if entity.enabled?
+        raise Entity::Error::IsNotDestroyedException.new "Cannot release #{entity}!"
+      end
+
+      entity.remove_all_on_entity_released_handlers
+      self.retained_entities.delete(entity)
+      self.reusable_entities << entity
+    end
+
+    def on_destroy_entity(event : Entitas::Entity::Events::OnDestroyEntity)
+      entity = event.entity
+      self.entities.delete(entity)
+      self.entities_cache.clear
+
+      # TODO: OnEntityWillBeDestroyed
+
+      entity._destroy!
+
+      # TODO: OnEntityDestroyed
+
+      if entity.retain_count == 1
+        # Can be released immediately without
+        # adding to _retainedEntities
+
+        # TODO: tEntity.OnEntityReleased -= _cachedEntityReleased;
+
+        self.reusable_entities << entity
+        entity.release(self)
+        entity.remove_all_on_entity_released_handlers
+      else
+        self.retained_entities << entity
+        entity.release(self)
+      end
     end
 
     ############################

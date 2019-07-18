@@ -18,6 +18,9 @@ module Entitas
 
       class IsNotRetainedByOwner < Error
       end
+
+      class IsNotDestroyedException < Error
+      end
     end
   end
 end
