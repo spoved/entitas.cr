@@ -189,7 +189,7 @@ module Entitas
         # Can be released immediately without
         # adding to retained_entities
 
-        entity.on_entity_released_events.delete(on_entity_released_event_cache)
+        entity.on_entity_released_event_hooks.delete(on_entity_released_event_cache)
 
         self.reusable_entities << entity
         entity.release(self)
@@ -204,7 +204,7 @@ module Entitas
     # OnEntityCreated, OnEntityWillBeDestroyed,
     # OnEntityDestroyed and OnGroupCreated
     def remove_all_event_handlers
-      raise Error::MethodNotImplemented.new
+      raise Entitas::Error::MethodNotImplemented.new
     end
 
     ############################

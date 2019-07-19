@@ -31,9 +31,6 @@ module Entitas
       OnComponentRemoved, OnEntityReleased, OnEntityCreated, OnEntityDestroyed,
       OnDestroyEntity, OnGroupCreated
 
-    # emits_events OnComponentAdded, OnComponentRemoved, OnComponentReplaced,
-    #   OnDestroyEntity, OnEntityReleased, OnEntityChanged, OnEntityCreated
-
     def initialize(
       @creation_index : Int32 = 0,
       @context_info : Entitas::Context::Info? = nil,
@@ -214,7 +211,7 @@ module Entitas
     ############################
 
     def remove_all_on_entity_released_handlers
-      self.on_entity_released_events.clear
+      self.on_entity_released_event_hooks.clear
     end
 
     def to_s
