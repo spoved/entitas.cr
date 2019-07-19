@@ -121,7 +121,7 @@ describe Entitas::Context do
       end
 
       it "destroys all entities" do
-        ctx, e = context_with_entity
+        ctx, _ = context_with_entity
         ctx.create_entity
         ctx.destroy_all_entities
       end
@@ -140,6 +140,96 @@ describe Entitas::Context do
         ctx, _ = context_with_entity
         entities = ctx.get_entities
         ctx.get_entities.should eq entities
+      end
+
+      it "updates entities cache when creating an entity" do
+        ctx, _ = context_with_entity
+        entities = ctx.get_entities
+        ctx.create_entity
+        ctx.get_entities.should_not eq entities
+      end
+
+      it "updates entities cache when destroying an entity" do
+        ctx, e = context_with_entity
+        entities = ctx.get_entities
+        e.destroy
+        ctx.get_entities.should_not eq entities
+      end
+    end
+
+    describe "events" do
+      it "dispatches OnEntityCreated when creating a new entity" do
+        did_dispatch = 0
+        ctx = new_context
+
+        event_entity : ::Entitas::Entity? = nil
+        ctx.on_entity_created do |event|
+          did_dispatch += 1
+          event_entity = event.entity
+        end
+
+        e = ctx.create_entity
+        did_dispatch.should eq 1
+        event_entity.should be e
+      end
+
+      it "dispatches OnEntityWillBeDestroyed when destroying an entity" do
+        did_dispatch = 0
+        ctx, e = context_with_entity
+        ctx.on_entity_will_be_destroyed do |event|
+          did_dispatch += 1
+          event.context.should be ctx
+          event.entity.should be e
+          event.entity.has_a?.should be_true
+          event.entity.enabled?.should be_true
+          event.context.get_entities.size.should eq 0
+        end
+
+        ctx.get_entities
+        e.destroy
+        did_dispatch.should eq 1
+      end
+
+      it "dispatches OnEntityDestroyed when destroying an entity" do
+        did_dispatch = 0
+        ctx, e = context_with_entity
+        ctx.on_entity_destroyed do |event|
+          did_dispatch += 1
+          event.context.should be ctx
+          event.entity.should be e
+          event.entity.has_a?.should be_false
+          event.entity.enabled?.should be_false
+        end
+
+        e.destroy
+        did_dispatch.should eq 1
+      end
+
+      it "entity is released after OnEntityDestroyed" do
+        did_dispatch = 0
+        ctx, e = context_with_entity
+        ctx.on_entity_destroyed do |event|
+          did_dispatch += 1
+          event.entity.retain_count.should eq 1
+          new_e = ctx.create_entity
+          new_e.should_not be_nil
+          new_e.should_not be event.entity
+        end
+
+        e.destroy
+        reused_entity = ctx.create_entity
+        reused_entity.should be e
+        did_dispatch.should eq 1
+      end
+
+      it "throws if entity is released before it is destroyed" do
+        ctx, e = context_with_entity
+        e.retain_count.should eq 1
+
+        expect_raises Entitas::Entity::Error::IsNotDestroyedException do
+          e.release(ctx)
+          exit
+        end
       end
     end
   end

@@ -23,13 +23,9 @@ module Entitas
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
 
-    emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
-
-    protected property on_component_added_event_cache : Proc(Events::OnComponentAdded, Nil)? = nil
-    protected property on_component_removed_event_cache : Proc(Events::OnComponentRemoved, Nil)? = nil
-    protected property on_component_replaced_event : Proc(Events::OnComponentReplaced, Nil)? = nil
-    protected property on_entity_released_cache : Proc(Events::OnEntityReleased, Nil)? = nil
-    protected property on_destroy_entity_cache : Proc(Events::OnDestroyEntity, Nil)? = nil
+    accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed
+    emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
+      OnComponentAdded, OnComponentRemoved, OnEntityReleased, OnDestroyEntity
 
     def initialize(
       @creation_index : Int32 = 0,
@@ -37,11 +33,7 @@ module Entitas
       @aerc_factory : AERCFactory = AERCFactory.new { |entity| Entitas::SafeAERC.new(entity) },
       @entity_factory : EntityFactory = EntityFactory.new { Entitas::Entity.new }
     )
-      @on_destroy_entity_cache = ->on_destroy_entity_event(Events::OnDestroyEntity)
-      @on_entity_created_event_cache = ->on_entity_created_event(Events::OnEntityCreated)
-      @on_entity_will_be_destroyed_event_cache = ->on_entity_will_be_destroyed_event(Events::OnEntityWillBeDestroyed)
-      @on_entity_destroyed_event_cache = ->on_entity_destroyed_event(Events::OnEntityDestroyed)
-      @on_group_created_event_cache = ->on_group_created_event(Events::OnGroupCreated)
+      set_cache_hooks
 
       @context_info = context_info || create_default_context_info
 
@@ -55,10 +47,10 @@ module Entitas
       destroy_all_entities
       reset_creation_index
 
-      self.on_entity_created_event_cache = null
-      self.on_entity_will_be_destroyed_event_cache = null
-      self.on_entity_destroyed_event_cache = null
-      self.on_group_created_event_cache = null
+      self.on_entity_created_event_cache = nil
+      self.on_entity_will_be_destroyed_event_cache = nil
+      self.on_entity_destroyed_event_cache = nil
+      self.on_group_created_event_cache = nil
     end
 
     ############################
@@ -130,28 +122,6 @@ module Entitas
       entity
     end
 
-    private def set_entity_event_hooks(entity)
-      if !on_component_added_event_cache.nil?
-        entity.on_component_added &on_component_added_event_cache.as(Proc(Events::OnComponentAdded, Nil))
-      end
-
-      if !on_component_removed_event_cache.nil?
-        entity.on_component_removed &on_component_removed_event_cache.as(Proc(Events::OnComponentRemoved, Nil))
-      end
-
-      if !on_component_replaced_event.nil?
-        entity.on_component_replaced &on_component_replaced_event.as(Proc(Events::OnComponentReplaced, Nil))
-      end
-
-      if !on_entity_released_cache.nil?
-        entity.on_entity_released &on_entity_released_cache.as(Proc(Events::OnEntityReleased, Nil))
-      end
-
-      if !on_destroy_entity_cache.nil?
-        entity.on_destroy_entity &on_destroy_entity_cache.as(Proc(Events::OnDestroyEntity, Nil))
-      end
-    end
-
     # Destroys all entities in the context.
     # Throws an exception if there are still retained entities.
     def destroy_all_entities
@@ -186,40 +156,40 @@ module Entitas
     # Event functions
     ############################
 
-    def on_entity_changed(event : Events::OnEntityChanged)
+    def on_component_added(event : Events::OnComponentAdded)
     end
 
-    def on_component_added_event(event : Events::OnComponentAdded)
-    end
-
-    def on_component_replaced(event : Events::OnComponentReplaced)
+    def on_component_removed(event : Events::OnComponentRemoved)
     end
 
     def on_entity_released(event : Events::OnEntityReleased)
+      logger.info "Processing OnEntityReleased: #{event}"
       entity = event.entity
+
       if entity.enabled?
         raise Entity::Error::IsNotDestroyedException.new "Cannot release #{entity}!"
       end
 
       entity.remove_all_on_entity_released_handlers
+
       self.retained_entities.delete(entity)
       self.reusable_entities << entity
     end
 
-    def on_destroy_entity_event(event : Events::OnDestroyEntity)
+    def on_destroy_entity(event : Events::OnDestroyEntity)
       entity = event.entity
       self.entities.delete(entity)
       self.entities_cache = nil
 
       emit_event OnEntityWillBeDestroyed, self, entity
-      entity._destroy!
+      entity.internal_destroy!
       emit_event OnEntityDestroyed, self, entity
 
       if entity.retain_count == 1
         # Can be released immediately without
         # adding to retained_entities
 
-        entity.on_entity_released_events.delete(on_entity_released_cache)
+        entity.on_entity_released_events.delete(on_entity_released_event_cache)
 
         self.reusable_entities << entity
         entity.release(self)
@@ -230,7 +200,11 @@ module Entitas
       end
     end
 
+    # Removes all event handlers
+    # OnEntityCreated, OnEntityWillBeDestroyed,
+    # OnEntityDestroyed and OnGroupCreated
     def remove_all_event_handlers
+      raise Error::MethodNotImplemented.new
     end
 
     ############################
@@ -255,6 +229,28 @@ module Entitas
 
     def to_s
       info.name
+    end
+
+    macro finished
+      {% begin %}
+      private def set_entity_event_hooks(entity)
+        {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
+        {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
+        if !{{meth.name.id}}.nil?
+          logger.debug "Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class
+          entity.{{ent_meth_name}} &{{meth.name.id}}.as(Proc(Events::{{ent_meth_name.camelcase.id}}, Nil))
+        end
+        {% end %}{% end %}
+      end
+
+      private def set_cache_hooks
+        {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
+        {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
+        @{{meth.name.id}} = ->{{ent_meth_name.id}}(Events::{{ent_meth_name.camelcase.id}})
+        {% end %}{% end %}
+      end
+
+      {% end %}
     end
   end
 end

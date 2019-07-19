@@ -4,7 +4,7 @@ describe Entitas::Entity do
   describe "destroyed" do
     it "raises IsNotEnabled when adding a component" do
       entity = new_entity
-      entity._destroy!
+      entity.internal_destroy!
       expect_raises Entitas::Entity::Error::IsNotEnabled do
         entity.add_a
       end
@@ -28,7 +28,7 @@ describe Entitas::Entity do
         entity = new_entity
         entity.enabled?.should be_truthy
 
-        entity._destroy!
+        entity.internal_destroy!
         entity.enabled?.should be_falsey
 
         entity.reactivate(42)

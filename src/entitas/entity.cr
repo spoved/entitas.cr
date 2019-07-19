@@ -27,20 +27,18 @@ module Entitas
 
     protected getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
 
-    emits_events OnComponentAdded, OnComponentRemoved, OnComponentReplaced, OnDestroyEntity, OnEntityReleased, OnEntityChanged
+    accept_events OnEntityWillBeDestroyed, OnComponentAdded, OnComponentReplaced,
+      OnComponentRemoved, OnEntityReleased, OnEntityCreated, OnEntityDestroyed,
+      OnDestroyEntity, OnGroupCreated
+
+    # emits_events OnComponentAdded, OnComponentRemoved, OnComponentReplaced,
+    #   OnDestroyEntity, OnEntityReleased, OnEntityChanged, OnEntityCreated
 
     def initialize(
       @creation_index : Int32 = 0,
       @context_info : Entitas::Context::Info? = nil,
       @aerc : SafeAERC? = nil
     )
-      @on_component_added_event_cache = ->on_component_added_event(Events::OnComponentAdded)
-      @on_component_removed_event_cache = ->on_component_removed_event(Events::OnComponentRemoved)
-      @on_component_replaced_event_cache = ->on_component_replaced_event(Events::OnComponentReplaced)
-      @on_entity_released_event_cache = ->on_entity_released_event(Events::OnEntityReleased)
-      @on_entity_changed_event_cache = ->on_entity_changed_event(Events::OnEntityChanged)
-      @on_destroy_entity_event_cache = ->on_destroy_entity_event(Events::OnDestroyEntity)
-
       reactivate(@creation_index)
     end
 
@@ -103,8 +101,9 @@ module Entitas
     end
 
     # This method is used internally. Don't call it yourself. use `destroy`
-    def _destroy!
+    def internal_destroy!
       logger.info "Destroying entity: #{self}", self.to_s
+
       self.is_enabled = false
       self.remove_all_components!
 
