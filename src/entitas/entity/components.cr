@@ -167,7 +167,9 @@ module Entitas
 
     # Removes all components.
     def remove_all_components! : Nil
+      self.clear_cache :strings
       self.components.each_index do |i|
+        next if self.components[i].nil?
         self._replace_component(i, nil)
       end
     end
@@ -175,7 +177,7 @@ module Entitas
     private def _replace_component(index : Int32, replacement : Entitas::Component?) : Nil
       prev_component = self.components[index]
 
-      if prev_component != replacement
+      if replacement != prev_component
         self.components[index] = replacement
         self.clear_cache :components
 

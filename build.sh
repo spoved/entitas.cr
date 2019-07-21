@@ -11,9 +11,9 @@ crystal tool format
 ./bin/ameba
 
 # Generate coverage
-if [ -d ./coverage ];then
-  rm -r ./coverage
-fi
+# if [ -d ./coverage ];then
+#   rm -r ./coverage
+# fi
 ./bin/crystal-coverage spec/entitas/*.cr spec/entitas/**/*.cr
 
 # Run spec tests?

@@ -228,8 +228,66 @@ describe Entitas::Context do
 
         expect_raises Entitas::Entity::Error::IsNotDestroyedException do
           e.release(ctx)
-          exit
         end
+      end
+
+      # TODO: dispatches OnGroupCreated when creating a new group
+      # TODO: doesn't dispatch OnGroupCreated when group alredy exists
+
+      it "removes all external delegates when destroying an entity" do
+        ctx = new_context
+        e = ctx.create_entity
+
+        e.on_component_added { false.should be_true }
+        e.on_component_removed { false.should be_true }
+        e.on_component_replaced { false.should be_true }
+
+        e.destroy
+
+        e2 = ctx.create_entity
+        e2.should be e
+        e2.add_a
+        e2.replace_component(A.new)
+        e2.remove_component(Entitas::Component::Index::A)
+      end
+
+      it "will not remove external delegates for OnEntityReleased" do
+        ctx = new_context
+        e = ctx.create_entity
+        did_release = 0
+        e.on_entity_released { did_release += 1 }
+        e.destroy
+        did_release.should eq 1
+      end
+
+      it "removes all external delegates from OnEntityReleased when after being dispatched" do
+        _, e = context_with_entity
+        did_release = 0
+        e.on_entity_released { did_release += 1 }
+        e.destroy
+        obj = "owner"
+        e.retain(obj)
+        e.release(obj)
+        did_release.should eq 1
+      end
+
+      it "removes all external delegates from OnEntityReleased after being dispatched (when delayed release)" do
+        _, e = context_with_entity
+        did_release = 0
+        obj = "owner"
+
+        e.on_entity_released { did_release += 1 }
+
+        e.retain(obj)
+        e.destroy
+        did_release.should eq 0
+
+        e.release(obj)
+        did_release.should eq 1
+
+        e.retain(obj)
+        e.release(obj)
+        did_release.should eq 1
       end
     end
   end

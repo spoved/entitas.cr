@@ -88,7 +88,7 @@ end
 
 macro emit_event(event, *args)
   logger.debug "Emiting event {{event.id}}", self.to_s
-  self.{{event.id.underscore.id}}_event_hooks.each &.call(::Entitas::Events::{{event.id}}.new({{*args}}))
+  self.{{event.id.underscore.id}}_event_hooks.reverse.each &.call(::Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
 # Wrapper for multiple `accept_event` calls
