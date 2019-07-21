@@ -23,7 +23,7 @@ module Entitas
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
 
-    accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed
+    accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed, OnGroupCreated
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
       OnComponentAdded, OnComponentRemoved, OnEntityReleased, OnDestroyEntity
 
@@ -204,7 +204,10 @@ module Entitas
     # OnEntityCreated, OnEntityWillBeDestroyed,
     # OnEntityDestroyed and OnGroupCreated
     def remove_all_event_handlers
-      raise Entitas::Error::MethodNotImplemented.new
+      self.clear_on_entity_created_event_hooks
+      self.clear_on_entity_will_be_destroyed_event_hooks
+      self.clear_on_entity_destroyed_event_hooks
+      self.clear_on_group_created_event_hooks
     end
 
     ############################

@@ -290,5 +290,176 @@ describe Entitas::Context do
         did_release.should eq 1
       end
     end
+
+    describe "entity pool" do
+      it "gets entity from object pool" do
+        _, e = context_with_entity
+        e.should_not be_nil
+        e.should be_a TestEntity
+      end
+
+      it "destroys entity when pushing back to object pool" do
+        _, e = context_with_entity
+        e.has_a?.should be_true
+        e.destroy!
+        e.has_a?.should be_false
+      end
+
+      it "returns pushed entity" do
+        ctx, e = context_with_entity
+        e.has_a?.should be_true
+        e.destroy!
+
+        entity = ctx.create_entity
+        entity.has_a?.should be_false
+        entity.should be e
+      end
+
+      it "only returns released entities" do
+        ctx, e1 = context_with_entity
+        owner = "owner"
+        e1.retain(owner)
+        e1.destroy
+
+        e2 = ctx.create_entity
+        e2.should_not be e1
+
+        e1.release owner
+
+        e3 = ctx.create_entity
+        e3.should be e1
+      end
+
+      it "returns a new entity" do
+        ctx, e1 = context_with_entity
+        e1.destroy
+        ctx.create_entity.should be e1
+
+        e2 = ctx.create_entity
+        e2.has_a?.should be_false
+        e2.should_not be e1
+      end
+
+      it "sets up entity from pool" do
+        # ctx, e = context_with_entity
+        # c_index = e.creation_index
+        # e.destroy
+        # TODO: FINISH GROUPS
+      end
+
+      describe "when entity gets destroyed" do
+        it "throws when adding component" do
+          _, e = context_with_entity
+          e.has_a?.should be_true
+          e.destroy!
+
+          expect_raises Entitas::Entity::Error::IsNotEnabled do
+            e.add_a
+          end
+        end
+
+        it "throws when removing component" do
+          _, e = context_with_entity
+          e.has_a?.should be_true
+          e.destroy!
+
+          expect_raises Entitas::Entity::Error::IsNotEnabled do
+            e.del_a
+          end
+        end
+
+        it "throws when replacing component" do
+          _, e = context_with_entity
+          e.has_a?.should be_true
+          e.destroy!
+
+          expect_raises Entitas::Entity::Error::IsNotEnabled do
+            e.replace_component(A.new)
+          end
+        end
+
+        it "throws when replacing component with null" do
+          _, e = context_with_entity
+          e.has_a?.should be_true
+          e.destroy!
+
+          expect_raises Entitas::Entity::Error::IsNotEnabled do
+            e.replace_component(Entitas::Component::Index::A, nil)
+          end
+        end
+
+        it "throws when attempting to destroy again" do
+          _, e = context_with_entity
+          e.has_a?.should be_true
+          e.destroy!
+
+          expect_raises Entitas::Entity::Error::IsNotEnabled do
+            e.destroy!
+          end
+        end
+      end
+    end
+
+    describe "groups" do
+      # TODO
+    end
+
+    describe "entity index" do
+      # TODO
+    end
+
+    describe "reset" do
+      describe "context" do
+        it "resets creation index" do
+          ctx = new_context
+          ctx.reset_creation_index
+          ctx.create_entity.creation_index.should eq 0
+        end
+
+        describe "removes all event handlers" do
+          it "removes OnEntityCreated" do
+            ctx = new_context
+            ctx.on_entity_created { true.should be_false }
+            ctx.remove_all_event_handlers
+            ctx.create_entity
+          end
+
+          it "removes OnEntityWillBeDestroyed" do
+            ctx = new_context
+            ctx.on_entity_will_be_destroyed { true.should be_false }
+            ctx.remove_all_event_handlers
+            ctx.create_entity.destroy!
+          end
+
+          it "removes OnEntityDestroyed" do
+            ctx = new_context
+            ctx.on_entity_destroyed { true.should be_false }
+            ctx.remove_all_event_handlers
+            ctx.create_entity.destroy!
+          end
+
+          it "removes OnGroupCreated" do
+            # TODO finish
+          end
+        end
+      end
+
+      describe "component pools" do
+        it "clears all component pools" do
+          # ctx, e = context_with_entity
+          # e.add_b
+          # e.del_a
+          # e.del_b
+
+          # ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 1
+          # ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 1
+
+          # ctx.clear_component_pools
+
+          # ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 0
+          # ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 0
+        end
+      end
+    end
   end
 end
