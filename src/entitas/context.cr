@@ -1,5 +1,4 @@
 require "./*"
-require "./component/helper"
 require "./context/*"
 require "spoved/logger"
 
@@ -11,17 +10,21 @@ module Entitas
   abstract class Context
     spoved_logger
 
-    # include Entitas::Entity::Events
-    include Entitas::Component::Helper
-
     protected property creation_index : Int32
-    protected property aerc_factory : AERCFactory
-    protected property entity_factory : EntityFactory
     protected setter context_info : Context::Info
     protected getter entities = Array(Entity).new
     protected property reusable_entities = Array(Entity).new
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
+
+    # component_pools is set by the context which created the entity and
+    # is used to reuse removed components.
+    # Removed components will be pushed to the componentPool.
+    # Use entity.CreateComponent(index, type) to get a new or
+    # reusable component from the componentPool.
+    # Use entity.GetComponentPool(index) to get a componentPool for
+    # a specific component index.
+    getter component_pools : Array(::Entitas::ComponentPool)
 
     accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed, OnGroupCreated
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
@@ -29,13 +32,14 @@ module Entitas
 
     def initialize(
       @creation_index : Int32 = 0,
-      context_info : Entitas::Context::Info? = nil,
-      @aerc_factory : AERCFactory = AERCFactory.new { |entity| Entitas::SafeAERC.new(entity) },
-      @entity_factory : EntityFactory = EntityFactory.new { Entitas::Entity.new }
+      context_info : Entitas::Context::Info? = nil
     )
       set_cache_hooks
 
       @context_info = context_info || create_default_context_info
+      @component_pools = Array(::Entitas::ComponentPool).new(total_components) do
+        ::Entitas::ComponentPool.new
+      end
 
       if self.context_info.component_names.size != self.total_components
         raise Error::Info.new(self, self.context_info)
@@ -51,6 +55,29 @@ module Entitas
       self.on_entity_will_be_destroyed_event_cache = nil
       self.on_entity_destroyed_event_cache = nil
       self.on_group_created_event_cache = nil
+    end
+
+    ############################
+    # Abstract functions
+    ############################
+
+    abstract def total_components : Int32
+    abstract def klass_to_index(klass) : Int32
+    abstract def entity_factory : Entitas::Entity
+
+    ############################
+    # ComponentPool functions
+    ############################
+
+    # Returns the `ComponentPool` for the specified component index.
+    # `component_pools` is set by the context which created the entity and
+    # is used to reuse removed components.
+    # Removed components will be pushed to the componentPool.
+    # Use entity.create_component(index, type) to get a new or
+    # reusable component from the `ComponentPool`.
+    def component_pool(index : Int32) : ComponentPool
+      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
+      self.component_pools[index]
     end
 
     ############################
@@ -103,9 +130,9 @@ module Entitas
                  self.creation_index += 1
                  e
                else
-                 e = self.entity_factory.call
+                 e = self.entity_factory
                  logger.debug "Created new entity: #{e}", self.to_s
-                 e.init(self.creation_index, self.context_info, self.aerc_factory.call(e))
+                 e.init(self.creation_index, self.context_info, self.aerc_factory(e))
                  self.creation_index += 1
                  e
                end
@@ -120,6 +147,10 @@ module Entitas
       emit_event OnEntityCreated, self, entity
 
       entity
+    end
+
+    def aerc_factory(entity : Entitas::Entity) : Entitas::SafeAERC
+      Entitas::SafeAERC.new(entity)
     end
 
     # Destroys all entities in the context.

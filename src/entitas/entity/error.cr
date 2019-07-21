@@ -2,7 +2,7 @@ require "../error"
 require "../component"
 
 module Entitas
-  class Entity
+  abstract class Entity
     class Error < Exception
       class IsNotEnabled < Error
       end

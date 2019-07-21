@@ -3,7 +3,7 @@ require "./entity/*"
 require "./context/info"
 
 module Entitas
-  class Entity
+  abstract class Entity
     spoved_logger
 
     class Error < Exception
@@ -25,17 +25,33 @@ module Entitas
     protected property component_indices_cache = Array(Int32).new
     protected property to_string_cache : String? = nil
 
-    protected getter components = Array(Entitas::Component?).new(::Entitas::Component::TOTAL_COMPONENTS, nil)
+    protected getter components : Array(Entitas::Component?)
+
+    # The total amount of components an entity can possibly have.
+    getter total_components : Int32
+
+    # component_pools is set by the context which created the entity and
+    # is used to reuse removed components.
+    # Removed components will be pushed to the componentPool.
+    # Use entity.CreateComponent(index, type) to get a new or
+    # reusable component from the componentPool.
+    # Use entity.GetComponentPool(index) to get a componentPool for
+    # a specific component index.
+    getter component_pools : Array(::Entitas::ComponentPool)
 
     accept_events OnEntityWillBeDestroyed, OnComponentAdded, OnComponentReplaced,
       OnComponentRemoved, OnEntityReleased, OnEntityCreated, OnEntityDestroyed,
       OnDestroyEntity, OnGroupCreated
 
     def initialize(
-      @creation_index : Int32 = 0,
+      @creation_index : Int32,
+      @total_components : Int32,
+      @component_pools : Array(ComponentPool),
       @context_info : Entitas::Context::Info? = nil,
       @aerc : SafeAERC? = nil
     )
+      @components = Array(Entitas::Component?).new(@total_components, nil)
+
       reactivate(@creation_index)
     end
 
@@ -54,6 +70,13 @@ module Entitas
       self.reactivate(ct_index)
       self
     end
+
+    ############################
+    # Abstract functions
+    ############################
+
+    abstract def klass_to_index(klass) : Int32
+    abstract def index(i : ::Entitas::Component::Index) : Int32
 
     ############################
     # State functions

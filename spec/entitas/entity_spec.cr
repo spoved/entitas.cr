@@ -156,8 +156,6 @@ describe Entitas::Entity do
     end
 
     describe "component pool" do
-      clear_pools
-
       it "gets component context" do
         entity = new_entity
         pool = entity.component_pool(Entitas::Component::Index::A)
@@ -183,16 +181,12 @@ describe Entitas::Entity do
       end
 
       it "creates new component when component_pool is empty" do
-        clear_pools
-
         entity = new_entity
         component = entity.create_component(A)
         component.should be_a A
       end
 
       it "gets pooled component when component_pool is not empty" do
-        clear_pools
-
         entity = new_entity
         component = entity.add_a
         component.should be_a A

@@ -1,4 +1,1 @@
-require "../spec_helper"
-
-class TestContext < Entitas::Context
-end
+require "../../src/entitas"

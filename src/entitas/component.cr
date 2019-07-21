@@ -1,9 +1,12 @@
-annotation ::Component::Unique
-end
+require "./macros/component"
 
 module Entitas
   abstract class Component
     spoved_logger
+
+    # Component error class raised when an issue is encountered
+    class Error < Exception
+    end
 
     macro inherited
 
@@ -90,7 +93,7 @@ module Entitas
         end
 
         def has_component_{{@type.name.id.downcase}}?
-          self.has_component?({{@type.name.id}}.index)
+          self.has_component?(klass_to_index({{@type.name.id}}))
         end
 
         # Will return the component that is a `{{@type.name.id}}` or raise
@@ -99,7 +102,7 @@ module Entitas
         end
 
         def get_component_{{@type.name.id.downcase}} : {{@type.id}}
-          self.get_component({{@type.name.id}}.index).as({{@type.name.id}})
+          self.get_component(klass_to_index({{@type.name.id}})).as({{@type.name.id}})
         end
 
         # Add a `{{@type.name.id}}` to the entity
@@ -108,7 +111,7 @@ module Entitas
         # ```
         def add_{{@type.name.id.downcase}}(**args)
           component = {{@type.name.id}}.new(**args)
-          self.add_component({{@type.name.id}}.index, component)
+          self.add_component(klass_to_index({{@type.name.id}}), component)
         end
 
 
@@ -118,28 +121,19 @@ module Entitas
         # entity.{{@type.name.id.downcase}} # => nil
         # ```
         def del_{{@type.name.id.downcase}}
-          self.remove_component({{@type.name.id}}.index)
+          self.remove_component(klass_to_index({{@type.name.id}}))
+        end
+
+        # See `del_{{@type.name.id.downcase}}`
+        def remove_{{@type.name.id.downcase}}
+          self.del_{{@type.name.id.downcase}}
+        end
+
+        # See `del_{{@type.name.id.downcase}}`
+        def remove_component_{{@type.name.id.downcase}}
+          self.del_{{@type.name.id.downcase}}
         end
       end
-    end
-
-    # Will create getter/setter for the provided `var`, ensuring its type
-    macro prop(var, kype, **kwargs)
-      {% if kwargs[:default] %}
-        property {{ var.id }} : {{kype}} = {{ kwargs[:default] }}
-
-        # This is a private methods used for code generation
-        private def _entitas_set_{{ var.id }}(value : {{kype}} = {{ kwargs[:default] }})
-          @{{ var.id }} = value
-        end
-      {% else %}
-        property {{ var.id }} : {{kype}}? = nil
-
-        # This is a private methods used for code generation
-        private def _entitas_set_{{ var.id }}(value : {{kype}})
-          @{{ var.id }} = value
-        end
-      {% end %}
     end
 
     # Will return true if the class is a unique component for a context
@@ -147,11 +141,8 @@ module Entitas
       self.class.is_unique?
     end
 
-    # Component error class raised when an issue is encountered
-    class Error < Exception
-    end
-
     macro finished
+      {% begin %}
       {% i = 0 %}
 
       enum Index
@@ -160,7 +151,6 @@ module Entitas
         {% i = i + 1 %}
         {% end %}
       end
-
 
       # A hash to map of enum `Index` to class of `Component`
       INDEX_MAP = {
@@ -176,40 +166,8 @@ module Entitas
         {% end %}
       }
 
-      POOLS = [
-        {% for sub_klass in @type.subclasses %}
-          ::Entitas::ComponentPool.new,
-        {% end %}
-      ]
-
-      # Make class functions on each sub-class to get the index easier
-      {% for sub_klass in @type.subclasses %}
-
-      class ::{{sub_klass.name.id}}
-
-        # Returns the `::Entitas::Component::Index` corresponding to this class
-        #
-        # ```
-        # entity.index # => ::Entitas::Component::Index::{{sub_klass.name.id}}
-        # ```
-        def self.index : ::Entitas::Component::Index
-          ::Entitas::Component::Index::{{sub_klass.name.id}}
-        end
-
-        # Returns the `::Entitas::Component::Index::{{sub_klass.name.id}}#value` corresponding to this class
-        #
-        # ```
-        # entity.index_value # => 1
-        # ```
-        def self.index_value : Int32
-          self.index.value
-        end
-      end
-
-      {% end %}
-
-      # The total number of `::Entitas::Component` subclases
       TOTAL_COMPONENTS = {{i}}
+      {% end %}
     end
   end
 end

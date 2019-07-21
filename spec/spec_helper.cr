@@ -6,16 +6,14 @@ Spoved.logger.level = Logger::UNKNOWN
 
 # Spoved.logger.level = Logger::DEBUG
 
-def clear_pools
-  ::Entitas::Component::POOLS.each { |p| p.clear }
-end
-
 def component_pools
-  Array(Entitas::ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS)
+  Array(Entitas::ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS) do
+    Entitas::ComponentPool.new
+  end
 end
 
 def new_entity
-  Entitas::Entity.new(1)
+  TestEntity.new(1, ::Entitas::Component::TOTAL_COMPONENTS, component_pools)
 end
 
 def new_entity_with_a
@@ -35,10 +33,7 @@ def new_context_info
 end
 
 def new_context
-  TestContext.new(context_info: new_context_info,
-    aerc_factory: Entitas::AERCFactory.new { |entity| Entitas::SafeAERC.new(entity) },
-    entity_factory: Entitas::EntityFactory.new { TestEntity.new },
-  )
+  TestContext.new
 end
 
 def context_with_entity

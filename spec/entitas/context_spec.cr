@@ -33,7 +33,7 @@ describe Entitas::Context do
 
     it "has default Context::Info" do
       ctx = TestContext.new
-      ctx.info.name.should eq "Unnamed Context"
+      ctx.info.name.should eq "TestContext"
       ctx.info.component_names.size.should eq 5
       ctx.total_components.times do |i|
         ctx.info.component_names[i].should eq "Index #{i}"
@@ -248,7 +248,7 @@ describe Entitas::Context do
         e2.should be e
         e2.add_a
         e2.replace_component(A.new)
-        e2.remove_component(Entitas::Component::Index::A)
+        e2.remove_component(TestContext::Index::A.value)
       end
 
       it "will not remove external delegates for OnEntityReleased" do
@@ -446,18 +446,18 @@ describe Entitas::Context do
 
       describe "component pools" do
         it "clears all component pools" do
-          # ctx, e = context_with_entity
-          # e.add_b
-          # e.del_a
-          # e.del_b
+          ctx, e = context_with_entity
+          e.add_b
+          e.del_a
+          e.del_b
 
-          # ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 1
-          # ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 1
+          ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 1
+          ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 1
 
-          # ctx.clear_component_pools
+          ctx.clear_component_pools
 
-          # ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 0
-          # ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 0
+          ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 0
+          ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 0
         end
       end
     end

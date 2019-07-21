@@ -1,17 +1,29 @@
-require "../component/helper"
-
 module Entitas
-  class Entity
+  abstract class Entity
     ############################
     # Component functions
     ############################
 
-    include Entitas::Component::Helper
+    # Returns the `ComponentPool` for the specified component index.
+    # `component_pools` is set by the context which created the entity and
+    # is used to reuse removed components.
+    # Removed components will be pushed to the componentPool.
+    # Use entity.create_component(index, type) to get a new or
+    # reusable component from the `ComponentPool`.
+    def component_pool(index : Int32) : ComponentPool
+      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
+      self.component_pools[index]
+    end
+
+    def component_pool(index : ::Entitas::Component::Index) : ComponentPool
+      component_pool self.index_value(index)
+    end
 
     def create_component(index : ::Entitas::Component::Index, **args)
       pool = component_pool(index)
+
       # FIXME: This should also clear the component
-      pool.empty? ? ::Entitas::Component::INDEX_MAP[index].new : pool.pop.init
+      pool.empty? ? self.index_class(index).new : pool.pop.init
     end
 
     def create_component(_type, **args)
@@ -43,7 +55,7 @@ module Entitas
     end
 
     def add_component(index : ::Entitas::Component::Index, component : Entitas::Component)
-      add_component(index.value, component)
+      add_component(self.index_value(index), component)
     end
 
     def add_component(component : Entitas::Component)
@@ -69,7 +81,7 @@ module Entitas
     end
 
     def remove_component(index : ::Entitas::Component::Index) : Nil
-      remove_component(index.value)
+      remove_component(self.index_value(index))
     end
 
     # Replaces an existing component at the specified index
@@ -88,7 +100,7 @@ module Entitas
     end
 
     def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
-      replace_component index.value, component
+      replace_component self.index_value(index), component
     end
 
     def replace_component(component : Entitas::Component?)
@@ -109,7 +121,7 @@ module Entitas
     end
 
     def get_component(index : ::Entitas::Component::Index) : Entitas::Component
-      get_component(index.value)
+      get_component(self.index_value(index))
     end
 
     # Returns all added components.
@@ -136,7 +148,7 @@ module Entitas
     end
 
     def has_component?(index : ::Entitas::Component::Index) : Bool
-      has_component? index.value
+      has_component? self.index_value(index)
     end
 
     # Determines whether this entity has components
@@ -162,7 +174,7 @@ module Entitas
     end
 
     def has_any_component?(indices : Array(::Entitas::Component::Index)) : Bool
-      has_any_component? indices.map &.value
+      has_any_component? indices.map { |i| self.index_value(i) }
     end
 
     # Removes all components.

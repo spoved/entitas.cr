@@ -1,7 +1,7 @@
 require "./error"
 
 module Entitas
-  class Entity
+  abstract class Entity
     module Index
       getter name : String | Nil
 
