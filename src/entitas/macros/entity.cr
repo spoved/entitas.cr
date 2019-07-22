@@ -1,7 +1,7 @@
 macro create_entity_for_context(context_name)
   class ::{{context_name.id}}Entity < ::Entitas::Entity
     def klass_to_index(klass) : Int32
-      raise Error::DoesNotHaveComponent.new unless ::{{context_name.id}}Context::COMPONENT_TO_INDEX_MAP[klass]? 
+      raise Error::DoesNotHaveComponent.new unless ::{{context_name.id}}Context::COMPONENT_TO_INDEX_MAP[klass]?
       ::{{context_name.id}}Context::COMPONENT_TO_INDEX_MAP[klass].value
     end
 
