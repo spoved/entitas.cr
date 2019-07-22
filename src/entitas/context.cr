@@ -80,6 +80,22 @@ module Entitas
       self.component_pools[index]
     end
 
+    # Clears the `ComponentPool` at the specified index.
+    def clear_component_pool(index : Int32)
+      component_pools[index].clear
+    end
+
+    def clear_component_pool(index : ::Entitas::Component.class)
+      component_pool(klass_to_index(index)).clear
+    end
+
+    # Clears all `ComponentPool`s.
+    def clear_component_pools
+      component_pools.each do |pool|
+        pool.clear
+      end
+    end
+
     ############################
     # Context::Info functions
     ############################
@@ -239,22 +255,6 @@ module Entitas
       self.clear_on_entity_will_be_destroyed_event_hooks
       self.clear_on_entity_destroyed_event_hooks
       self.clear_on_group_created_event_hooks
-    end
-
-    ############################
-    # ComponentPool functions
-    ############################
-
-    # Clears the `ComponentPool` at the specified index.
-    def clear_component_pool(index : Int32)
-      component_pools[index].clear
-    end
-
-    # Clears all `ComponentPool`s.
-    def clear_component_pools
-      component_pools.each do |pool|
-        pool.clear
-      end
     end
 
     ############################

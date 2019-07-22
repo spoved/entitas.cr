@@ -66,15 +66,15 @@ module Entitas
     # You can only remove a component at an index if it exists.
     def remove_component(index : Int32) : Nil
       if !enabled?
-        raise Error::IsNotEnabled.new "Cannot remove component " \
-                                      "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise Entitas::Entity::Error::IsNotEnabled.new "Cannot remove component " \
+                                                       "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if !has_component?(index)
-        raise Error::DoesNotHaveComponent.new "Cannot remove component " \
-                                              "'#{self.context_info.component_names[index]}' from #{self}! " \
-                                              "You should check if an entity has the component " \
-                                              "before removing it."
+        raise Entitas::Entity::Error::DoesNotHaveComponent.new "Cannot remove component " \
+                                                               "'#{self.context_info.component_names[index]}' from #{self}! " \
+                                                               "You should check if an entity has the component " \
+                                                               "before removing it."
       end
 
       self._replace_component(index, nil)
@@ -88,8 +88,8 @@ module Entitas
     # or adds it if it doesn't exist yet.
     def replace_component(index : Int32, component : Entitas::Component?)
       if !enabled?
-        raise Error::IsNotEnabled.new "Cannot replace component " \
-                                      "'#{self.context_info.component_names[index]}' from #{self}!"
+        raise Entitas::Entity::Error::IsNotEnabled.new "Cannot replace component " \
+                                                       "'#{self.context_info.component_names[index]}' from #{self}!"
       end
 
       if has_component?(index)
@@ -113,10 +113,10 @@ module Entitas
       if has_component?(index)
         self.components[index].as(Entitas::Component)
       else
-        raise Error::DoesNotHaveComponent.new "Cannot get component " \
-                                              "'#{self.context_info.component_names[index]}' from #{self}!" \
-                                              "You should check if an entity has the component " \
-                                              "before getting it."
+        raise Entitas::Entity::Error::DoesNotHaveComponent.new "Cannot get component " \
+                                                               "'#{self.context_info.component_names[index]}' from #{self}!" \
+                                                               "You should check if an entity has the component " \
+                                                               "before getting it."
       end
     end
 

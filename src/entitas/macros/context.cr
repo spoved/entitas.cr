@@ -65,11 +65,11 @@ module Entitas
             end
 
             def klass_to_index(klass)
-              raise Error::DoesNotHaveComponent.new unless COMPONENT_TO_INDEX_MAP[klass]?
+              raise Entitas::Entity::Error::DoesNotHaveComponent.new unless COMPONENT_TO_INDEX_MAP[klass]?
 
               COMPONENT_TO_INDEX_MAP[klass]
             rescue
-              raise Error::DoesNotHaveComponent.new
+              raise Entitas::Entity::Error::DoesNotHaveComponent.new
             end
 
             def component_pool(index : Index) : ::Entitas::ComponentPool

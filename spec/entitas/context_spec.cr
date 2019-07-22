@@ -466,7 +466,30 @@ describe Entitas::Context do
           ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 0
           ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 0
         end
+
+        it "clears a specific component pool" do
+          ctx, e = context_with_entity
+          e.add_b
+          e.del_a
+          e.del_b
+
+          ctx.clear_component_pool(B)
+          ctx.component_pools[Entitas::Component::Index::A.value].size.should eq 1
+          ctx.component_pools[Entitas::Component::Index::B.value].size.should eq 0
+        end
+
+        it "only clears existing component pool" do
+          ctx, e = context_with_entity
+          e.add_b
+          e.del_a
+          e.del_b
+          ctx.clear_component_pool(C)
+        end
       end
+    end
+
+    describe "entitas cache" do
+      # TODO: Finish groups
     end
   end
 end
