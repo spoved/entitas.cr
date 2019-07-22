@@ -69,7 +69,7 @@ describe Entitas::Context do
       end
 
       it "throws when component_names is not same length as total_components" do
-        context = Entitas::Context::Info.new("TestContext", ["A", "B"])
+        context = Entitas::Context::Info.new("TestContext", ["A", "B"], [A, B, C])
         expect_raises Entitas::Context::Error::Info do
           TestContext.new(context_info: context)
         end
@@ -445,6 +445,13 @@ describe Entitas::Context do
       end
 
       describe "component pools" do
+        it "cant add component not in context" do
+          ctx = InputContext.new
+          expect_raises Entitas::Entity::Error::DoesNotHaveComponent do
+            ctx.create_entity.add_a
+          end
+        end
+
         it "clears all component pools" do
           ctx, e = context_with_entity
           e.add_b

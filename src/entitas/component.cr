@@ -152,21 +152,24 @@ module Entitas
         {% end %}
       end
 
-      # A hash to map of enum `Index` to class of `Component`
-      INDEX_MAP = {
+      # A hash to map of enum `Index` to subclass of `::Entitas::Component`
+      INDEX_TO_COMPONENT_MAP = {
       {% for sub_klass in @type.subclasses %}
-        ::Entitas::Component::Index::{{sub_klass.name.id}} => {{sub_klass.name.id}},
+        ::Entitas::Component::Index::{{sub_klass.name.id}} => ::{{sub_klass.name.id}},
       {% end %}
       }
 
-      # A hash to map of class of `Component` to enum `Index`
-      COMPONENT_MAP = {
+      # A hash to map of class of `::Entitas::Component` to enum `Index`
+      COMPONENT_TO_INDEX_MAP = {
         {% for sub_klass in @type.subclasses %}
-          {{sub_klass.name.id}} => ::Entitas::Component::Index::{{sub_klass.name.id}},
+          ::{{sub_klass.name.id}} => ::Entitas::Component::Index::{{sub_klass.name.id}},
         {% end %}
       }
 
       TOTAL_COMPONENTS = {{i}}
+
+      COMPONENT_NAMES = COMPONENT_TO_INDEX_MAP.keys.map &.to_s
+      COMPONENT_KLASSES = COMPONENT_TO_INDEX_MAP.keys
       {% end %}
     end
   end

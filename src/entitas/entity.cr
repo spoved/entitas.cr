@@ -221,12 +221,7 @@ module Entitas
 
     # This will create a default `Entitas::Context::Info`
     private def create_default_context_info : Entitas::Context::Info
-      component_names = Array(String).new
-      0..Entitas::Component::TOTAL_COMPONENTS.times do |i|
-        component_names << "Index #{i}"
-      end
-
-      Entitas::Context::Info.new("No Context", component_names, nil)
+      Entitas::Context::Info.new("No Context", ::Entitas::Component::COMPONENT_NAMES, ::Entitas::Component::COMPONENT_KLASSES)
     end
 
     ############################

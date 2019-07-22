@@ -29,7 +29,10 @@ def new_entity_with_ab
 end
 
 def new_context_info
-  Entitas::Context::Info.new("TestContext")
+  Entitas::Context::Info.new("TestContext",
+    TestContext::COMPONENT_TO_INDEX_MAP.keys.map &.to_s,
+    TestContext::COMPONENT_TO_INDEX_MAP.keys,
+  )
 end
 
 def new_context

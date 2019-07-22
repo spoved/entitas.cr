@@ -27,7 +27,7 @@ module Entitas
     end
 
     def create_component(_type, **args)
-      create_component(::Entitas::Component::COMPONENT_MAP[_type], **args)
+      create_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[_type], **args)
     end
 
     # Will add the `Entitas::Component` at the provided index.
@@ -59,7 +59,7 @@ module Entitas
     end
 
     def add_component(component : Entitas::Component)
-      add_component(::Entitas::Component::COMPONENT_MAP[component.class], component)
+      add_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[component.class], component)
     end
 
     # Removes a component at the specified index.
@@ -104,7 +104,7 @@ module Entitas
     end
 
     def replace_component(component : Entitas::Component?)
-      replace_component(::Entitas::Component::COMPONENT_MAP[component.class].value, component)
+      replace_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[component.class], component)
     end
 
     # Will return the `Entitas::Component` at the provided index.

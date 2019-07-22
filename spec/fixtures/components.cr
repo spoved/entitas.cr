@@ -13,6 +13,7 @@ class C < Entitas::Component
 end
 
 @[Context(Test)]
+@[Context(Input)]
 class D < Entitas::Component
 end
 

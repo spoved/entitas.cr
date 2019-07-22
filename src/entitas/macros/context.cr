@@ -36,14 +36,14 @@ module Entitas
             # A hash to map of enum `Index` to class of `Component`
             INDEX_TO_COMPONENT_MAP = {
             {% for comp in comp_array %}
-              Index::{{comp.name.id}} => {{comp.name.id}},
+              Index::{{comp.name.id}} => ::{{comp.name.id}},
             {% end %}
             }
 
             # A hash to map of class of `Component` to enum `Index`
             COMPONENT_TO_INDEX_MAP = {
               {% for comp in comp_array %}
-                {{comp.name.id}} => Index::{{comp.name.id}},
+                ::{{comp.name.id}} => Index::{{comp.name.id}},
               {% end %}
             }
 
@@ -54,7 +54,7 @@ module Entitas
             UNIQUE_COMPONENTS = [
               {% for comp in comp_array %}
                 {% if comp.annotation(::Component::Unique) %}
-                  {{comp.name.id}},
+                  ::{{comp.name.id}},
                 {% end %}
               {% end %}
             ]
@@ -65,7 +65,11 @@ module Entitas
             end
 
             def klass_to_index(klass)
+              raise Error::DoesNotHaveComponent.new unless COMPONENT_TO_INDEX_MAP[klass]?
+
               COMPONENT_TO_INDEX_MAP[klass]
+            rescue
+              raise Error::DoesNotHaveComponent.new
             end
 
             def component_pool(index : Index) : ::Entitas::ComponentPool

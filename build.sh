@@ -23,4 +23,4 @@ crystal tool format
 if [ -d ./docs ];then
   rm -r ./docs
 fi
-crystal doc
+crystal doc ./spec/fixtures/*

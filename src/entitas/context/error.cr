@@ -1,5 +1,3 @@
-require "./info"
-
 module Entitas
   class Context
     class Error < Exception
