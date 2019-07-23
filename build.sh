@@ -14,10 +14,10 @@ crystal tool format
 # if [ -d ./coverage ];then
 #   rm -r ./coverage
 # fi
-./bin/crystal-coverage spec/entitas/*.cr spec/entitas/**/*.cr
+# ./bin/crystal-coverage spec/entitas/*.cr spec/entitas/**/*.cr
 
 # Run spec tests?
-# crystal spec --error-trace
+crystal spec --error-trace
 
 # Generate docs
 if [ -d ./docs ];then

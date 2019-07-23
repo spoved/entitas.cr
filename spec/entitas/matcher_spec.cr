@@ -1,25 +1,25 @@
 require "../spec_helper"
 
 private def new_entities
-  eA = new_entity
-  eA.add_a
+  e_a = new_entity
+  e_a.add_a
 
-  eB = new_entity
-  eB.add_b
+  e_b = new_entity
+  e_b.add_b
 
-  eC = new_entity
-  eC.add_c
+  e_c = new_entity
+  e_c.add_c
 
-  eAB = new_entity
-  eAB.add_a
-  eAB.add_b
+  e_ab = new_entity
+  e_ab.add_a
+  e_ab.add_b
 
-  eABC = new_entity
-  eABC.add_a
-  eABC.add_b
-  eABC.add_c
+  e_abc = new_entity
+  e_abc.add_a
+  e_abc.add_b
+  e_abc.add_c
 
-  {eA, eB, eC, eAB, eABC}
+  {e_a, e_b, e_c, e_ab, e_abc}
 end
 
 private def assert_indices_contain(indices, expected_indices)
@@ -51,8 +51,16 @@ private def all_of_any_of
   Entitas::Matcher(TestEntity).all_of(A, B).any_of(C, D)
 end
 
+private def all_of_ab
+  Entitas::Matcher(TestEntity).all_of(A, B)
+end
+
+private def all_of_ba
+  Entitas::Matcher(TestEntity).all_of(B, A)
+end
+
 describe Entitas::Matcher do
-  eA, eB, eC, eAB, eABC = new_entities
+  e_a, e_b, e_c, e_ab, e_abc = new_entities
 
   describe "#all_of" do
     it "has all indices" do
@@ -73,13 +81,13 @@ describe Entitas::Matcher do
     end
 
     it "doesn't match" do
-      new_matcher_all_of.matches?(eA).should be_false
+      new_matcher_all_of.matches?(e_a).should be_false
     end
 
     it "matches" do
       m = new_matcher_all_of
-      m.matches?(eAB).should be_true
-      m.matches?(eABC).should be_true
+      m.matches?(e_ab).should be_true
+      m.matches?(e_abc).should be_true
     end
 
     it "merges matchers to new matcher" do
@@ -113,7 +121,7 @@ describe Entitas::Matcher do
     it "throws when merging matcher with more than one index" do
       m1 = new_matcher_all_of
       expect_raises Entitas::Matcher::Error do
-        merged_matcher = Entitas::Matcher(TestEntity).all_of(m1)
+        Entitas::Matcher(TestEntity).all_of(m1)
       end
     end
 
@@ -158,14 +166,14 @@ describe Entitas::Matcher do
     end
 
     it "doesn't match" do
-      new_matcher_any_of.matches?(eC).should be_false
+      new_matcher_any_of.matches?(e_c).should be_false
     end
 
     it "matches" do
       m = new_matcher_any_of
-      m.matches?(eA).should be_true
-      m.matches?(eB).should be_true
-      m.matches?(eABC).should be_true
+      m.matches?(e_a).should be_true
+      m.matches?(e_b).should be_true
+      m.matches?(e_abc).should be_true
     end
 
     it "merges matchers to new matcher" do
@@ -199,7 +207,7 @@ describe Entitas::Matcher do
     it "throws when merging matcher with more than one index" do
       m1 = new_matcher_any_of
       expect_raises Entitas::Matcher::Error do
-        merged_matcher = Entitas::Matcher(TestEntity).any_of(m1)
+        Entitas::Matcher(TestEntity).any_of(m1)
       end
     end
 
@@ -238,12 +246,12 @@ describe Entitas::Matcher do
     end
 
     it "doesn't match" do
-      all_of_none_of.matches?(eABC).should be_false
+      all_of_none_of.matches?(e_abc).should be_false
     end
 
     it "matches" do
       m = all_of_none_of
-      m.matches?(eAB).should be_true
+      m.matches?(e_ab).should be_true
     end
 
     it "mutates existing matcher" do
@@ -308,13 +316,13 @@ describe Entitas::Matcher do
     end
 
     it "doesn't match" do
-      any_of_none_of.matches?(eABC).should be_false
+      any_of_none_of.matches?(e_abc).should be_false
     end
 
     it "matches" do
       m = any_of_none_of
-      m.matches?(eA).should be_true
-      m.matches?(eB).should be_true
+      m.matches?(e_a).should be_true
+      m.matches?(e_b).should be_true
     end
 
     it "mutates existing matcher" do
@@ -384,12 +392,12 @@ describe Entitas::Matcher do
     end
 
     it "doesn't match" do
-      all_of_any_of.matches?(eAB).should be_false
+      all_of_any_of.matches?(e_ab).should be_false
     end
 
     it "matches" do
       m = all_of_any_of
-      m.matches?(eABC).should be_true
+      m.matches?(e_abc).should be_true
     end
 
     it "mutates existing matcher" do
@@ -425,6 +433,15 @@ describe Entitas::Matcher do
       matcher = all_of_any_of
       matcher.component_names = ["one", "two", "three", "four", "five"]
       matcher.to_s.should eq "AllOf(one, two).AnyOf(three, four)"
+    end
+  end
+
+  describe "equals" do
+    it "equals equal AllOfMatcher" do
+      m1 = all_of_ab
+      m2 = all_of_ab
+      m1.should_not be m2
+      m1.should eq m2
     end
   end
 end

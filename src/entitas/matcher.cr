@@ -40,6 +40,14 @@ module Entitas
       self.none_of_indices.empty? || !entity.has_any_component?(self.none_of_indices)
     end
 
+    # Equality. Returns `true` if each element in `self` is equal to each
+    # corresponding element in *other*.
+    def ==(other : Matcher(T))
+      (self.all_of_indices == other.all_of_indices &&
+        self.any_of_indices == other.any_of_indices &&
+        self.none_of_indices == other.none_of_indices)
+    end
+
     ####################
     # Chainables
     ####################
