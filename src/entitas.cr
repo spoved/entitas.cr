@@ -14,7 +14,7 @@ module Entitas
 
   abstract class Entity; end
 
-  abstract class Matcher(T); end
+  # abstract class Matcher(T); end
 
   abstract class Group; end
 end
