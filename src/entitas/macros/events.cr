@@ -1,31 +1,33 @@
-# Will create `Entitas::Events` struct for the provided `name`. `opts` defines the struct variables.
-#
-# ```
-# create_event OnEntityCreated, {context: Context, entity: Entity}
-# ```
-#
-# This will create the code:
-# ```
-#   struct ::Entitas::Events::{{name.id}}
-#
-#     getter context : Context
-#     getter entity : Entity
-#
-#     def initialize(context : Context, entity : Entity)
-#     end
-#   end
-# ```
-macro create_event(name, opts)
-  struct ::Entitas::Events::{{name.id}}
-    {% for a, t in opts %}
-    getter {{a.id}} : {{t.id}}
-    {% end %}
-
-    def initialize(
+module ::Entitas::Events
+  # Will create `Entitas::Events` struct for the provided `name`. `opts` defines the struct variables.
+  #
+  # ```
+  # create_event OnEntityCreated, {context: Context, entity: Entity}
+  # ```
+  #
+  # This will create the code:
+  # ```
+  #   struct ::Entitas::Events::{{name.id}}
+  #
+  #     getter context : Context
+  #     getter entity : Entity
+  #
+  #     def initialize(context : Context, entity : Entity)
+  #     end
+  #   end
+  # ```
+  macro create_event(name, opts)
+    struct ::Entitas::Events::{{name.id}}
       {% for a, t in opts %}
-      @{{a.id}} : {{t.id}},
+      getter {{a.id}} : {{t.id}}
       {% end %}
-    )
+
+      def initialize(
+        {% for a, t in opts %}
+        @{{a.id}} : {{t.id}},
+        {% end %}
+      )
+      end
     end
   end
 end

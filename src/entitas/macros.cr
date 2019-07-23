@@ -1,5 +1,4 @@
 require "./error"
-require "./aliases"
 
 # Used to define the context(s) of the component
 #

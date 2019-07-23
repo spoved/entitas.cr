@@ -4,11 +4,19 @@ require "spoved/logger"
 module Entitas
   spoved_logger
 
+  alias ComponentPool = Array(::Entitas::Component)
+  alias AERCFactory = Proc(::Entitas::Entity, ::Entitas::SafeAERC)
+  alias EntityFactory = Proc(::Entitas::Entity)
+
   abstract class Component; end
 
   abstract class Context; end
 
   abstract class Entity; end
+
+  abstract class Matcher(T); end
+
+  abstract class Group; end
 end
 
 require "./entitas/*"
