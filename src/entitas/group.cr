@@ -15,13 +15,13 @@ module Entitas
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?
 
-    protected getter matcher : Entitas::Matcher(T)
+    protected getter matcher : Entitas::Matcher
 
     def contains_entity?(entity : Entitas::Entity) : Bool
       self.entities.includes?(entity)
     end
 
-    def initialize(@matcher : Entitas::Matcher(T))
+    def initialize(@matcher : Entitas::Matcher)
     end
 
     # This is used by the context to manage the group.
@@ -144,7 +144,9 @@ module Entitas
       single_entitie_cache
     end
 
+    ############################
     # Enumerable funcs
+    ############################
 
     # Returns the total number of `Entitas::Entity` in this `Group`
     def size
@@ -157,7 +159,9 @@ module Entitas
       end
     end
 
+    ############################
     # Misc funcs
+    ############################
 
     def to_s
       if to_string_cache.nil?

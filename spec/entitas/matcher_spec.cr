@@ -28,35 +28,35 @@ private def assert_indices_contain(indices, expected_indices)
 end
 
 private def new_matcher_all_of
-  Entitas::Matcher(TestEntity).all_of(A, B)
+  Entitas::Matcher.all_of(A, B)
 end
 
 private def new_matcher_any_of
-  Entitas::Matcher(TestEntity).any_of(A, B)
+  Entitas::Matcher.any_of(A, B)
 end
 
 private def new_matcher_none_of
-  Entitas::Matcher(TestEntity).none_of(A, B)
+  Entitas::Matcher.none_of(A, B)
 end
 
 private def all_of_none_of
-  Entitas::Matcher(TestEntity).all_of(A, B).none_of(C, D)
+  Entitas::Matcher.all_of(A, B).none_of(C, D)
 end
 
 private def any_of_none_of
-  Entitas::Matcher(TestEntity).any_of(A, B).none_of(C, D)
+  Entitas::Matcher.any_of(A, B).none_of(C, D)
 end
 
 private def all_of_any_of
-  Entitas::Matcher(TestEntity).all_of(A, B).any_of(C, D)
+  Entitas::Matcher.all_of(A, B).any_of(C, D)
 end
 
 private def all_of_ab
-  Entitas::Matcher(TestEntity).all_of(A, B)
+  Entitas::Matcher.all_of(A, B)
 end
 
 private def all_of_ba
-  Entitas::Matcher(TestEntity).all_of(B, A)
+  Entitas::Matcher.all_of(B, A)
 end
 
 describe Entitas::Matcher do
@@ -70,7 +70,7 @@ describe Entitas::Matcher do
     end
 
     it "has all indices without duplicates" do
-      m = Entitas::Matcher(TestEntity).all_of(A, A, B, B)
+      m = Entitas::Matcher.all_of(A, A, B, B)
       assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
       assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
     end
@@ -91,11 +91,11 @@ describe Entitas::Matcher do
     end
 
     it "merges matchers to new matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
-      m3 = Entitas::Matcher(TestEntity).all_of(C)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
+      m3 = Entitas::Matcher.all_of(C)
 
-      merged_matcher = Entitas::Matcher(TestEntity).all_of(m1, m2, m3)
+      merged_matcher = Entitas::Matcher.all_of(m1, m2, m3)
 
       assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
                                                       ::Entitas::Component::Index::B,
@@ -106,11 +106,11 @@ describe Entitas::Matcher do
     end
 
     it "merges matchers to new matcher without duplicates" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(A)
-      m3 = Entitas::Matcher(TestEntity).all_of(B)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(A)
+      m3 = Entitas::Matcher.all_of(B)
 
-      merged_matcher = Entitas::Matcher(TestEntity).all_of(m1, m2, m3)
+      merged_matcher = Entitas::Matcher.all_of(m1, m2, m3)
 
       assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
                                                       ::Entitas::Component::Index::B]
@@ -121,7 +121,7 @@ describe Entitas::Matcher do
     it "throws when merging matcher with more than one index" do
       m1 = new_matcher_all_of
       expect_raises Entitas::Matcher::Error do
-        Entitas::Matcher(TestEntity).all_of(m1)
+        Entitas::Matcher.all_of(m1)
       end
     end
 
@@ -136,13 +136,13 @@ describe Entitas::Matcher do
     end
 
     it "uses component_names when merged matcher to_s" do
-      m1 = Entitas::Matcher(TestEntity).all_of(B)
-      m2 = Entitas::Matcher(TestEntity).all_of(C)
-      m3 = Entitas::Matcher(TestEntity).all_of(D)
+      m1 = Entitas::Matcher.all_of(B)
+      m2 = Entitas::Matcher.all_of(C)
+      m3 = Entitas::Matcher.all_of(D)
 
       m2.component_names = ["m_0", "m_1", "m_2", "m_3"]
 
-      merged_matcher = Entitas::Matcher(TestEntity).all_of(m1, m2, m3)
+      merged_matcher = Entitas::Matcher.all_of(m1, m2, m3)
       merged_matcher.to_s.should eq "AllOf(m_1, m_2, m_3)"
     end
   end
@@ -155,7 +155,7 @@ describe Entitas::Matcher do
     end
 
     it "has all indices without duplicates" do
-      m = Entitas::Matcher(TestEntity).any_of(A, A, B, B)
+      m = Entitas::Matcher.any_of(A, A, B, B)
       assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
       assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
     end
@@ -177,11 +177,11 @@ describe Entitas::Matcher do
     end
 
     it "merges matchers to new matcher" do
-      m1 = Entitas::Matcher(TestEntity).any_of(A)
-      m2 = Entitas::Matcher(TestEntity).any_of(B)
-      m3 = Entitas::Matcher(TestEntity).any_of(C)
+      m1 = Entitas::Matcher.any_of(A)
+      m2 = Entitas::Matcher.any_of(B)
+      m3 = Entitas::Matcher.any_of(C)
 
-      merged_matcher = Entitas::Matcher(TestEntity).any_of(m1, m2, m3)
+      merged_matcher = Entitas::Matcher.any_of(m1, m2, m3)
 
       assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
                                                       ::Entitas::Component::Index::B,
@@ -192,11 +192,11 @@ describe Entitas::Matcher do
     end
 
     it "merges matchers to new matcher without duplicates" do
-      m1 = Entitas::Matcher(TestEntity).any_of(A)
-      m2 = Entitas::Matcher(TestEntity).any_of(B)
-      m3 = Entitas::Matcher(TestEntity).any_of(B)
+      m1 = Entitas::Matcher.any_of(A)
+      m2 = Entitas::Matcher.any_of(B)
+      m3 = Entitas::Matcher.any_of(B)
 
-      merged_matcher = Entitas::Matcher(TestEntity).any_of(m1, m2, m3)
+      merged_matcher = Entitas::Matcher.any_of(m1, m2, m3)
 
       assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
                                                       ::Entitas::Component::Index::B]
@@ -207,7 +207,7 @@ describe Entitas::Matcher do
     it "throws when merging matcher with more than one index" do
       m1 = new_matcher_any_of
       expect_raises Entitas::Matcher::Error do
-        Entitas::Matcher(TestEntity).any_of(m1)
+        Entitas::Matcher.any_of(m1)
       end
     end
 
@@ -230,7 +230,7 @@ describe Entitas::Matcher do
     end
 
     it "has all indices without duplicates" do
-      m = Entitas::Matcher(TestEntity).all_of(A, A, B).none_of(B, C, C)
+      m = Entitas::Matcher.all_of(A, A, B).none_of(B, C, C)
       assert_indices_contain m.indices, [
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
@@ -261,9 +261,9 @@ describe Entitas::Matcher do
     end
 
     it "mutates existing merged matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
-      m3 = Entitas::Matcher(TestEntity).all_of(m1)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
+      m3 = Entitas::Matcher.all_of(m1)
       m4 = m3.none_of(m2)
 
       m3.should be m4
@@ -299,7 +299,7 @@ describe Entitas::Matcher do
     end
 
     it "has all indices without duplicates" do
-      m = Entitas::Matcher(TestEntity).any_of(A, A, B).none_of(B, C, C)
+      m = Entitas::Matcher.any_of(A, A, B).none_of(B, C, C)
 
       assert_indices_contain m.indices, [
         ::Entitas::Component::Index::A,
@@ -326,7 +326,7 @@ describe Entitas::Matcher do
     end
 
     it "mutates existing matcher" do
-      m1 = Entitas::Matcher(TestEntity).any_of(A)
+      m1 = Entitas::Matcher.any_of(A)
       m2 = m1.none_of(B)
       m1.should be m2
 
@@ -339,9 +339,9 @@ describe Entitas::Matcher do
     end
 
     it "mutates existing merged matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
-      m3 = Entitas::Matcher(TestEntity).any_of(m1)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
+      m3 = Entitas::Matcher.any_of(m1)
       m4 = m3.none_of(m2)
 
       m3.should be m4
@@ -376,7 +376,7 @@ describe Entitas::Matcher do
     end
 
     it "has all indices without duplicates" do
-      m = Entitas::Matcher(TestEntity).all_of(A, A, B).any_of(B, C, C)
+      m = Entitas::Matcher.all_of(A, A, B).any_of(B, C, C)
       assert_indices_contain m.indices, [
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
@@ -401,7 +401,7 @@ describe Entitas::Matcher do
     end
 
     it "mutates existing matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m1 = Entitas::Matcher.all_of(A)
       m2 = m1.any_of(B)
       m1.should be m2
       assert_indices_contain m1.indices, [
@@ -413,9 +413,9 @@ describe Entitas::Matcher do
     end
 
     it "mutates existing merged matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
-      m3 = Entitas::Matcher(TestEntity).all_of(m1)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
+      m3 = Entitas::Matcher.all_of(m1)
       m4 = m3.any_of(m2)
 
       m3.should be m4
@@ -452,47 +452,47 @@ describe Entitas::Matcher do
     end
 
     it "equals merged matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
       m3 = all_of_ba
 
-      merged_matcher = Entitas::Matcher(TestEntity).all_of(m1, m2)
+      merged_matcher = Entitas::Matcher.all_of(m1, m2)
 
       merged_matcher.should eq m3
     end
 
     it "doesn't equal different all_of matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m1 = Entitas::Matcher.all_of(A)
       m2 = all_of_ab
 
       m1.should_not eq m2
     end
 
     it "all_of doesn't equal any_of with same indices" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).any_of(A)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.any_of(A)
 
       m1.should_not eq m2
     end
 
     it "doesn't equal differnt type matchers with same indices" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).all_of(B)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.all_of(B)
 
-      m3 = Entitas::Matcher(TestEntity).all_of(m1, m2)
-      m4 = Entitas::Matcher(TestEntity).any_of(m1, m2)
+      m3 = Entitas::Matcher.all_of(m1, m2)
+      m4 = Entitas::Matcher.any_of(m1, m2)
 
       m3.should_not eq m4
     end
 
     it "equals compound matcher" do
-      m1 = Entitas::Matcher(TestEntity).all_of(A)
-      m2 = Entitas::Matcher(TestEntity).any_of(B)
-      m3 = Entitas::Matcher(TestEntity).any_of(C)
-      m4 = Entitas::Matcher(TestEntity).any_of(D)
+      m1 = Entitas::Matcher.all_of(A)
+      m2 = Entitas::Matcher.any_of(B)
+      m3 = Entitas::Matcher.any_of(C)
+      m4 = Entitas::Matcher.any_of(D)
 
-      mX = Entitas::Matcher(TestEntity).all_of(m1, m2).any_of(m3, m4)
-      mY = Entitas::Matcher(TestEntity).all_of(m1, m2).any_of(m3, m4)
+      mX = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
+      mY = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
 
       mX.should eq mY
     end

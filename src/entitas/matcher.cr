@@ -1,5 +1,5 @@
 module Entitas
-  class Matcher(T)
+  class Matcher
     spoved_logger
 
     class Error < Exception
@@ -21,28 +21,28 @@ module Entitas
     protected setter none_of_indices : Array(Entitas::Component::Index) = Array(Entitas::Component::Index).new
     protected setter indices : Array(Entitas::Component::Index)? = nil
 
-    def matches?(entity : T)
+    def matches?(entity : ::Entitas::Entity)
       logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
                    " && matches_any_of? #{matches_any_of?(entity)}" \
                    " && matches_none_of? #{matches_none_of?(entity)}", self)
       matches_all_of?(entity) && matches_any_of?(entity) && matches_none_of?(entity)
     end
 
-    private def matches_all_of?(entity : T)
+    private def matches_all_of?(entity : ::Entitas::Entity)
       self.all_of_indices.empty? || entity.has_components?(self.all_of_indices)
     end
 
-    private def matches_any_of?(entity : T)
+    private def matches_any_of?(entity : ::Entitas::Entity)
       self.any_of_indices.empty? || entity.has_any_component?(self.any_of_indices)
     end
 
-    private def matches_none_of?(entity : T)
+    private def matches_none_of?(entity : ::Entitas::Entity)
       self.none_of_indices.empty? || !entity.has_any_component?(self.none_of_indices)
     end
 
     # Equality. Returns `true` if each element in `self` is equal to each
     # corresponding element in *other*.
-    def ==(other : Matcher(T))
+    def ==(other : Matcher)
       (self.all_of_indices == other.all_of_indices &&
         self.any_of_indices == other.any_of_indices &&
         self.none_of_indices == other.none_of_indices)
@@ -52,34 +52,34 @@ module Entitas
     # Chainables
     ####################
 
-    def all_of(*comps : Entitas::Component.class) : Matcher(T)
+    def all_of(*comps : Entitas::Component.class) : Matcher
       self.all_of_indices = comps.to_a.map { |c| ::Entitas::Component::COMPONENT_TO_INDEX_MAP[c] }.uniq.sort
       self
     end
 
-    def all_of(*matchers : Matcher) : Matcher(T)
+    def all_of(*matchers : Matcher) : Matcher
       self.all_of_indices = self.class.merge_indicies(*matchers)
       self.class.set_component_names(self, *matchers)
       self
     end
 
-    def any_of(*comps : Entitas::Component.class) : Matcher(T)
+    def any_of(*comps : Entitas::Component.class) : Matcher
       self.any_of_indices = comps.to_a.map { |c| ::Entitas::Component::COMPONENT_TO_INDEX_MAP[c] }.uniq.sort
       self
     end
 
-    def any_of(*matchers : Matcher) : Matcher(T)
+    def any_of(*matchers : Matcher) : Matcher
       self.any_of_indices = self.class.merge_indicies(*matchers)
       self.class.set_component_names(self, *matchers)
       self
     end
 
-    def none_of(*comps : Entitas::Component.class) : Matcher(T)
+    def none_of(*comps : Entitas::Component.class) : Matcher
       self.none_of_indices = comps.to_a.map { |c| ::Entitas::Component::COMPONENT_TO_INDEX_MAP[c] }.uniq.sort
       self
     end
 
-    def none_of(*matchers : Matcher) : Matcher(T)
+    def none_of(*matchers : Matcher) : Matcher
       self.none_of_indices = self.class.merge_indicies(*matchers)
       self.class.set_component_names(self, *matchers)
       self
@@ -94,8 +94,8 @@ module Entitas
     # ```
     # Entitas::Matcher(TestEntity).all_of(A, B)
     # ```
-    def self.all_of(*comps : Entitas::Component.class) : Matcher(T)
-      Entitas::Matcher(T).new.all_of(*comps)
+    def self.all_of(*comps : Entitas::Component.class) : Matcher
+      Entitas::Matcher.new.all_of(*comps)
     end
 
     # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
@@ -106,8 +106,8 @@ module Entitas
     # m2 = Entitas::Matcher(TestEntity).all_of(B)
     # matcher = Entitas::Matcher(TestEntity).all_of(m1, m2)
     # ```
-    def self.all_of(*matchers : Matcher) : Matcher(T)
-      Entitas::Matcher(T).new.all_of(*matchers)
+    def self.all_of(*matchers : Matcher) : Matcher
+      Entitas::Matcher.new.all_of(*matchers)
     end
 
     # Create a matcher to match entities that have ANY of the provided `Entitas::Component` classes
@@ -115,8 +115,8 @@ module Entitas
     # ```
     # Entitas::Matcher(TestEntity).any_of(A, B)
     # ```
-    def self.any_of(*comps : Entitas::Component.class) : Matcher(T)
-      Entitas::Matcher(T).new.any_of(*comps)
+    def self.any_of(*comps : Entitas::Component.class) : Matcher
+      Entitas::Matcher.new.any_of(*comps)
     end
 
     # Create a matcher to match entities that have ANY of the `Entitas::Component` classes
@@ -127,8 +127,8 @@ module Entitas
     # m2 = Entitas::Matcher(TestEntity).any_of(B)
     # matcher = Entitas::Matcher(TestEntity).any_of(m1, m2)
     # ```
-    def self.any_of(*matchers : Matcher) : Matcher(T)
-      Entitas::Matcher(T).new.any_of(*matchers)
+    def self.any_of(*matchers : Matcher) : Matcher
+      Entitas::Matcher.new.any_of(*matchers)
     end
 
     # Create a matcher to match entities that have NONE of the provided `Entitas::Component` classes
@@ -136,8 +136,8 @@ module Entitas
     # ```
     # Entitas::Matcher(TestEntity).none_of(A, B)
     # ```
-    def self.none_of(*comps : Entitas::Component.class) : Matcher(T)
-      Entitas::Matcher(T).new.none_of(*comps)
+    def self.none_of(*comps : Entitas::Component.class) : Matcher
+      Entitas::Matcher.new.none_of(*comps)
     end
 
     # Create a matcher to match entities that have NONE of the `Entitas::Component` classes
@@ -148,12 +148,12 @@ module Entitas
     # m2 = Entitas::Matcher(TestEntity).none_of(B)
     # matcher = Entitas::Matcher(TestEntity).none_of(m1, m2)
     # ```
-    def self.none_of(*matchers : Matcher) : Matcher(T)
-      Entitas::Matcher(T).new.none_of(*matchers)
+    def self.none_of(*matchers : Matcher) : Matcher
+      Entitas::Matcher.new.none_of(*matchers)
     end
 
-    protected def self.merge(*matchers : Matcher) : Matcher(T)
-      matcher = Entitas::Matcher(T).new
+    protected def self.merge(*matchers : Matcher) : Matcher
+      matcher = Entitas::Matcher.new
 
       matchers.each do |m|
         matcher.all_of_indices += m.all_of_indices

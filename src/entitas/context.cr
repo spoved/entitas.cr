@@ -17,13 +17,10 @@ module Entitas
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
 
-    # component_pools is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.CreateComponent(index, type) to get a new or
-    # reusable component from the componentPool.
-    # Use entity.GetComponentPool(index) to get a componentPool for
-    # a specific component index.
+    # component_pools is set by the context which created the entity and is used to reuse removed components.
+    # Removed components will be pushed to the componentPool. Use entity.CreateComponent(index, type) to get
+    # a new or reusable component from the componentPool. Use entity.GetComponentPool(index) to get a
+    # componentPool for a specific component index.
     getter component_pools : Array(::Entitas::ComponentPool)
 
     accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed, OnGroupCreated
@@ -69,12 +66,10 @@ module Entitas
     # ComponentPool functions
     ############################
 
-    # Returns the `ComponentPool` for the specified component index.
-    # `component_pools` is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.create_component(index, type) to get a new or
-    # reusable component from the `ComponentPool`.
+    # Returns the `ComponentPool` for the specified component index. `component_pools` is set by the context which
+    # created the entity and is used to reuse removed components. Removed components will be pushed to the
+    # componentPool. Use entity.create_component(index, type) to get a new or reusable component
+    # from the `ComponentPool`.
     def component_pool(index : Int32) : ComponentPool
       self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
       self.component_pools[index]

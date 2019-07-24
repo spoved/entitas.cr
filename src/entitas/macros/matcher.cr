@@ -1,4 +1,4 @@
 module Entitas
-  class Matcher(T)
+  class Matcher
   end
 end
