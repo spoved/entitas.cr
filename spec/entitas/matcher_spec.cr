@@ -491,10 +491,10 @@ describe Entitas::Matcher do
       m3 = Entitas::Matcher.any_of(C)
       m4 = Entitas::Matcher.any_of(D)
 
-      mX = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
-      mY = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
+      m_x = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
+      m_y = Entitas::Matcher.all_of(m1, m2).any_of(m3, m4)
 
-      mX.should eq mY
+      m_x.should eq m_y
     end
   end
 end

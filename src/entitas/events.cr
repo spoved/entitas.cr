@@ -5,6 +5,8 @@ module ::Entitas::Events
   create_event OnEntityRemoved, {group: Group, entity: Entity, index: Int32, prev_component: Entitas::Component?}
   create_event OnEntityUpdated, {group: Group, entity: Entity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
 
+  alias GroupChanged = OnEntityAdded.class | OnEntityRemoved.class | OnEntityUpdated.class | Nil
+
   create_event OnEntityCreated, {context: Context, entity: Entity}
   create_event OnEntityWillBeDestroyed, {context: Context, entity: Entity}
   create_event OnEntityDestroyed, {context: Context, entity: Entity}
@@ -17,5 +19,5 @@ module ::Entitas::Events
 
   create_event OnDestroyEntity, {entity: Entity}
 
-  create_event OnGroupCreated, {context: Context, entity: Entity}
+  create_event OnGroupCreated, {context: Context, group: Group}
 end

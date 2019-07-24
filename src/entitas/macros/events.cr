@@ -147,4 +147,8 @@ macro accept_event(name)
   private def clear_{{name.id.underscore.id}}_event_hooks : Nil
     self.{{name.id.underscore.id}}_event_hooks.clear
   end
+
+  def receive_{{name.id.underscore.id}}_event(event : ::Entitas::Events::{{name.id}})
+    self.{{name.id.underscore.id}}_event_hooks.reverse.each &.call(event)
+  end
 end

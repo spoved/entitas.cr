@@ -17,15 +17,19 @@ module Entitas
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
 
+    protected property groups : Hash(Matcher, Group) = Hash(Matcher, Group).new
+    protected property groups_for_index : Array(Array(Group))
+
     # component_pools is set by the context which created the entity and is used to reuse removed components.
     # Removed components will be pushed to the componentPool. Use entity.CreateComponent(index, type) to get
     # a new or reusable component from the componentPool. Use entity.GetComponentPool(index) to get a
     # componentPool for a specific component index.
     getter component_pools : Array(::Entitas::ComponentPool)
 
-    accept_events OnEntityCreated, OnEntityDestroyed, OnEntityWillBeDestroyed, OnGroupCreated
+    accept_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
-      OnComponentAdded, OnComponentRemoved, OnEntityReleased, OnDestroyEntity
+      OnComponentAdded, OnComponentRemoved, OnComponentReplaced,
+      OnEntityReleased, OnDestroyEntity
 
     def initialize(
       @creation_index : Int32 = 0,
@@ -36,6 +40,10 @@ module Entitas
       @context_info = context_info || create_default_context_info
       @component_pools = Array(::Entitas::ComponentPool).new(total_components) do
         ::Entitas::ComponentPool.new
+      end
+
+      @groups_for_index = Array(Array(Group)).new(total_components) do
+        Array(Group).new
       end
 
       if self.context_info.component_names.size != self.total_components
@@ -199,9 +207,15 @@ module Entitas
     ############################
 
     def on_component_added(event : Events::OnComponentAdded)
+      update_groups_component_added_or_removed(event.entity, event.index, event.component)
     end
 
     def on_component_removed(event : Events::OnComponentRemoved)
+      update_groups_component_added_or_removed(event.entity, event.index, event.component)
+    end
+
+    def on_component_replaced(event : Events::OnComponentReplaced)
+      update_groups_component_replaced(event.entity, event.index, event.prev_component, event.new_component)
     end
 
     def on_entity_released(event : Events::OnEntityReleased)

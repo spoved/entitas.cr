@@ -3,7 +3,7 @@ require "./events"
 require "./group/*"
 
 module Entitas
-  abstract class Group
+  class Group
     spoved_logger
 
     accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated
@@ -11,7 +11,7 @@ module Entitas
     include Enumerable(Entitas::Entity)
 
     getter entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
-    protected property entities_cache : Array(Entitas::Entity) = Array(Entitas::Entity).new
+    protected property entities_cache : Array(Entitas::Entity)? = nil
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?
 
@@ -43,11 +43,11 @@ module Entitas
     end
 
     # This is used by the context to manage the group.
-    def update_entity(entity : Entity, index : Int32, prev_component : Entitas::Component, new_component : Entitas::Component)
+    def update_entity(entity : Entitas::Entity, index : Int32, prev_component : Entitas::Component?, new_component : Entitas::Component?)
       if has_entity?(entity)
-        emit OnEntityRemoved, self, entity, index, prev_component
-        emit OnEntityAdded, self, entity, index, new_component
-        emit OnEntityUpdated, self, entity, index, prev_component, new_component
+        emit_event OnEntityRemoved, self, entity, index, prev_component
+        emit_event OnEntityAdded, self, entity, index, new_component
+        emit_event OnEntityUpdated, self, entity, index, prev_component, new_component
       end
     end
 
@@ -62,11 +62,11 @@ module Entitas
       self.clear_on_entity_updated_event_hooks
     end
 
-    def handle_entity(entity : Entity)
+    def handle_entity(entity : Entity) : ::Entitas::Events::GroupChanged
       if self.matcher.matches?(entity)
-        add_entity_silently(entity) # ? OnEntityAdded : null
+        add_entity_silently(entity) ? ::Entitas::Events::OnEntityAdded : nil
       else
-        remove_entity_silently(entity) # ? OnEntityRemoved : null
+        remove_entity_silently(entity) ? ::Entitas::Events::OnEntityRemoved : nil
       end
     end
 
@@ -83,11 +83,11 @@ module Entitas
 
     def add_entity(entity : Entity, index : Int32, component : Component)
       if add_entity_silently(entity)
-        emit OnEntityAdded, self, entity, index, new_component
+        emit_event ::Entitas::Events::OnEntityAdded, self, entity, index, new_component
       end
     end
 
-    def remove_entity_silently(entity : Entity) : Entity
+    def remove_entity_silently(entity : Entity) : Entity?
       removed = self.entities.delete(entity)
       if removed
         self.entities_cache = nil
@@ -102,7 +102,7 @@ module Entitas
       if removed
         self.entities_cache = nil
         self.single_entitie_cache = nil
-        emit OnEntityRemoved, self, entity, index, prev_component
+        emit_event ::Entitas::Events::OnEntityRemoved, self, entity, index, prev_component
         entity.release(self)
       end
       removed
@@ -163,9 +163,15 @@ module Entitas
     # Misc funcs
     ############################
 
+    def to_s(io)
+      io << "Group("
+      matcher.to_s(io)
+      io << ")"
+    end
+
     def to_s
       if to_string_cache.nil?
-        self.to_string_cache = "Group( )"
+        self.to_string_cache = "Group(#{matcher})"
       end
       to_string_cache
     end
