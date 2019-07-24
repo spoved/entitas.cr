@@ -62,12 +62,13 @@ module Entitas
       self.clear_on_entity_updated_event_hooks
     end
 
-    # TODO: Finish?
-    # public GroupChanged<TEntity> HandleEntity(TEntity entity) {
-    #      return _matcher.Matches(entity)
-    #          ? (addEntitySilently(entity) ? OnEntityAdded : null)
-    #          : (removeEntitySilently(entity) ? OnEntityRemoved : null);
-    #  }
+    def handle_entity(entity : Entity)
+      if self.matcher.matches?(entity)
+        add_entity_silently(entity) # ? OnEntityAdded : null
+      else
+        remove_entity_silently(entity) # ? OnEntityRemoved : null
+      end
+    end
 
     def add_entity_silently(entity : Entity) : Entity | Bool
       if entity.enabled?
