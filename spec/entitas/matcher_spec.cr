@@ -443,5 +443,58 @@ describe Entitas::Matcher do
       m1.should_not be m2
       m1.should eq m2
     end
+
+    it "equals equal all_of matcher independent of the order of indices" do
+      m1 = all_of_ab
+      m2 = all_of_ba
+      m1.should_not be m2
+      m1.should eq m2
+    end
+
+    it "equals merged matcher" do
+      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m2 = Entitas::Matcher(TestEntity).all_of(B)
+      m3 = all_of_ba
+
+      merged_matcher = Entitas::Matcher(TestEntity).all_of(m1, m2)
+
+      merged_matcher.should eq m3
+    end
+
+    it "doesn't equal different all_of matcher" do
+      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m2 = all_of_ab
+
+      m1.should_not eq m2
+    end
+
+    it "all_of doesn't equal any_of with same indices" do
+      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m2 = Entitas::Matcher(TestEntity).any_of(A)
+
+      m1.should_not eq m2
+    end
+
+    it "doesn't equal differnt type matchers with same indices" do
+      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m2 = Entitas::Matcher(TestEntity).all_of(B)
+
+      m3 = Entitas::Matcher(TestEntity).all_of(m1, m2)
+      m4 = Entitas::Matcher(TestEntity).any_of(m1, m2)
+
+      m3.should_not eq m4
+    end
+
+    it "equals compound matcher" do
+      m1 = Entitas::Matcher(TestEntity).all_of(A)
+      m2 = Entitas::Matcher(TestEntity).any_of(B)
+      m3 = Entitas::Matcher(TestEntity).any_of(C)
+      m4 = Entitas::Matcher(TestEntity).any_of(D)
+
+      mX = Entitas::Matcher(TestEntity).all_of(m1, m2).any_of(m3, m4)
+      mY = Entitas::Matcher(TestEntity).all_of(m1, m2).any_of(m3, m4)
+
+      mX.should eq mY
+    end
   end
 end
