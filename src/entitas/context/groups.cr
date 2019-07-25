@@ -4,20 +4,22 @@ module Entitas
     # Calling context.GetGroup(matcher) with the same matcher will always
     # return the same instance of the group.
     def get_group(matcher : ::Entitas::Matcher) : ::Entitas::Group
-      if self.groups[matcher]?
-        self.groups[matcher]
-      else
-        if matcher.component_names.empty?
-          matcher.component_names = info.component_names
-        end
+      if matcher.component_names.empty?
+        matcher.component_names = info.component_names
+      end
 
+      if self.groups[matcher.to_s]?
+        self.groups[matcher.to_s]
+      else
         group = Group.new(matcher)
+
+        logger.debug("created new group: #{group}", self)
 
         get_entities.each do |entity|
           group.handle_entity_silently(entity)
         end
 
-        self.groups[matcher] = group
+        self.groups[matcher.to_s] = group
 
         matcher.indices.each do |i|
           groups_for_index[i.value] << group

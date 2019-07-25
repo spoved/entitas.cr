@@ -17,7 +17,7 @@ module Entitas
     protected property retained_entities = Array(Entity).new
     protected property entities_cache : Array(Entity)? = Array(Entity).new
 
-    protected property groups : Hash(Matcher, Group) = Hash(Matcher, Group).new
+    protected property groups : Hash(String, Group) = Hash(String, Group).new
     protected property groups_for_index : Array(Array(Group))
 
     # component_pools is set by the context which created the entity and is used to reuse removed components.

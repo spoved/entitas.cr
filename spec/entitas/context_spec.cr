@@ -1,5 +1,21 @@
 require "../spec_helper"
 
+private def ctx_and_entities
+  ctx = new_context
+  eab1 = ctx.create_entity
+  eab1.add_a
+  eab1.add_b
+
+  eab2 = ctx.create_entity
+  eab2.add_a
+  eab2.add_b
+
+  ea = ctx.create_entity
+  ea.add_a
+
+  {ctx, eab1, eab2, ea}
+end
+
 describe Entitas::Context do
   describe "when created" do
     it "increments creation index" do
@@ -231,8 +247,29 @@ describe Entitas::Context do
         end
       end
 
-      # TODO: dispatches OnGroupCreated when creating a new group
-      # TODO: doesn't dispatch OnGroupCreated when group alredy exists
+      it "dispatches OnGroupCreated when creating a new group" do
+        did_dispatch = 0
+        ctx, _ = context_with_entity
+
+        event_group : Entitas::Group? = nil
+
+        ctx.on_group_created do |event|
+          did_dispatch += 1
+          event.context.should be ctx
+          event_group = event.group
+        end
+
+        group = ctx.get_group(Entitas::Matcher.all_of(A))
+        did_dispatch.should eq 1
+        event_group.should be group
+      end
+
+      it "doesn't dispatch OnGroupCreated when group alredy exists" do
+        ctx, _ = context_with_entity
+        ctx.get_group(Entitas::Matcher.all_of(A))
+        ctx.on_group_created { true.should be_false }
+        ctx.get_group(Entitas::Matcher.all_of(A))
+      end
 
       it "removes all external delegates when destroying an entity" do
         ctx = new_context
@@ -401,7 +438,136 @@ describe Entitas::Context do
     end
 
     describe "groups" do
-      # TODO
+      it "gets empty group for matcher when no entities were created" do
+        g = new_context.get_group(Entitas::Matcher.all_of(A))
+        g.should_not be_nil
+        g.get_entities.should be_empty
+      end
+
+      describe "when entities created" do
+        matcher_ab = Entitas::Matcher.all_of(A, B)
+
+        it "gets group with matching entities" do
+          ctx, eab1, eab2, _ = ctx_and_entities
+          g = ctx.get_group(matcher_ab)
+          g.size.should eq 2
+          g.includes?(eab1)
+          g.includes?(eab2)
+        end
+
+        it "gets cached group" do
+          ctx, _, _, _ = ctx_and_entities
+          ctx.get_group(matcher_ab).should be ctx.get_group(matcher_ab)
+        end
+
+        it "cached group contains newly created matching entity" do
+          ctx, _, _, ea = ctx_and_entities
+          g = ctx.get_group(matcher_ab)
+          ea.add_b
+          g.get_entities.includes?(ea).should be_true
+        end
+
+        it "cached group doesn't contain entity which are not matching anymore" do
+          ctx, eab1, _, _ = ctx_and_entities
+          g = ctx.get_group(matcher_ab)
+          eab1.del_a
+          g.get_entities.includes?(eab1).should be_false
+        end
+
+        it "removes destroyed entity" do
+          ctx, eab1, _, _ = ctx_and_entities
+          g = ctx.get_group(matcher_ab)
+          eab1.destroy!
+          g.get_entities.includes?(eab1).should be_false
+        end
+
+        it "group dispatches OnEntityRemoved and OnEntityAdded when replacing components" do
+          ctx, eab1, _, _ = ctx_and_entities
+          g = ctx.get_group(matcher_ab)
+
+          eab1_comp_a = eab1.a
+          did_dispatch_removed = 0
+          did_dispatch_added = 0
+          comp_a = A.new
+
+          g.on_entity_removed do |event|
+            event.group.should be g
+            event.entity.should be eab1
+            event.index.should eq Entitas::Component::Index::A.value
+            event.component.should be eab1_comp_a
+            did_dispatch_removed += 1
+          end
+
+          g.on_entity_added do |event|
+            event.group.should be g
+            event.entity.should be eab1
+            event.index.should eq Entitas::Component::Index::A.value
+            event.component.should be comp_a
+            did_dispatch_added += 1
+          end
+
+          eab1.replace_a(comp_a)
+          did_dispatch_removed.should eq 1
+          did_dispatch_added.should eq 1
+        end
+
+        it "group dispatches OnEntityUpdated with previous and current component when replacing a component" do
+          updated = 0
+
+          ctx, eab1, _, _ = ctx_and_entities
+          prev_comp = eab1.a
+          new_comp = A.new
+
+          g = ctx.get_group(matcher_ab)
+
+          g.on_entity_updated do |event|
+            event.group.should be g
+            event.entity.should be eab1
+            event.index.should eq Entitas::Component::Index::A.value
+            event.prev_component.should be prev_comp
+            event.new_component.should be new_comp
+            updated += 1
+          end
+
+          eab1.replace_component Entitas::Component::Index::A, new_comp
+          updated.should eq 1
+        end
+
+        it "group with matcher NoneOf doesn't dispatch OnEntityAdded when destroying entity" do
+          ctx = new_context
+          e = ctx.create_entity.add_a.add_b
+          matcher = Entitas::Matcher.all_of(B).all_of(A)
+          g = ctx.get_group(matcher)
+          g.on_entity_added { true.should be_false }
+          e.destroy!
+        end
+
+        describe "event timing" do
+          it "dispatches group.OnEntityAdded events after all groups are updated" do
+            ctx = new_context
+            group_a = ctx.get_group Entitas::Matcher.all_of(A, B)
+            group_b = ctx.get_group Entitas::Matcher.all_of(B)
+
+            group_a.on_entity_added do
+              group_b.size.should eq 1
+            end
+
+            ctx.create_entity.add_a.add_b
+          end
+
+          it "dispatches group.OnEntityRemoved events after all groups are updated" do
+            ctx = new_context
+            group_b = ctx.get_group Entitas::Matcher.all_of(B)
+            group_ab = ctx.get_group Entitas::Matcher.all_of(A, B)
+
+            group_b.on_entity_removed do
+              group_ab.size.should eq 0
+            end
+
+            ctx.create_entity.add_a.add_b.del_b
+          end
+        end
+      end
     end
 
     describe "entity index" do

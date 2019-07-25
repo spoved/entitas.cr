@@ -105,23 +105,42 @@ module Entitas
           self.get_component(klass_to_index({{@type.name.id}})).as({{@type.name.id}})
         end
 
-        # Add a `{{@type.name.id}}` to the entity
+        # Add a `{{@type.name.id}}` to the entity. Returns `self` to allow chainables
         # ```
         # entity.add_{{@type.name.id.downcase}}
         # ```
-        def add_{{@type.name.id.downcase}}(**args)
-          component = {{@type.name.id}}.new(**args)
-          self.add_component(klass_to_index({{@type.name.id}}), component)
+        def add_{{@type.name.id.downcase}}(**args) : ::Entitas::Entity
+          self.add_component_{{@type.name.id.downcase}}(**args)
         end
 
+        # Add a `{{@type.name.id}}` to the entity. Returns `self` to allow chainables
+        # ```
+        # entity.add_component_{{@type.name.id.downcase}}
+        # ```
+        def add_component_{{@type.name.id.downcase}}(**args) : ::Entitas::Entity
+          component = {{@type.name.id}}.new(**args)
+          self.add_component(klass_to_index({{@type.name.id}}), component)
+          self
+        end
 
-        # Delete *all* `{{@type.name.id}}` from the entity
+        # Delete `{{@type.name.id}}` from the entity. Returns `self` to allow chainables
         # ```
         # entity.del_{{@type.name.id.downcase}}
         # entity.{{@type.name.id.downcase}} # => nil
         # ```
-        def del_{{@type.name.id.downcase}}
+        def del_{{@type.name.id.downcase}} : ::Entitas::Entity
+          self.del_component_{{@type.name.id.downcase}}
+          self
+        end
+
+        # Delete `{{@type.name.id}}` from the entity. Returns `self` to allow chainables
+        # ```
+        # entity.del_{{@type.name.id.downcase}}
+        # entity.{{@type.name.id.downcase}} # => nil
+        # ```
+        def del_component_{{@type.name.id.downcase}} : ::Entitas::Entity
           self.remove_component(klass_to_index({{@type.name.id}}))
+          self
         end
 
         # See `del_{{@type.name.id.downcase}}`
@@ -129,9 +148,9 @@ module Entitas
           self.del_{{@type.name.id.downcase}}
         end
 
-        # See `del_{{@type.name.id.downcase}}`
+        # See `del_component_{{@type.name.id.downcase}}`
         def remove_component_{{@type.name.id.downcase}}
-          self.del_{{@type.name.id.downcase}}
+          self.del_component_{{@type.name.id.downcase}}
         end
       end
     end

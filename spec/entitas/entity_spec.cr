@@ -170,8 +170,11 @@ describe Entitas::Entity do
 
       it "pushes component to component_pool when removed" do
         entity = new_entity
-        component = entity.add_a
+
+        entity.add_a
+        component = entity.a
         component.should be_a A
+
         pool = entity.component_pool(Entitas::Component::Index::A)
         pool.should be_empty
 
@@ -188,7 +191,8 @@ describe Entitas::Entity do
 
       it "gets pooled component when component_pool is not empty" do
         entity = new_entity
-        component = entity.add_a
+        entity.add_a
+        component = entity.a
         component.should be_a A
 
         entity.del_a

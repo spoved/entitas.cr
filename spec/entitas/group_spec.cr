@@ -205,7 +205,8 @@ describe Entitas::Group do
       group_a = new_group_a
 
       e_a1 = new_entity
-      comp = e_a1.add_a
+      e_a1.add_a
+      comp = e_a1.a
 
       group_a.on_entity_added do |event|
         did_dispatch += 1
