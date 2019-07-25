@@ -176,7 +176,7 @@ describe Entitas::Group do
   end
 
   it "throws when attempting to get single entity and multiple matching entities exist" do
-    group_a, e_a1 = new_group_a_w_e
+    group_a, _ = new_group_a_w_e
     e_a2 = new_entity
     e_a2.add_a
     group_a.handle_entity_silently(e_a2)
@@ -221,7 +221,7 @@ describe Entitas::Group do
     end
 
     it "doesn't dispatches OnEntityAdded when entity is not matching" do
-      group_a, e_a1 = new_group_a_w_e
+      group_a, _ = new_group_a_w_e
 
       e_b1 = new_entity
       e_b1.add_b
@@ -255,7 +255,6 @@ describe Entitas::Group do
     end
 
     it "doesn't dispatch OnEntityRemoved when entity didn't get removed" do
-      did_dispatch = 0
       group_a, e_a1 = new_group_a_w_e
       comp = e_a1.a
       group_a.on_entity_removed { true.should be_false }
