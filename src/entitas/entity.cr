@@ -15,7 +15,7 @@ module Entitas
     protected setter creation_index
 
     protected setter context_info : Entitas::Context::Info? = nil
-    protected setter aerc : AERC? = nil
+    protected setter aerc : SafeAERC? = nil
 
     # The context manages the state of an entity.
     # Active entities are enabled, destroyed entities are not.
@@ -141,7 +141,7 @@ module Entitas
     # is used internally to prevent pooling retained entities.
     # If you use retain manually you also have to
     # release it manually at some point.
-    def aerc : AERC
+    def aerc : SafeAERC
       @aerc ||= SafeAERC.new(self)
     end
 
@@ -157,6 +157,11 @@ module Entitas
     # release it manually at some point.
     def retain(owner)
       aerc.retain(owner)
+    end
+
+    # Returns `Bool` if the `owner` retains this instance
+    def retained_by?(owner)
+      self.aerc.includes?(owner)
     end
 
     # Releases the entity. An owner can only release an entity

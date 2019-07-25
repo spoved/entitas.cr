@@ -83,11 +83,11 @@ module Entitas
     def add_entity_silently(entity : Entity) : Entity | Bool
       logger.debug "Silently adding entity : #{entity}", self.to_s
 
-      if entity.enabled?
+      if entity.enabled? && !entities.includes?(entity)
         entities << entity
         self.entities_cache = nil
         self.single_entitie_cache = nil
-        entity.retain(self)
+        entity.retain(self) unless entity.retained_by?(self)
         return entity
       end
       false
@@ -95,7 +95,7 @@ module Entitas
 
     def add_entity(entity : Entity, index : Int32, component : Component)
       if add_entity_silently(entity)
-        emit_event ::Entitas::Events::OnEntityAdded, self, entity, index, new_component
+        emit_event OnEntityAdded, self, entity, index, component
       end
     end
 
@@ -111,14 +111,14 @@ module Entitas
       removed
     end
 
-    def remove_entity(entity : Entity, index : Int32, component : Component) : Entity
+    def remove_entity(entity : Entity, index : Int32, component : Component) : Entity?
       logger.debug "Removing entity : #{entity}", self.to_s
 
       removed = self.entities.delete(entity)
       if removed
         self.entities_cache = nil
         self.single_entitie_cache = nil
-        emit_event ::Entitas::Events::OnEntityRemoved, self, entity, index, prev_component
+        emit_event OnEntityRemoved, self, entity, index, component
         entity.release(self)
       end
       removed
@@ -155,7 +155,7 @@ module Entitas
     def get_single_entity : Entitas::Entity?
       if single_entitie_cache.nil?
         if size == 1
-          self.entities_cache = entities.first
+          self.single_entitie_cache = entities.first?
         elsif size == 0
           return nil
         else

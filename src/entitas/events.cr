@@ -1,8 +1,8 @@
 require "./macros"
 
 module ::Entitas::Events
-  create_event OnEntityAdded, {group: Group, entity: Entity, index: Int32, new_component: Entitas::Component?}
-  create_event OnEntityRemoved, {group: Group, entity: Entity, index: Int32, prev_component: Entitas::Component?}
+  create_event OnEntityAdded, {group: Group, entity: Entity, index: Int32, component: Entitas::Component?}
+  create_event OnEntityRemoved, {group: Group, entity: Entity, index: Int32, component: Entitas::Component?}
   create_event OnEntityUpdated, {group: Group, entity: Entity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
 
   alias GroupChanged = OnEntityAdded.class | OnEntityRemoved.class | OnEntityUpdated.class | Nil

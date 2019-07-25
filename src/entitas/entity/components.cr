@@ -33,7 +33,7 @@ module Entitas
     # Will add the `Entitas::Component` at the provided index.
     # You can only have one component at an index.
     # Each component type must have its own constant index.
-    def add_component(index : Int32, component : Entitas::Component)
+    def add_component(index : Int32, component : Entitas::Component) : Entitas::Component
       if !enabled?
         raise Error::IsNotEnabled.new "Cannot add component " \
                                       "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -54,11 +54,11 @@ module Entitas
       component
     end
 
-    def add_component(index : ::Entitas::Component::Index, component : Entitas::Component)
+    def add_component(index : ::Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
       add_component(self.index_value(index), component)
     end
 
-    def add_component(component : Entitas::Component)
+    def add_component(component : Entitas::Component) : Entitas::Component
       add_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[component.class], component)
     end
 
