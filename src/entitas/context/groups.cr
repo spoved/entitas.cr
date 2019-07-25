@@ -7,7 +7,12 @@ module Entitas
       if self.groups[matcher]?
         self.groups[matcher]
       else
+        if matcher.component_names.empty?
+          matcher.component_names = info.component_names
+        end
+
         group = Group.new(matcher)
+
         get_entities.each do |entity|
           group.handle_entity_silently(entity)
         end

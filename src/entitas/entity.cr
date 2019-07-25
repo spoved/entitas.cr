@@ -232,6 +232,10 @@ module Entitas
       self.on_entity_released_event_hooks.clear
     end
 
+    def to_s(io)
+      io << to_s
+    end
+
     def to_s
       if self.to_string_cache.nil?
         self.to_string_cache = String::Builder.build do |builder|
