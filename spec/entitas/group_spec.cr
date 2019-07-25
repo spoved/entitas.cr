@@ -36,8 +36,8 @@ describe Entitas::Group do
   describe "initial state" do
     it "doesn't have entities which haven't been added" do
       group_a = new_group_a
-      e_a1 = new_entity
-      e_a2 = new_entity
+      new_entity
+      new_entity
       group_a.get_entities.should be_empty
     end
 
@@ -98,7 +98,7 @@ describe Entitas::Group do
       group_a, e_a1 = new_group_a_w_e
 
       group_a.each do |entity|
-        e = entity
+        entity
       end
 
       group_a.size.should eq 1
