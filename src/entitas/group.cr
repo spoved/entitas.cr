@@ -137,10 +137,7 @@ module Entitas
     # Returns all entities which are currently in this group.
     # TODO: Do we need buffer?
     def get_entities : Array(Entitas::Entity)
-      if entities_cache.nil?
-        self.entities_cache = self.entities.dup
-      end
-      self.entities
+      self.entities_cache ||= self.entities.dup
     end
 
     def get_entities(buff : Array(Entitas::Entity)) : Array(Entitas::Entity)

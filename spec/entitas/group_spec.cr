@@ -15,6 +15,18 @@ private def new_group_a_w_e
   {group, entity}
 end
 
+private def new_group_with_cache
+  group, entity = new_group_a_w_e
+  cache = group.get_entities
+  {group, entity, cache}
+end
+
+private def new_group_with_single_cache
+  group, entity = new_group_a_w_e
+  cache = group.get_single_entity
+  {group, entity, cache}
+end
+
 private def assert_contains(group, expected_entites)
   group.size.should eq expected_entites.size
   entities = group.get_entities
@@ -300,5 +312,236 @@ describe Entitas::Group do
       added.should eq 1
       updated.should eq 1
     end
+
+    it "doesn't dispatch OnEntityRemoved and OnEntityAdded when updating when group doesn't contain entity" do
+      group_a = new_group_a
+      e_a1 = new_entity
+      e_a1.add_a
+
+      group_a.on_entity_added { true.should be_false }
+      group_a.on_entity_removed { true.should be_false }
+      group_a.on_entity_updated { true.should be_false }
+
+      group_a.update_ea(e_a1, e_a1.a, A.new)
+    end
+
+    it "removes all event handlers" do
+      group_a = new_group_a
+      e_a1 = new_entity
+      e_a1.add_a
+
+      group_a.on_entity_added { true.should be_false }
+      group_a.on_entity_removed { true.should be_false }
+      group_a.on_entity_updated { true.should be_false }
+
+      group_a.remove_all_event_handlers
+
+      group_a.handle_add_ea(e_a1)
+
+      c_a = e_a1.a
+      e_a1.del_a
+      group_a.handle_remove_ea(e_a1, c_a)
+
+      e_a1.add_a
+      group_a.update_ea(e_a1, e_a1.a, c_a)
+    end
+  end
+
+  describe "internal caching" do
+    describe "#get_entities" do
+      it "gets cached entities" do
+        group_a, _, cache = new_group_with_cache
+        group_a.get_entities.should be cache
+      end
+
+      it "updates cache when adding a new matching entity" do
+        group_a, _, cache = new_group_with_cache
+        e_a2 = new_entity
+        e_a2.add_a
+        group_a.handle_silently(e_a2)
+
+        group_a.get_entities.should_not be cache
+        group_a.get_entities.should_not eq cache
+      end
+
+      it "doesn't update cache when attempting to add a not matching entity" do
+        group_a, _, cache = new_group_with_cache
+        group_a.handle_silently(new_entity)
+        group_a.get_entities.should be cache
+      end
+
+      it "updates cache when removing an entity" do
+        group_a, e_a1, cache = new_group_with_cache
+        e_a1.del_a
+        group_a.handle_silently(e_a1)
+        group_a.get_entities.should_not be cache
+        group_a.get_entities.should_not eq cache
+      end
+
+      it "doesn't update cache when attempting to remove an entity that wasn't added before" do
+        group_a, _, cache = new_group_with_cache
+        e_a2 = new_entity
+        e_a2.add_a
+        e_a2.del_a
+        group_a.handle_silently(e_a2)
+
+        group_a.get_entities.should be cache
+      end
+
+      it "doesn't update cache when updating an entity" do
+        group_a, e_a1, cache = new_group_with_cache
+        group_a.update_ea(e_a1, e_a1.a, A.new)
+        group_a.get_entities.should be cache
+      end
+    end
+
+    describe "#get_single_entity" do
+      it "gets cached singleEntities" do
+        group_a, _, cache = new_group_with_single_cache
+        group_a.get_single_entity.should be cache
+      end
+
+      it "updates cache when new single entity was added" do
+        group_a, e_a1, cache = new_group_with_single_cache
+        e_a1.del_a
+        e_a2 = new_entity
+        e_a2.add_a
+        group_a.handle_silently(e_a1)
+        group_a.handle_silently(e_a2)
+        group_a.get_single_entity.should_not be cache
+        group_a.get_single_entity.should be e_a2
+      end
+
+      it "updates cache when single entity is removed" do
+        group_a, e_a1, cache = new_group_with_single_cache
+        e_a1.del_a
+        group_a.handle_silently(e_a1)
+        group_a.get_single_entity.should_not be cache
+      end
+
+      it "doesn't update cache when single entity is updated" do
+        group_a, e_a1, cache = new_group_with_single_cache
+        group_a.update_ea(e_a1, e_a1.a, A.new)
+        group_a.get_single_entity.should be cache
+      end
+    end
+  end
+
+  describe "reference counting" do
+    it "retains matched entity" do
+      e = new_entity
+      e.add_a
+
+      e.retain_count.should eq 0
+      new_group_a.handle_silently(e)
+      e.retain_count.should eq 1
+    end
+
+    it "releases removed entity" do
+      e = new_entity
+      e.add_a
+      group = new_group_a
+      e.retain_count.should eq 0
+      group.handle_silently(e)
+      e.retain_count.should eq 1
+      e.del_a
+      group.handle_silently(e)
+      e.retain_count.should eq 0
+    end
+
+    it "invalidates entitiesCache (silent mode)" do
+      did_execute = 0
+      group = new_group_a
+      e = new_entity
+      e.add_a
+      e.on_entity_released do
+        did_execute += 1
+        group.get_entities.should be_empty
+      end
+
+      group.handle_silently(e)
+      group.get_entities
+      e.del_a
+      group.handle_silently(e)
+      did_execute.should eq 1
+    end
+
+    it "invalidates entitiesCache" do
+      did_execute = 0
+      group = new_group_a
+      e = new_entity
+      e.add_a
+      e.on_entity_released do
+        did_execute += 1
+        group.get_entities.should be_empty
+      end
+
+      group.handle_add_ea(e)
+      group.get_entities
+      e.del_a
+      group.handle_remove_ea(e, A.new)
+      did_execute.should eq 1
+    end
+
+    it "invalidates singleEntityCache (silent mode)" do
+      did_execute = 0
+      group = new_group_a
+      e = new_entity
+      e.add_a
+      e.on_entity_released do
+        did_execute += 1
+        group.get_single_entity.should be_nil
+      end
+
+      group.handle_silently(e)
+      group.get_single_entity
+      e.del_a
+      group.handle_silently(e)
+      did_execute.should eq 1
+    end
+
+    it "invalidates singleEntityCache" do
+      did_execute = 0
+      group = new_group_a
+      e = new_entity
+      e.add_a
+      e.on_entity_released do
+        did_execute += 1
+        group.get_single_entity.should be_nil
+      end
+
+      group.handle_add_ea(e)
+      group.get_single_entity
+      e.del_a
+      group.handle_remove_ea(e, A.new)
+      did_execute.should eq 1
+    end
+
+    it "retains entity until after event handlers were called" do
+      did_execute = 0
+      group = new_group_a
+      e = new_entity
+      e.add_a
+      group.on_entity_removed do |event|
+        did_execute += 1
+        event.entity.retain_count.should eq 1
+      end
+
+      group.handle_add_ea(e)
+      group.get_entities
+      e.del_a
+      group.handle_remove_ea(e, A.new)
+      did_execute.should eq 1
+      e.retain_count.should eq 0
+    end
+  end
+
+  it "can to_s" do
+    m = Entitas::Matcher.all_of(
+      Entitas::Matcher.all_of(A),
+      Entitas::Matcher.all_of(B)
+    )
+    group = Entitas::Group.new(m)
+    group.to_s.should eq "Group(AllOf(0, 1))"
   end
 end
