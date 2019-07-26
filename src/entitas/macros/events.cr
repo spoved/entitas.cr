@@ -149,6 +149,11 @@ macro accept_event(name)
     self.{{name.id.underscore.id}}_event_hooks.clear
   end
 
+  def remove_{{name.id.underscore.id}}_hook(hook : Proc(::Entitas::Events::{{name.id}}, Nil))
+    logger.debug "Removing event {{name.id}} hook #{hook}", self.to_s
+    self.{{name.id.underscore.id}}_event_hooks.delete hook
+  end
+
   def receive_{{name.id.underscore.id}}_event(event : ::Entitas::Events::{{name.id}})
     logger.debug "Receiving event {{name.id}}", self.to_s
     self.{{name.id.underscore.id}}_event_hooks.reverse.each &.call(event)

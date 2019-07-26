@@ -55,17 +55,17 @@ module Entitas
     # Activates the Collector and will start collecting
     # changed entities. Collectors are activated by default.
     def activate
-      logger.info "activating collector", self.to_s
+      logger.info "activating collector with events : #{group_events}", self.to_s
 
       groups.each_with_index do |group, i|
         case group_events[i]
-        when Events::OnEntityAdded.class
+        when Events::GroupEvent::Added
           group.on_entity_added &add_entity_on_added_cache.as(Proc(Events::OnEntityAdded, Nil))
-        when Events::OnEntityRemoved.class
+        when Events::GroupEvent::Removed
           group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Events::OnEntityRemoved, Nil))
-        when Events::OnEntityUpdated.class
+        when Events::GroupEvent::AddedOrRemoved
           group.on_entity_added &add_entity_on_added_cache.as(Proc(Events::OnEntityAdded, Nil))
-          group.on_entity_updated &add_entity_on_updated_cache.as(Proc(Events::OnEntityUpdated, Nil))
+          group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Events::OnEntityRemoved, Nil))
         else
           raise Error.new "Unknown group event : #{group_events[i]}"
         end
@@ -74,6 +74,13 @@ module Entitas
 
     def deactivate
       logger.info "deactivating collector", self.to_s
+
+      self.groups.each do |group|
+        group.remove_on_entity_added_hook add_entity_on_added_cache
+        group.remove_on_entity_removed_hook add_entity_on_removed_cache
+      end
+
+      self.clear
     end
 
     ############################
@@ -91,11 +98,21 @@ module Entitas
       end
     end
 
+    # Clears all collected entities
+    def clear
+      self.entities.each &.release(self)
+      self.entities.clear
+    end
+
+    def empty?
+      self.entities.empty?
+    end
+
     ############################
     # Entity funcs
     ############################
 
-    def add_entity(event : Entitas::Events::OnEntityAdded)
+    def add_entity(event : Entitas::Events::OnEntityAdded) : Nil
       logger.debug("Processing OnEntityAdded : #{event.entity}", self.to_s)
       return if self.entities.includes?(event.entity)
 
@@ -103,7 +120,7 @@ module Entitas
       event.entity.retain(self)
     end
 
-    def add_entity(event : Entitas::Events::OnEntityRemoved)
+    def add_entity(event : Entitas::Events::OnEntityRemoved) : Nil
       logger.debug("Processing OnEntityRemoved : #{event.entity}", self.to_s)
       return if self.entities.includes?(event.entity)
 
@@ -111,7 +128,7 @@ module Entitas
       event.entity.retain(self)
     end
 
-    def add_entity(event : Entitas::Events::OnEntityUpdated)
+    def add_entity(event : Entitas::Events::OnEntityUpdated) : Nil
       logger.debug("Processing OnEntityUpdated : #{event.entity}", self.to_s)
       return if self.entities.includes?(event.entity)
 
