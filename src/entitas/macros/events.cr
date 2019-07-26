@@ -87,7 +87,7 @@ macro emits_event(name)
 end
 
 macro emit_event(event, *args)
-  logger.debug "Emiting event {{event.id}}", self.to_s
+  logger.debug "Emitting event {{event.id}}", self.to_s
   self.{{event.id.underscore.id}}_event_hooks.reverse.each &.call(::Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
@@ -137,6 +137,7 @@ macro accept_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(&block : ::Entitas::Events::{{name.id}} -> Nil)
+    logger.debug "Setting event {{name.id}} hook #{block}", self.to_s
     self.{{name.id.underscore.id}}_event_hooks << block
   end
 
@@ -149,6 +150,7 @@ macro accept_event(name)
   end
 
   def receive_{{name.id.underscore.id}}_event(event : ::Entitas::Events::{{name.id}})
+    logger.debug "Receiving event {{name.id}}", self.to_s
     self.{{name.id.underscore.id}}_event_hooks.reverse.each &.call(event)
   end
 end

@@ -22,6 +22,8 @@ module Entitas
         def initialize(@context, @retained_entities)
         end
       end
+
+      class UnknownEvent < Error; end
     end
   end
 end

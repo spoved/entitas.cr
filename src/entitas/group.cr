@@ -35,9 +35,19 @@ module Entitas
       end
     end
 
+    def handle_entity(entity : Entity) : ::Entitas::Events::GroupChanged
+      logger.debug "Handling entity : #{entity}", self.to_s
+
+      if self.matcher.matches?(entity)
+        add_entity_silently(entity) ? ::Entitas::Events::OnEntityAdded : nil
+      else
+        remove_entity_silently(entity) ? ::Entitas::Events::OnEntityRemoved : nil
+      end
+    end
+
     # This is used by the context to manage the group.
     def handle_entity(entity : Entity, index : Int32, component : Entitas::Component)
-      logger.debug "Handle entity : #{entity}", self.to_s
+      logger.debug "Context handle entity : #{entity}", self.to_s
 
       if self.matcher.matches?(entity)
         add_entity(entity, index, component)
@@ -70,19 +80,8 @@ module Entitas
       self.clear_on_entity_updated_event_hooks
     end
 
-    def handle_entity(entity : Entity) : ::Entitas::Events::GroupChanged
-      logger.debug "Handling entity : #{entity}", self.to_s
-
-      if self.matcher.matches?(entity)
-        add_entity_silently(entity) ? ::Entitas::Events::OnEntityAdded : nil
-      else
-        remove_entity_silently(entity) ? ::Entitas::Events::OnEntityRemoved : nil
-      end
-    end
-
     def add_entity_silently(entity : Entity) : Entity | Bool
       logger.debug "Silently adding entity : #{entity}", self.to_s
-
       if entity.enabled? && !entities.includes?(entity)
         entities << entity
         self.entities_cache = nil
@@ -94,6 +93,7 @@ module Entitas
     end
 
     def add_entity(entity : Entity, index : Int32, component : Component)
+      logger.warn("Adding entity : #{entity}", self.to_s)
       if add_entity_silently(entity)
         emit_event OnEntityAdded, self, entity, index, component
       end

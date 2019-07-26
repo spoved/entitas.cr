@@ -193,7 +193,6 @@ module Entitas
       @entities_cache ||= entities.dup
     end
 
-    # TODO: get_group
     # TODO: add_entity_index
     # TODO: get_entity_index
 

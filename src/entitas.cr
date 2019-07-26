@@ -15,6 +15,8 @@ module Entitas
   abstract class Entity; end
 
   class Group; end
+
+  class Collector; end
 end
 
 require "./entitas/*"
