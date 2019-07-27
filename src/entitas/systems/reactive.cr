@@ -1,9 +1,11 @@
 require "../system"
+require "./execute"
 
 module Entitas::Systems::ReactiveSystem
   include Entitas::System
+  include Entitas::Systems::ExecuteSystem
 
-  abstract def activate
-  abstract def deactivate
-  abstract def clear
+  abstract def activate : Nil
+  abstract def deactivate : Nil
+  abstract def clear : Nil
 end

@@ -26,4 +26,11 @@ module ::Entitas::Events
   create_event OnDestroyEntity, {entity: Entity}
 
   create_event OnGroupCreated, {context: Context, group: Group}
+
+  struct TriggerOn
+    getter matcher : Entitas::Matcher
+    getter event : Entitas::Events::GroupEvent
+
+    def initialize(@matcher, @event); end
+  end
 end

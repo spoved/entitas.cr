@@ -25,12 +25,12 @@ module Entitas
     end
 
     # Specify the collector that will trigger the ReactiveSystem.
-    protected abstract def get_trigger(context : Entitas::Context) : Entitas::Collector
+    abstract def get_trigger(context : Entitas::Context) : Entitas::Collector
 
     # This will exclude all entities which don't pass the filter.
-    protected abstract def filter(entity : Entitas::Entity) : Bool
+    abstract def filter(entity : Entitas::Entity) : Bool
 
-    protected abstract def execute(entities : Array(Entitas::Entity))
+    abstract def execute(entities : Array(Entitas::Entity))
 
     # Activates the `ReactiveSystem` and starts observing changes
     # based on the specified `Collector`.
@@ -52,7 +52,7 @@ module Entitas
       self.collector.clear
     end
 
-    def execute
+    def execute : Nil
       unless self.collector.empty?
         self.collector.each do |e|
           if self.filter(e)
@@ -74,15 +74,15 @@ module Entitas
       end
     end
 
-    def to_s(io)
-      io << to_string_cache
-    end
-
-    def to_s
-      if to_string_cache.nil?
-        self.to_string_cache = "ReactiveSystem(#{self.class})"
-      end
-      to_string_cache
-    end
+    # def to_s(io)
+    #   io << self.to_string_cache
+    # end
+    #
+    # def to_s : String
+    #   if self.to_string_cache.nil?
+    #     self.to_string_cache = "ReactiveSystem(#{self.class})"
+    #   end
+    #   self.to_string_cache
+    # end
   end
 end

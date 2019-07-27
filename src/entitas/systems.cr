@@ -7,12 +7,11 @@ module Entitas
   # `TearDownSystem`, `ReactiveSystem` and other nested Systems instances.
   # All systems will be initialized and executed based on the order
   # you added them.
-  abstract class Systems
+  class Systems
     include Entitas::Systems::CleanupSystem
     include Entitas::Systems::ExecuteSystem
     include Entitas::Systems::InitializeSystem
     include Entitas::Systems::TearDownSystem
-    include Entitas::Systems::ReactiveSystem
 
     private getter cleanup_systems : Array(Entitas::Systems::CleanupSystem) = Array(Entitas::Systems::CleanupSystem).new
     private getter execute_systems : Array(Entitas::Systems::ExecuteSystem) = Array(Entitas::Systems::ExecuteSystem).new
@@ -65,13 +64,13 @@ module Entitas
     # Calls `#cleanup` on all `CleanupSystem` and other
     # nested `Systems` instances in the order you added them.
     def cleanup
-      self.execute_systems.each &.cleanup
+      self.cleanup_systems.each &.cleanup
     end
 
     # Calls `#tear_down` on all `TearDownSystem` and other
     # nested `Systems` instances in the order you added them.
     def tear_down
-      self.cleanup_systems.each &.tear_down
+      self.tear_down_systems.each &.tear_down
     end
 
     # Activates all `ReactiveSystems` in the systems list.

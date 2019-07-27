@@ -26,7 +26,7 @@ module Entitas
     end
 
     # Specify the collector that will trigger the ReactiveSystem.
-    protected abstract def get_trigger(contexts : Array(Entitas::Context)) : Array(Entitas::Collector)
+    protected abstract def get_trigger(contexts : ::Contexts) : Array(Entitas::Collector)
 
     # This will exclude all entities which don't pass the filter.
     protected abstract def filter(entity : Entitas::Entity) : Bool

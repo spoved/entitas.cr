@@ -3,5 +3,5 @@ require "../system"
 module Entitas::Systems::InitializeSystem
   include Entitas::System
 
-  abstract def init
+  abstract def init : Nil
 end

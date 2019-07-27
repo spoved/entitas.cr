@@ -14,7 +14,7 @@ module Entitas
 
   abstract class Entity; end
 
-  abstract class Systems; end
+  class Systems; end
 
   class Group; end
 

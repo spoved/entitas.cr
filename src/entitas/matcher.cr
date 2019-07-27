@@ -1,3 +1,5 @@
+require "./matcher/*"
+
 module Entitas
   class Matcher
     spoved_logger

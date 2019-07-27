@@ -14,11 +14,18 @@ module Entitas
           {% end %}
         {% end %}
 
+        {% context_names = [] of TypePath %}
         {% for context_ann, comp_array in context_map %}
           {% comp_array = comp_array.uniq %}
           {% context_name = context_ann[0] %}
-
+          {% context_names << context_name %}
           create_entity_for_context({{context_name}})
+
+          create_matcher_for_context({{context_name}}, [
+            {% for comp in comp_array %}
+            {{comp.name.id}},
+            {% end %}
+          ])
 
           class ::{{context_name.id}}Context < ::Entitas::Context
 
@@ -57,7 +64,7 @@ module Entitas
                   ::{{comp.name.id}},
                 {% end %}
               {% end %}
-            ]
+            ] of Entitas::Component.class
 
             # The total amount of components an entity can possibly have.
             def total_components : Int32
@@ -97,6 +104,31 @@ module Entitas
             end
           end
         {% end %}
+
+
+        class ::Contexts
+          private class_property _shared_instance : ::Contexts? = nil
+
+          def self.shared_instance
+            self._shared_instance ||= ::Contexts.new
+          end
+
+        {% for context_name in context_names %}
+          property {{context_name.id.underscore.id}} : ::{{context_name.id}}Context = ::{{context_name.id}}Context.new
+        {% end %}
+
+          def all_contexts : Array(Entitas::Context)
+            [
+              {% for context_name in context_names %}
+              self.{{context_name.id.underscore.id}},
+              {% end %}
+            ]
+          end
+
+          def reset
+            self.all_contexts.each &.reset
+          end
+        end
       {% end %}
     end
   end
