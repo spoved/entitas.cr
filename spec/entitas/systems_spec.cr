@@ -8,8 +8,6 @@ def new_reactive_system
 end
 
 describe Entitas::Systems do
-  new_reactive_system
-
   describe "fixtures" do
     it "initializes InitializeSystemSpy" do
       sys = InitializeSystemSpy.new

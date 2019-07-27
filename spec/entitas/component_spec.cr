@@ -2,7 +2,7 @@ require "../spec_helper"
 
 describe Entitas::Component do
   it "should have 5 total components" do
-    Entitas::Component::TOTAL_COMPONENTS.should eq 5
+    Entitas::Component::TOTAL_COMPONENTS.should eq 6
   end
 
   it "should add methods" do

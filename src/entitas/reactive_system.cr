@@ -15,10 +15,25 @@ module Entitas
     private getter collector : Entitas::Collector
     private property buffer : Array(Entitas::Entity) = Array(Entitas::Entity).new
     private property to_string_cache : String? = nil
+    protected property _filter : Proc(Entitas::Entity, Bool) = ->(entity : Entitas::Entity) { true }
 
     def initialize(@collector : Entitas::Collector); end
 
-    macro extended
+    macro inherited
+      def self.new(collector : Entitas::Collector, filter : Proc(Entitas::Entity, Bool)) : {{@type.id}}
+        instance = {{@type.id}}.allocate
+        instance.initialize collector
+        instance._filter = filter
+        instance
+      end
+
+      def self.new(context : Entitas::Context, filter : Proc(Entitas::Entity, Bool)) : {{@type.id}}
+        instance = {{@type.id}}.allocate
+        instance.initialize instance.get_trigger(context)
+        instance._filter = filter
+        instance
+      end
+
       def self.new(context : Entitas::Context) : {{@type.id}}
         instance = {{@type.id}}.allocate
         instance.collector = instance.get_trigger(context)
@@ -30,7 +45,11 @@ module Entitas
     abstract def get_trigger(context : Entitas::Context) : Entitas::Collector
 
     # This will exclude all entities which don't pass the filter.
-    abstract def filter(entity : Entitas::Entity) : Bool
+    def filter(entity)
+      self._filter.call(entity)
+    end
+
+    # abstract def filter(entity : Entitas::Entity) : Bool
 
     abstract def execute(entities : Array(Entitas::Entity))
 
@@ -81,15 +100,12 @@ module Entitas
       end
     end
 
-    # def to_s(io)
-    #   io << self.to_string_cache
-    # end
-    #
-    # def to_s : String
-    #   if self.to_string_cache.nil?
-    #     self.to_string_cache = "ReactiveSystem(#{self.class})"
-    #   end
-    #   self.to_string_cache
-    # end
+    def to_s(io)
+      io << self.to_string_cache
+    end
+
+    def to_s : String
+      self.to_string_cache ||= "ReactiveSystem(#{self.class})"
+    end
   end
 end

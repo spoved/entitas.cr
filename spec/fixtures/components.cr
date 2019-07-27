@@ -31,3 +31,10 @@ class UniqueComp < Entitas::Component
   prop :size, Int32
   prop :default, String, default: "foo"
 end
+
+@[Context(Test)]
+@[Context(Test2)]
+class NameAgeComponent < Entitas::Component
+  prop :name, String
+  prop :age, Int32
+end

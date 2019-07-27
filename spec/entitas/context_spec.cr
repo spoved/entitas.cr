@@ -50,7 +50,7 @@ describe Entitas::Context do
     it "has default Context::Info" do
       ctx = TestContext.new
       ctx.info.name.should eq "TestContext"
-      ctx.info.component_names.size.should eq 5
+      ctx.info.component_names.size.should eq 6
       ctx.total_components.times do |i|
         ctx.info.component_names[i].should eq "Index #{i}"
       end

@@ -48,13 +48,9 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
   property did_tear_down = 0
   property entities = Array(Entitas::Entity).new
 
-  property _filter : Proc(Entitas::Entity, Bool) = ->(entity : Entitas::Entity) { true }
+  property execute_action : Proc(Array(Entitas::Entity), Nil)? = nil
 
   def get_trigger(context)
-  end
-
-  def filter(entity)
-    self._filter.call(entity)
   end
 
   def init
@@ -62,9 +58,13 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
   end
 
   def execute(entities)
-    logger.debug "#{self} running execute(entities)"
+    logger.warn "#{self} running execute(entities)"
     self.did_execute += 1
     self.entities = entities.dup
+
+    if !execute_action.nil?
+      execute_action.as(Proc(Array(Entitas::Entity), Nil)).call(entities)
+    end
   end
 
   def cleanup
@@ -85,10 +85,6 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
       contexts.test.create_collector(TestMatcher.a),
       contexts.test.create_collector(TestMatcher.a.removed),
     ]
-  end
-
-  def filter(entity)
-    true
   end
 
   def execute(entities)
