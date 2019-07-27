@@ -8,6 +8,8 @@ module Entitas
   # All systems will be initialized and executed based on the order
   # you added them.
   class Systems
+    spoved_logger
+
     include Entitas::Systems::CleanupSystem
     include Entitas::Systems::ExecuteSystem
     include Entitas::Systems::InitializeSystem
@@ -17,10 +19,11 @@ module Entitas
     private getter execute_systems : Array(Entitas::Systems::ExecuteSystem) = Array(Entitas::Systems::ExecuteSystem).new
     private getter initialize_systems : Array(Entitas::Systems::InitializeSystem) = Array(Entitas::Systems::InitializeSystem).new
     private getter tear_down_systems : Array(Entitas::Systems::TearDownSystem) = Array(Entitas::Systems::TearDownSystem).new
-    private getter reactive_systems : Array(Entitas::Systems::ReactiveSystem) = Array(Entitas::Systems::ReactiveSystem).new
 
     # Adds the system instance to the systems list.
     def add(sys : Entitas::System) : Systems
+      logger.debug "adding sub system : #{sys}", self.to_s
+
       if sys.is_a?(Entitas::Systems::CleanupSystem)
         cleanup_systems << sys unless cleanup_systems.includes?(sys)
       end
@@ -37,10 +40,6 @@ module Entitas
         tear_down_systems << sys unless tear_down_systems.includes?(sys)
       end
 
-      if sys.is_a?(Entitas::Systems::ReactiveSystem)
-        reactive_systems << sys unless reactive_systems.includes?(sys)
-      end
-
       self
     end
 
@@ -51,35 +50,40 @@ module Entitas
 
     # Calls `#init` on all `InitializeSystem` and other
     # nested `Systems` instances in the order you added them.
-    def init
+    def init : Nil
+      logger.info "running init on sub systems", self.to_s
       self.initialize_systems.each &.init
     end
 
     # Calls `#execute` on all `ExecuteSystem` and other
     # nested `Systems` instances in the order you added them.
-    def execute
+    def execute : Nil
+      logger.info "running execute on sub systems", self.to_s
       self.execute_systems.each &.execute
     end
 
     # Calls `#cleanup` on all `CleanupSystem` and other
     # nested `Systems` instances in the order you added them.
-    def cleanup
+    def cleanup : Nil
+      logger.info "running cleanup on sub systems", self.to_s
       self.cleanup_systems.each &.cleanup
     end
 
     # Calls `#tear_down` on all `TearDownSystem` and other
     # nested `Systems` instances in the order you added them.
-    def tear_down
+    def tear_down : Nil
+      logger.info "running tear_down on sub systems", self.to_s
       self.tear_down_systems.each &.tear_down
     end
 
     # Activates all `ReactiveSystems` in the systems list.
-    def activate_reactive_systems
-      self.reactive_systems.each do |sys|
+    def activate_reactive_systems : Nil
+      logger.info "activating sub reactive systems", self.to_s
+      self.execute_systems.each do |sys|
         if sys.is_a?(Systems)
           sys.activate_reactive_systems
         else
-          sys.activate
+          sys.activate if sys.is_a?(Entitas::Systems::ReactiveSystem)
         end
       end
     end
@@ -88,23 +92,26 @@ module Entitas
     # This will also clear all ReactiveSystems.
     # This is useful when you want to soft-restart your application and
     # want to reuse your existing system instances.
-    def deactivate_reactive_systems
-      self.reactive_systems.each do |sys|
+    def deactivate_reactive_systems : Nil
+      logger.info "deactivating sub reactive systems", self.to_s
+
+      self.execute_systems.each do |sys|
         if sys.is_a?(Systems)
           sys.deactivate_reactive_systems
         else
-          sys.deactivate
+          sys.deactivate if sys.is_a?(Entitas::Systems::ReactiveSystem)
         end
       end
     end
 
     # Clears all `ReactiveSystems` in the systems list.
     def clear_reactive_systems
-      self.reactive_systems.each do |sys|
+      logger.info "clearing sub reactive systems", self.to_s
+      self.execute_systems.each do |sys|
         if sys.is_a?(Systems)
           sys.clear_reactive_systems
         else
-          sys.clear
+          sys.clear if sys.is_a?(Entitas::Systems::ReactiveSystem)
         end
       end
     end

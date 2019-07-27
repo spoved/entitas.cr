@@ -62,6 +62,7 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
   end
 
   def execute(entities)
+    logger.debug "#{self} running execute(entities)"
     self.did_execute += 1
     self.entities = entities.dup
   end
@@ -77,7 +78,6 @@ end
 
 class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   property did_execute = 0
-
   property entities = Array(Entitas::Entity).new
 
   def get_trigger(contexts : ::Contexts)
@@ -92,6 +92,8 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   end
 
   def execute(entities)
+    logger.debug "#{self} running execute(entities)"
+
     self.did_execute += 1
     self.entities = entities.dup
   end

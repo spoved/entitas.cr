@@ -193,5 +193,86 @@ describe Entitas::Systems do
       parent_systems.tear_down
       sys.did_tear_down.should eq 1
     end
+
+    it "clears reactive systems" do
+      systems = Entitas::Systems.new
+      sys, _ = new_reactive_system
+
+      systems << sys
+
+      systems.init
+      sys.did_initialize.should eq 1
+
+      systems.clear_reactive_systems
+      systems.execute
+      sys.did_execute.should eq 0
+    end
+
+    it "deactivates reactive systems" do
+      systems = Entitas::Systems.new
+      sys, _ = new_reactive_system
+
+      systems << sys
+
+      systems.init
+      sys.did_initialize.should eq 1
+
+      systems.deactivate_reactive_systems
+      systems.execute
+      sys.did_execute.should eq 0
+    end
+
+    it "deactivates reactive systems recursively" do
+      systems = Entitas::Systems.new
+      sys, _ = new_reactive_system
+      systems << sys
+
+      parent_systems = Entitas::Systems.new
+      parent_systems.add systems
+      parent_systems.init
+      sys.did_initialize.should eq 1
+
+      parent_systems.deactivate_reactive_systems
+      parent_systems.execute
+
+      sys.did_execute.should eq 0
+    end
+
+    it "activates reactive systems" do
+      systems = Entitas::Systems.new
+      sys, ctx = new_reactive_system
+
+      systems << sys
+
+      systems.init
+      sys.did_initialize.should eq 1
+
+      systems.deactivate_reactive_systems
+      systems.activate_reactive_systems
+
+      ctx.create_entity.add_a
+      systems.execute
+      sys.did_execute.should eq 1
+    end
+
+    it "activates reactive systems recursively" do
+      systems = Entitas::Systems.new
+      sys, ctx = new_reactive_system
+
+      systems << sys
+
+      parent_systems = Entitas::Systems.new
+      parent_systems.add systems
+
+      parent_systems.init
+      sys.did_initialize.should eq 1
+
+      parent_systems.deactivate_reactive_systems
+      parent_systems.activate_reactive_systems
+
+      ctx.create_entity.add_a
+      parent_systems.execute
+      sys.did_execute.should eq 1
+    end
   end
 end

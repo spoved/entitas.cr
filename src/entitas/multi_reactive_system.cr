@@ -8,6 +8,8 @@ module Entitas
   # of an entity to update the gameObject.transform.position
   # of the related gameObject.
   abstract class MultiReactiveSystem
+    spoved_logger
+
     include Entitas::Systems::ReactiveSystem
 
     private getter collectors : Array(Entitas::Collector)
