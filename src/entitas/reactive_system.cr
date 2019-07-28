@@ -36,7 +36,7 @@ module Entitas
 
       def self.new(context : Entitas::Context) : {{@type.id}}
         instance = {{@type.id}}.allocate
-        instance.collector = instance.get_trigger(context)
+        instance.initialize instance.get_trigger(context)
         instance
       end
     end

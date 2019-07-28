@@ -80,44 +80,44 @@ module Entitas
 
       class ::Entitas::Entity
 
-        def replace_{{@type.name.id.downcase}}(component : {{@type.name.id}})
+        def replace_{{@type.name.id.underscore}}(component : {{@type.name.id}})
           self.replace_component(component)
         end
 
-        def replace_component_{{@type.name.id.downcase}}(component : {{@type.name.id}})
-          self.replace_{{@type.name.id.downcase}}(component)
+        def replace_component_{{@type.name.id.underscore}}(component : {{@type.name.id}})
+          self.replace_{{@type.name.id.underscore}}(component)
         end
 
-        def has_{{@type.name.id.downcase}}?
-          self.has_component_{{@type.name.id.downcase}}?
+        def has_{{@type.name.id.underscore}}?
+          self.has_component_{{@type.name.id.underscore}}?
         end
 
-        def has_component_{{@type.name.id.downcase}}?
+        def has_component_{{@type.name.id.underscore}}?
           self.has_component?(klass_to_index({{@type.name.id}}))
         end
 
         # Will return the component that is a `{{@type.name.id}}` or raise
-        def {{@type.name.id.downcase}} : {{@type.id}}
-          self.get_component_{{@type.name.id.downcase}}
+        def {{@type.name.id.underscore}} : {{@type.id}}
+          self.get_component_{{@type.name.id.underscore}}
         end
 
-        def get_component_{{@type.name.id.downcase}} : {{@type.id}}
+        def get_component_{{@type.name.id.underscore}} : {{@type.id}}
           self.get_component(klass_to_index({{@type.name.id}})).as({{@type.name.id}})
         end
 
         # Add a `{{@type.name.id}}` to the entity. Returns `self` to allow chainables
         # ```
-        # entity.add_{{@type.name.id.downcase}}
+        # entity.add_{{@type.name.id.underscore}}
         # ```
-        def add_{{@type.name.id.downcase}}(**args) : ::Entitas::Entity
-          self.add_component_{{@type.name.id.downcase}}(**args)
+        def add_{{@type.name.id.underscore}}(**args) : ::Entitas::Entity
+          self.add_component_{{@type.name.id.underscore}}(**args)
         end
 
         # Add a `{{@type.name.id}}` to the entity. Returns `self` to allow chainables
         # ```
-        # entity.add_component_{{@type.name.id.downcase}}
+        # entity.add_component_{{@type.name.id.underscore}}
         # ```
-        def add_component_{{@type.name.id.downcase}}(**args) : ::Entitas::Entity
+        def add_component_{{@type.name.id.underscore}}(**args) : ::Entitas::Entity
           component = {{@type.name.id}}.new(**args)
           self.add_component(klass_to_index({{@type.name.id}}), component)
           self
@@ -125,32 +125,32 @@ module Entitas
 
         # Delete `{{@type.name.id}}` from the entity. Returns `self` to allow chainables
         # ```
-        # entity.del_{{@type.name.id.downcase}}
-        # entity.{{@type.name.id.downcase}} # => nil
+        # entity.del_{{@type.name.id.underscore}}
+        # entity.{{@type.name.id.underscore}} # => nil
         # ```
-        def del_{{@type.name.id.downcase}} : ::Entitas::Entity
-          self.del_component_{{@type.name.id.downcase}}
+        def del_{{@type.name.id.underscore}} : ::Entitas::Entity
+          self.del_component_{{@type.name.id.underscore}}
           self
         end
 
         # Delete `{{@type.name.id}}` from the entity. Returns `self` to allow chainables
         # ```
-        # entity.del_{{@type.name.id.downcase}}
-        # entity.{{@type.name.id.downcase}} # => nil
+        # entity.del_{{@type.name.id.underscore}}
+        # entity.{{@type.name.id.underscore}} # => nil
         # ```
-        def del_component_{{@type.name.id.downcase}} : ::Entitas::Entity
+        def del_component_{{@type.name.id.underscore}} : ::Entitas::Entity
           self.remove_component(klass_to_index({{@type.name.id}}))
           self
         end
 
-        # See `del_{{@type.name.id.downcase}}`
-        def remove_{{@type.name.id.downcase}}
-          self.del_{{@type.name.id.downcase}}
+        # See `del_{{@type.name.id.underscore}}`
+        def remove_{{@type.name.id.underscore}}
+          self.del_{{@type.name.id.underscore}}
         end
 
-        # See `del_component_{{@type.name.id.downcase}}`
-        def remove_component_{{@type.name.id.downcase}}
-          self.del_component_{{@type.name.id.downcase}}
+        # See `del_component_{{@type.name.id.underscore}}`
+        def remove_component_{{@type.name.id.underscore}}
+          self.del_component_{{@type.name.id.underscore}}
         end
       end
     end

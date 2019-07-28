@@ -34,7 +34,7 @@ end
 
 @[Context(Test)]
 @[Context(Test2)]
-class NameAgeComponent < Entitas::Component
+class NameAge < Entitas::Component
   prop :name, String
-  prop :age, Int32
+  prop :age, Int32, default: 0
 end

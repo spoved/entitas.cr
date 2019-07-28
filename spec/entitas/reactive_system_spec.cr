@@ -243,23 +243,23 @@ describe Entitas::ReactiveSystem do
     ctx = new_context
 
     filter_proc = ->(entity : Entitas::Entity) do
-      comp = entity.get_component(Entitas::Component::Index::NameAgeComponent)
+      comp = entity.get_component(Entitas::Component::Index::NameAge)
       if comp.nil?
         false
       else
-        comp.as(NameAgeComponent).age.nil? ? false : (comp.as(NameAgeComponent).age.as(Int32) > 42)
+        comp.as(NameAge).age.nil? ? false : (comp.as(NameAge).age.as(Int32) > 42)
       end
     end
 
-    sys = ReactiveSystemSpy.new(ctx.create_collector(Entitas::Matcher.all_of(B, NameAgeComponent)), filter_proc)
+    sys = ReactiveSystemSpy.new(ctx.create_collector(Entitas::Matcher.all_of(B, NameAge)), filter_proc)
     ctx.create_entity.add_a.add_c
     eab1 = ctx.create_entity
     eab1.add_b
-    eab1.add_component(NameAgeComponent.new(age: 10))
+    eab1.add_component(NameAge.new(age: 10))
 
     eab2 = ctx.create_entity
     eab2.add_b
-    eab2.add_component(NameAgeComponent.new(age: 50))
+    eab2.add_component(NameAge.new(age: 50))
 
     did_execute = 0
     sys.execute_action = ->(entities : Array(Entitas::Entity)) do
