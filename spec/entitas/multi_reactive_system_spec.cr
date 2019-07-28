@@ -38,7 +38,7 @@ end
 describe Entitas::MultiReactiveSystem do
   describe "when triggered" do
     it "processes entities from different contexts" do
-      ctxs, sys, e1, e2 = before
+      # ctxs, sys, e1, e2 = before
     end
   end
 end

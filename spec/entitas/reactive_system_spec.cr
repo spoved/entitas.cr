@@ -64,7 +64,7 @@ end
 describe Entitas::ReactiveSystem do
   describe "OnEntityAdded" do
     it "does not execute when no entities were collected" do
-      ctx, sys = new_system
+      _, sys = new_system
       sys.execute
       assert_entities(sys, nil)
     end
@@ -122,7 +122,7 @@ describe Entitas::ReactiveSystem do
 
     it "doesn't execute when not triggered" do
       ctx, sys = new_system
-      e = ctx.create_entity.add_a
+      ctx.create_entity.add_a
       sys.execute
       assert_entities(sys, nil)
     end
@@ -130,7 +130,7 @@ describe Entitas::ReactiveSystem do
     it "deactivates and will not trigger" do
       ctx, sys = new_system
       sys.deactivate
-      e = create_entity_ab(ctx)
+      create_entity_ab(ctx)
       sys.execute
       assert_entities(sys, nil)
     end
@@ -147,7 +147,7 @@ describe Entitas::ReactiveSystem do
 
     it "clears" do
       ctx, sys = new_system
-      e = create_entity_ab(ctx)
+      create_entity_ab(ctx)
       sys.clear
       sys.execute
       assert_entities(sys, nil)
@@ -177,7 +177,7 @@ describe Entitas::ReactiveSystem do
 
     it "doesn't execute when not triggered" do
       ctx, sys = new_system_removed
-      e = create_entity_ab(ctx).add_c.remove_c
+      create_entity_ab(ctx).add_c.remove_c
       sys.execute
       assert_entities(sys, nil)
     end
