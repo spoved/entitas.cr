@@ -139,7 +139,7 @@ describe Entitas::Collector do
 
       it "can to_s" do
         collector, _, _ = new_collector
-        collector.to_s.should eq "Collector(Group(AllOf(Index 0)))"
+        collector.to_s.should eq "Collector(Group(AllOf(0)))"
       end
     end
 
@@ -222,7 +222,7 @@ describe Entitas::Collector do
 
       it "can to_s" do
         collector, _, _, _ = new_dual_collector
-        collector.to_s.should eq "Collector(Group(AllOf(Index 0)), Group(AllOf(Index 1)))"
+        collector.to_s.should eq "Collector(Group(AllOf(0)), Group(AllOf(1)))"
       end
     end
 

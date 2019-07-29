@@ -199,6 +199,8 @@ module Entitas
       else
         indices.map { |i| component_names[i.value] }.join(", ")
       end
+    rescue
+      (indices.map &.value).join(", ")
     end
 
     def to_s(io)

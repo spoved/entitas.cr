@@ -83,8 +83,32 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
 
   def get_trigger(contexts : ::Contexts)
     [
-      contexts.test.create_collector(TestMatcher.a),
-      contexts.test.create_collector(TestMatcher.a.removed),
+      contexts.test.create_collector(TestMatcher.name_age),
+      contexts.test2.create_collector(Test2Matcher.name_age),
+    ]
+  end
+
+  def execute(entities)
+    logger.debug "#{self} running execute(entities)"
+
+    self.did_execute += 1
+    self.entities = entities.dup
+
+    if !execute_action.nil?
+      execute_action.as(Proc(Array(Entitas::Entity), Nil)).call(entities)
+    end
+  end
+end
+
+class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
+  property did_execute = 0
+  property entities = Array(Entitas::Entity).new
+  property execute_action : Proc(Array(Entitas::Entity), Nil)? = nil
+
+  def get_trigger(contexts : ::Contexts)
+    [
+      contexts.test.create_collector(TestMatcher.name_age),
+      contexts.test.create_collector(TestMatcher.name_age.removed),
     ]
   end
 

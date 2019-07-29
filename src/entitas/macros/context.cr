@@ -79,6 +79,10 @@ module Entitas
               raise Entitas::Entity::Error::DoesNotHaveComponent.new
             end
 
+            def global_index_to_local(global_index : Entitas::Component::Index)
+              klass_to_index Entitas::Component::INDEX_TO_COMPONENT_MAP[global_index]
+            end
+
             def component_pool(index : Index) : ::Entitas::ComponentPool
               component_pool index.value
             end
