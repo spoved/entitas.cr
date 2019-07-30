@@ -1,5 +1,7 @@
 require "../../src/entitas.cr"
 
+CHANNEL = Channel(Char).new(1)
+
 @[Context(Game)]
 class DebugMessage < Entitas::Component
   prop :message, String, default: ""
@@ -30,18 +32,67 @@ class HelloWorldSystem
 
   getter context : Entitas::Context
 
-  def initialize(@context : Entitas::Context)
-  end
+  def initialize(@context : Entitas::Context); end
 
   def init; end
+end
+
+class InputSystem
+  spoved_logger
+
+  include Entitas::Systems::ExecuteSystem
+
+  getter context : Entitas::Context
+
+  def initialize(@context : Entitas::Context); end
+
+  def execute
+    logger.warn "execute"
+
+    char = CHANNEL.receive
+    case char
+    when '\u{4}', '\u{3}', '\e'
+      logger.warn "Exiting app : #{char.inspect}"
+      exit
+    else
+      # logger.unknown context.component_pools.inspect
+      logger.unknown context.entities.size
+      context.create_entity
+        .add_debug_message(message: char.inspect)
+      logger.unknown context.entities.size
+    end
+  end
+end
+
+class CleanupSystem
+  spoved_logger
+
+  include Entitas::Systems::CleanupSystem
+
+  getter context : Entitas::Context
+  getter debug_group : Entitas::Group
+
+  def initialize(@context : Entitas::Context)
+    @debug_group = context.get_group(GameMatcher.debug_message)
+  end
+
+  def cleanup
+    logger.warn "cleanup"
+    debug_group.get_entities.each do |e|
+      e.destroy!
+    end
+  end
 end
 
 # feature "tutorial", DebugMessageSystem, HelloWorldSystem
 class TutorialSystems < Entitas::Feature
   def initialize(contexts : Contexts)
     @name = "Tutorial System"
-    add DebugMessageSystem.new(contexts.game)
-    add HelloWorldSystem.new(contexts.game)
+    ctx = contexts.game
+    add ::HelloWorldSystem.new(ctx)
+    add ::InputSystem.new(ctx)
+    add ::DebugMessageSystem.new(ctx)
+    add ::CleanupSystem.new(ctx)
   end
 end
 
@@ -70,9 +121,16 @@ end
 hw = HelloWorld.new
 hw.start
 
-game_ctx = Contexts.shared_instance.game
-e = game_ctx.create_entity.add_debug_message(message: "Hello World")
-e.retain(hw)
+# game_ctx = Contexts.shared_instance.game
+# e = game_ctx.create_entity.add_debug_message(message: "Hello World")
+STDIN.blocking = false
+spawn do
+  ['e', 'f', 'w', '\e'].each do |char|
+    CHANNEL.send(char)
+  end
+end
 
-hw.update
-hw.update
+loop do
+  Fiber.yield
+  hw.update
+end
