@@ -22,7 +22,3 @@ module Entitas
 end
 
 require "./entitas/*"
-
-# Test code below
-
-require "../spec/fixtures/*"
