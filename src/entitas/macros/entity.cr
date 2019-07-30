@@ -8,6 +8,8 @@ macro create_entity_for_context(context_name)
     def self.index(i : ::Entitas::Component::Index) : ::{{context_name.id}}Context::Index
       klass = ::Entitas::Component::INDEX_TO_COMPONENT_MAP[i]
       ::{{context_name.id}}Context::COMPONENT_TO_INDEX_MAP[klass]
+    rescue KeyError
+      raise Error::DoesNotHaveComponent.new
     end
 
     def index(i : ::Entitas::Component::Index) : ::{{context_name.id}}Context::Index

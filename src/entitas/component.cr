@@ -73,7 +73,7 @@ module Entitas
 
 
         # Will reset all instance variables to nil or their default value
-        def init
+        def reset
           \{% for var_name, meth in comp_methods %}
             \{% if meth.args[0].default_value %}
               @\{{var_name}} = \{{meth.args[0].default_value}}
@@ -81,6 +81,20 @@ module Entitas
               @\{{var_name}} = nil
             \{% end %}
           \{% end %}
+
+          self
+        end
+
+
+        def init(**args)
+          args.each do |k,v|
+            case k
+            \{% for var_name, meth in comp_methods %}
+            when :\{{var_name}}
+              @\{{var_name}} = v.as(\{{meth.args[0].restriction}})
+            \{% end %}
+            end
+          end
 
           self
         end
@@ -131,7 +145,7 @@ module Entitas
         # entity.add_component_{{@type.name.id.underscore}}
         # ```
         def add_component_{{@type.name.id.underscore}}(**args) : ::Entitas::Entity
-          component = {{@type.name.id}}.new(**args)
+          component = self.create_component({{@type.name.id}}, **args)
           self.add_component(klass_to_index({{@type.name.id}}), component)
           self
         end

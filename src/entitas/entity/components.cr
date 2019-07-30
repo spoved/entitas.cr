@@ -22,8 +22,11 @@ module Entitas
     def create_component(index : ::Entitas::Component::Index, **args)
       pool = component_pool(index)
 
-      # FIXME: This should also clear the component
-      pool.empty? ? self.index_class(index).new : pool.pop.init
+      if pool.empty?
+        self.index_class(index).new.init(**args)
+      else
+        pool.pop.reset.init(**args)
+      end
     end
 
     def create_component(_type, **args)
@@ -59,7 +62,7 @@ module Entitas
     end
 
     def add_component(component : Entitas::Component) : Entitas::Component
-      add_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[component.class], component)
+      add_component(klass_to_index(component.class), component)
     end
 
     # Removes a component at the specified index.
@@ -104,7 +107,7 @@ module Entitas
     end
 
     def replace_component(component : Entitas::Component?)
-      replace_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[component.class], component)
+      replace_component(klass_to_index(component.class), component)
     end
 
     # Will return the `Entitas::Component` at the provided index.

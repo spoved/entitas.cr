@@ -51,6 +51,7 @@ module Entitas
       @aerc : SafeAERC? = nil
     )
       @components = Array(Entitas::Component?).new(@total_components, nil)
+      logger.debug "Calling initialize: #{self.object_id}", self.to_s
 
       reactivate(@creation_index)
     end
@@ -58,7 +59,7 @@ module Entitas
     def init(creation_index ct_index : Int32 = 0,
              context_info ctx_info : Entitas::Context::Info? = nil,
              aerc _aerc : SafeAERC? = nil)
-      logger.debug "Calling init", self.to_s
+      logger.debug "Calling init: #{self.object_id}", self.to_s
 
       self.aerc = _aerc
       self.context_info = ctx_info
@@ -90,7 +91,7 @@ module Entitas
 
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32) : Entity
-      logger.info "Reactivating Entity: #{self}", self.to_s
+      logger.debug "Reactivating Entity: #{self.object_id}", self.to_s
       # Set our passed variables
       self.creation_index = creation_index
       self.is_enabled = true

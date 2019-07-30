@@ -14,6 +14,7 @@ def before
 
   e2 = contexts.test.create_entity
   e2.add_name_age(name: "Jack", age: 24)
+
   sys.execute
 
   {contexts, sys, e1, e2}

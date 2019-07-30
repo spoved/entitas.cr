@@ -112,7 +112,9 @@ module Entitas
         component_names << prefix + i.to_s
       end
 
-      Entitas::Context::Info.new("Unnamed Context", component_names, ::Entitas::Component::COMPONENT_MAP.keys)
+      Entitas::Context::Info.new("Unnamed Context",
+        ::Entitas::Component::COMPONENT_NAMES,
+        ::Entitas::Component::COMPONENT_KLASSES)
     end
 
     def context_info : Context::Info
