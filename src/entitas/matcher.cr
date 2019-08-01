@@ -23,6 +23,10 @@ module Entitas
     protected setter none_of_indices : Array(Entitas::Component::Index) = Array(Entitas::Component::Index).new
     protected setter indices : Array(Entitas::Component::Index)? = nil
 
+    def indices : Array(Entitas::Component::Index)
+      @indices ||= (self.all_of_indices + self.any_of_indices + self.none_of_indices).uniq.sort
+    end
+
     def matches?(entity : ::Entitas::Entity)
       logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
                    " && matches_any_of? #{matches_any_of?(entity)}" \
@@ -54,159 +58,104 @@ module Entitas
     # Chainables
     ####################
 
-    # Create a matcher to match entities with ALL of the provided `Entitas::Component` classes
-    #
-    # ```
-    # Entitas::Matcher.new.all_of(A, B)
-    # ```
-    def all_of(*comps : Entitas::Component.class) : Matcher
-      self.all_of_indices = comps.map { |c| c.index }.to_a.uniq.sort
-      self
-    end
+    macro finished
+      {% begin %}{% for match in ["all", "any", "none"] %}
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `Int32` indices to merge
-    #
-    # ```
-    # Entitas::Matcher.new.all_of(0)
-    # ```
-    def all_of(*indices : Int32) : Matcher
-      self.all_of_indices = indices.map { |i| ::Entitas::Component::Index.new(i) }.to_a.uniq.sort
-      self
-    end
+      # Create a matcher to match entities with {{match.upcase}} of the provided `Entitas::Component` classes
+      #
+      # ```
+      # Entitas::Matcher.new.{{match.id}}_of(A, B)
+      # ```
+      def {{match.id}}_of(*comps : Entitas::Component.class) : Matcher
+        self.{{match.id}}_of_indices = comps.map { |c| c.index }.to_a.uniq.sort
+        self
+      end
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `::Entitas::Component::Index` indices to merge
-    #
-    # ```
-    # Entitas::Matcher.new.all_of(Entitas::Component::Index::A)
-    # ```
-    def all_of(*indices : Entitas::Component::Index) : Matcher
-      self.all_of_indices = indices.to_a.uniq.sort
-      self
-    end
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `Int32` indices to merge
+      #
+      # ```
+      # Entitas::Matcher.new.{{match.id}}_of(0)
+      # ```
+      def {{match.id}}_of(*indices : Int32) : Matcher
+        self.{{match.id}}_of_indices = indices.map { |i| ::Entitas::Component::Index.new(i) }.to_a.uniq.sort
+        self
+      end
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `Entitas::Matcher` instances to merge
-    #
-    # ```
-    # m1 = Entitas::Matcher.new.all_of(A)
-    # m2 = Entitas::Matcher.new.all_of(B)
-    # matcher = Entitas::Matcher.new.all_of(m1, m2)
-    # ```
-    def all_of(*matchers : Matcher) : Matcher
-      self.all_of_indices = self.class.merge_indicies(*matchers)
-      self.class.set_component_names(self, *matchers)
-      self
-    end
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `::Entitas::Component::Index` indices to merge
+      #
+      # ```
+      # Entitas::Matcher.new.{{match.id}}_of(Entitas::Component::Index::A)
+      # ```
+      def {{match.id}}_of(*indices : Entitas::Component::Index) : Matcher
+        self.{{match.id}}_of_indices = indices.to_a.uniq.sort
+        self
+      end
 
-    def any_of(*comps : Entitas::Component.class) : Matcher
-      self.any_of_indices = comps.map { |c| ::Entitas::Component::COMPONENT_TO_INDEX_MAP[c] }.to_a.uniq.sort
-      self
-    end
-
-    def any_of(*matchers : Matcher) : Matcher
-      self.any_of_indices = self.class.merge_indicies(*matchers)
-      self.class.set_component_names(self, *matchers)
-      self
-    end
-
-    def none_of(*comps : Entitas::Component.class) : Matcher
-      self.none_of_indices = comps.map { |c| ::Entitas::Component::COMPONENT_TO_INDEX_MAP[c] }.to_a.uniq.sort
-      self
-    end
-
-    def none_of(*matchers : Matcher) : Matcher
-      self.none_of_indices = self.class.merge_indicies(*matchers)
-      self.class.set_component_names(self, *matchers)
-      self
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `Entitas::Matcher` instances to merge
+      #
+      # ```
+      # m1 = Entitas::Matcher.new.{{match.id}}_of(A)
+      # m2 = Entitas::Matcher.new.{{match.id}}_of(B)
+      # matcher = Entitas::Matcher.new.{{match.id}}_of(m1, m2)
+      # ```
+      def {{match.id}}_of(*matchers : Matcher) : Matcher
+        self.{{match.id}}_of_indices = self.class.merge_indicies(*matchers)
+        self.class.set_component_names(self, *matchers)
+        self
+      end
+      {% end %}{% end %}
     end
 
     ####################
     # Class methods
     ####################
 
-    # Create a matcher to match entities with ALL of the provided `Entitas::Component` classes
-    #
-    # ```
-    # Entitas::Matcher.all_of(A, B)
-    # ```
-    def self.all_of(*comps : Entitas::Component.class) : Matcher
-      Entitas::Matcher.new.all_of(*comps)
-    end
+    macro finished
+      {% begin %}{% for match in ["all", "any", "none"] %}
+      # Create a matcher to match entities with {{match.upcase}} of the provided `Entitas::Component` classes
+      #
+      # ```
+      # Entitas::Matcher.{{match.id}}_of(A, B)
+      # ```
+      def self.{{match.id}}_of(*comps : Entitas::Component.class) : Matcher
+        Entitas::Matcher.new.{{match.id}}_of(*comps)
+      end
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `Entitas::Matcher` instances to merge
-    #
-    # ```
-    # m1 = Entitas::Matcher.all_of(A)
-    # m2 = Entitas::Matcher.all_of(B)
-    # matcher = Entitas::Matcher.all_of(m1, m2)
-    # ```
-    def self.all_of(*matchers : Matcher) : Matcher
-      Entitas::Matcher.new.all_of(*matchers)
-    end
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `Int32` indexs to merge
+      #
+      # ```
+      # Entitas::Matcher.{{match.id}}_of(0)
+      # ```
+      def self.{{match.id}}_of(*indices : Int32) : Matcher
+        Entitas::Matcher.new.{{match.id}}_of(*indices)
+      end
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `Int32` indexs to merge
-    #
-    # ```
-    # Entitas::Matcher.all_of(0)
-    # ```
-    def self.all_of(*indices : Int32) : Matcher
-      Entitas::Matcher.new.all_of(*indices)
-    end
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `Entitas::Component::Index` indices to merge
+      #
+      # ```
+      # Entitas::Matcher.{{match.id}}_of(Entitas::Component::Index::A)
+      # ```
+      def self.{{match.id}}_of(*indices : Entitas::Component::Index) : Matcher
+        Entitas::Matcher.new.{{match.id}}_of(*indices)
+      end
 
-    # Create a matcher to match entities that have ALL of the `Entitas::Component` classes
-    # in the provided `Entitas::Component::Index` indices to merge
-    #
-    # ```
-    # Entitas::Matcher.all_of(Entitas::Component::Index::A)
-    # ```
-    def self.all_of(*indices : Entitas::Component::Index) : Matcher
-      Entitas::Matcher.new.all_of(*indices)
-    end
-
-    # Create a matcher to match entities that have ANY of the provided `Entitas::Component` classes
-    #
-    # ```
-    # Entitas::Matcher.any_of(A, B)
-    # ```
-    def self.any_of(*comps : Entitas::Component.class) : Matcher
-      Entitas::Matcher.new.any_of(*comps)
-    end
-
-    # Create a matcher to match entities that have ANY of the `Entitas::Component` classes
-    # in the provided `Entitas::Matcher` instances to merge
-    #
-    # ```
-    # m1 = Entitas::Matcher.any_of(A)
-    # m2 = Entitas::Matcher.any_of(B)
-    # matcher = Entitas::Matcher.any_of(m1, m2)
-    # ```
-    def self.any_of(*matchers : Matcher) : Matcher
-      Entitas::Matcher.new.any_of(*matchers)
-    end
-
-    # Create a matcher to match entities that have NONE of the provided `Entitas::Component` classes
-    #
-    # ```
-    # Entitas::Matcher.none_of(A, B)
-    # ```
-    def self.none_of(*comps : Entitas::Component.class) : Matcher
-      Entitas::Matcher.new.none_of(*comps)
-    end
-
-    # Create a matcher to match entities that have NONE of the `Entitas::Component` classes
-    # in the provided `Entitas::Matcher` instances to merge
-    #
-    # ```
-    # m1 = Entitas::Matcher.none_of(A)
-    # m2 = Entitas::Matcher.none_of(B)
-    # matcher = Entitas::Matcher.none_of(m1, m2)
-    # ```
-    def self.none_of(*matchers : Matcher) : Matcher
-      Entitas::Matcher.new.none_of(*matchers)
+      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
+      # in the provided `Entitas::Matcher` instances to merge
+      #
+      # ```
+      # m1 = Entitas::Matcher.{{match.id}}_of(A)
+      # m2 = Entitas::Matcher.{{match.id}}_of(B)
+      # matcher = Entitas::Matcher.{{match.id}}_of(m1, m2)
+      # ```
+      def self.{{match.id}}_of(*matchers : Matcher) : Matcher
+        Entitas::Matcher.new.{{match.id}}_of(*matchers)
+      end
+      {% end %}{% end %}
     end
 
     protected def self.merge(*matchers : Matcher) : Matcher
@@ -242,10 +191,6 @@ module Entitas
       unless names.nil?
         matcher.component_names = names
       end
-    end
-
-    def indices : Array(Entitas::Component::Index)
-      @indices ||= (self.all_of_indices + self.any_of_indices + self.none_of_indices).uniq
     end
 
     private def comp_names_to_s(indices)
