@@ -30,7 +30,7 @@ module Entitas
     end
 
     def create_component(_type, **args)
-      create_component(::Entitas::Component::COMPONENT_TO_INDEX_MAP[_type], **args)
+      create_component(_type.index, **args)
     end
 
     # Will add the `Entitas::Component` at the provided index.
