@@ -10,10 +10,6 @@ module Entitas
 
     macro inherited
 
-      # TODO: Enable or remove
-      # annotation ::Component::{{@type.name}}
-      # end
-
       # If the component has the unique annotation,
       #   set the class method to `true`
       # The framework will make sure that only one instance of a unique component can be present in your context
@@ -189,8 +185,8 @@ module Entitas
 
     macro finished
       {% begin %}
-      {% i = 0 %}
 
+      {% i = 0 %}
       enum Index
         {% for sub_klass in @type.subclasses %}
         {{sub_klass.name.id}} = {{i}}

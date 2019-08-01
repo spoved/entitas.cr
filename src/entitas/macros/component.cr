@@ -18,5 +18,37 @@ module Entitas
         end
       {% end %}
     end
+
+    abstract def index_val : Int32
+    abstract def index : Entitas::Component::Index
+
+    macro finished
+      {% i = 0 %}
+
+      {% for sub_klass in @type.subclasses %}
+        class ::{{sub_klass.name.id}}
+
+          INDEX = Entitas::Component::Index::{{sub_klass.name.id}}
+          INDEX_VALUE = {{i}}
+
+          def self.index_val : Int32
+            INDEX_VALUE
+          end
+
+          def index_val : Int32
+            INDEX_VALUE
+          end
+
+          def self.index : Entitas::Component::Index
+            INDEX
+          end
+
+          def index : Entitas::Component::Index
+            INDEX
+          end
+        end
+      {% i = i + 1 %}
+      {% end %}
+    end
   end
 end
