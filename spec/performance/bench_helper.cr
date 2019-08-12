@@ -3,32 +3,38 @@ require "./fixtures"
 require "benchmark"
 
 Spoved.logger.level = Logger::UNKNOWN
-
-TASKS  = Array(Proc(Benchmark::BM::Job, Nil)).new
 LOGGER = Logger.new(STDOUT)
 
-def tasks
-  TASKS
-end
+alias BenchCall = Proc(Benchmark::IPS::Job, Nil)
 
-def n
-  100_000
-end
+TASKS_BUFFER = Array(BenchCall).new
+TASKS        = Hash(String, Array(BenchCall)).new
 
 def logger
   LOGGER
 end
 
-macro start_bench(subject, block)
-  func = ->(x : Benchmark::BM::Job) do
-    puts "-- {{subject.id}} --"
-    {{block.body}}
+def run
+  TASKS.each do |name, tasks|
+    puts "-- #{name} --"
+
+    Benchmark.ips do |x|
+      tasks.each &.call(x)
+    end
   end
-  tasks << func
+end
+
+macro start_bench(subject, block)
+
+  {{block.body}}
+
+  TASKS[{{subject.id.stringify}}] = TASKS_BUFFER.dup
+
+  TASKS_BUFFER.clear
 end
 
 macro bench(name, before, task, after)
-  func = ->(x : Benchmark::BM::Job) do
+  func = ->(x : Benchmark::IPS::Job) do
     begin
       {{before.body}}
       x.report({{name}}) do
@@ -39,15 +45,15 @@ macro bench(name, before, task, after)
     GC.collect
     nil
   end
-  tasks << func
+  TASKS_BUFFER << func
 end
 
-macro bench_n_times(name, before, task, after)
-  func = ->(x : Benchmark::BM::Job) do
+macro bench_n_times(name, n, before, task, after)
+  func = ->(x : Benchmark::IPS::Job) do
     begin
       {{before.body}}
       x.report({{name}}) do
-        n.times do
+        {{n}}.times do
           {{task.body}}
         end
       end
@@ -56,5 +62,5 @@ macro bench_n_times(name, before, task, after)
     GC.collect
     nil
   end
-  tasks << func
+  TASKS_BUFFER << func
 end

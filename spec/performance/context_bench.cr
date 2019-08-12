@@ -1,5 +1,5 @@
 start_bench Context, ->do
-  bench_n_times "#create_entity",
+  bench_n_times "#create_entity", 100_000,
     ->{ ctx = TestContext.new },
     ->{
       ctx.create_entity
@@ -9,7 +9,7 @@ start_bench Context, ->do
   bench "#get_entities &Entity.destroy!",
     ->{
       ctx = TestContext.new
-      n.times { ctx.create_entity }
+      100_000.times { ctx.create_entity }
     },
     ->{ ctx.get_entities.each &.destroy! },
     ->{ ctx.clear_component_pools }
@@ -17,26 +17,26 @@ start_bench Context, ->do
   bench "#destroy_all_entities",
     ->{
       ctx = TestContext.new
-      n.times { ctx.create_entity }
+      100_000.times { ctx.create_entity }
     },
     ->{ ctx.destroy_all_entities },
     ->{ ctx.clear_component_pools }
 
-  bench_n_times "#get_group by Int32",
+  bench_n_times "#get_group by Int32", 100_000,
     ->{ ctx = TestContext.new },
     ->{
       ctx.get_group(Entitas::Matcher.all_of(0))
     },
     ->{}
 
-  bench_n_times "#get_group by class",
+  bench_n_times "#get_group by class", 100_000,
     ->{ ctx = TestContext.new },
     ->{
       ctx.get_group(Entitas::Matcher.all_of(A))
     },
     ->{}
 
-  bench_n_times "#get_group by Enum",
+  bench_n_times "#get_group by Enum", 100_000,
     ->{ ctx = TestContext.new },
     ->{
       ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
@@ -46,15 +46,15 @@ start_bench Context, ->do
   bench "#get_entities",
     ->{
       ctx = TestContext.new
-      n.times { ctx.create_entity }
+      100_000.times { ctx.create_entity }
     },
     ->{ ctx.get_entities },
     ->{ ctx.clear_component_pools }
 
-  bench_n_times "#has_entity?",
+  bench_n_times "#has_entity?", 100_000,
     ->{
       ctx = TestContext.new
-      n.times { ctx.create_entity }
+      100_000.times { ctx.create_entity }
       e = ctx.create_entity
     },
     ->{
@@ -62,7 +62,7 @@ start_bench Context, ->do
     },
     ->{ ctx.clear_component_pools }
 
-  bench_n_times "OnEntityReplaced",
+  bench_n_times "OnEntityReplaced", 100_000,
     ->{
       ctx = TestContext.new
       ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
