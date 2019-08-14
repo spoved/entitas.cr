@@ -1,4 +1,6 @@
-start_bench Context, ->do
+require "./bench_helper"
+
+start_bench ::Entitas::Context, ->do
   bench_n_times "#create_entity", 100_000,
     ->{ ctx = TestContext.new },
     ->{
@@ -6,42 +8,46 @@ start_bench Context, ->do
     },
     ->{ ctx.clear_component_pools }
 
-  bench "#get_entities &Entity.destroy!",
-    ->{
-      ctx = TestContext.new
-      100_000.times { ctx.create_entity }
-    },
-    ->{ ctx.get_entities.each &.destroy! },
-    ->{ ctx.clear_component_pools }
+  group "Destroy all entities", ->do
+    bench "#get_entities &Entity.destroy!",
+      ->{
+        ctx = TestContext.new
+        100_000.times { ctx.create_entity }
+      },
+      ->{ ctx.get_entities.each &.destroy! },
+      ->{ ctx.clear_component_pools }
 
-  bench "#destroy_all_entities",
-    ->{
-      ctx = TestContext.new
-      100_000.times { ctx.create_entity }
-    },
-    ->{ ctx.destroy_all_entities },
-    ->{ ctx.clear_component_pools }
+    bench "#destroy_all_entities",
+      ->{
+        ctx = TestContext.new
+        100_000.times { ctx.create_entity }
+      },
+      ->{ ctx.destroy_all_entities },
+      ->{ ctx.clear_component_pools }
+  end
 
-  bench_n_times "#get_group by Int32", 100_000,
-    ->{ ctx = TestContext.new },
-    ->{
-      ctx.get_group(Entitas::Matcher.all_of(0))
-    },
-    ->{}
+  group "#get_group", ->do
+    bench_n_times "#get_group by Int32", 100_000,
+      ->{ ctx = TestContext.new },
+      ->{
+        ctx.get_group(Entitas::Matcher.all_of(0))
+      },
+      ->{}
 
-  bench_n_times "#get_group by class", 100_000,
-    ->{ ctx = TestContext.new },
-    ->{
-      ctx.get_group(Entitas::Matcher.all_of(A))
-    },
-    ->{}
+    bench_n_times "#get_group by class", 100_000,
+      ->{ ctx = TestContext.new },
+      ->{
+        ctx.get_group(Entitas::Matcher.all_of(A))
+      },
+      ->{}
 
-  bench_n_times "#get_group by Enum", 100_000,
-    ->{ ctx = TestContext.new },
-    ->{
-      ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
-    },
-    ->{}
+    bench_n_times "#get_group by Enum ", 100_000,
+      ->{ ctx = TestContext.new },
+      ->{
+        ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
+      },
+      ->{}
+  end
 
   bench "#get_entities",
     ->{

@@ -9,5 +9,3 @@
 /shard.lock
 /coverage/
 .vscode
-.idea
-cmake-build-debug

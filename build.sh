@@ -1,8 +1,7 @@
 #!/usr/bin/env zsh
-source ~/.zshrc
+# source ~/.zshrc
 
 set -e
-
 
 # Format code
 crystal tool format
@@ -23,4 +22,5 @@ crystal spec --error-trace
 if [ -d ./docs ];then
   rm -r ./docs
 fi
+
 crystal doc ./spec/fixtures/*

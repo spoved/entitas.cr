@@ -1,4 +1,4 @@
 require "./bench_helper"
 require "./*"
 
-run
+Bencher.run

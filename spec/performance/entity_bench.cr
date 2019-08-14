@@ -1,4 +1,6 @@
-start_bench Entity, ->do
+require "./bench_helper"
+
+start_bench ::Entitas::Entity, ->do
   bench_n_times "#add_component", 10_000_000,
     ->{
       ctx = TestContext.new
@@ -11,23 +13,25 @@ start_bench Entity, ->do
     },
     ->{}
 
-  bench_n_times "#get_component", 10_000_000,
-    ->{
-      ctx = TestContext.new
-      e = ctx.create_entity.add_a.add_b.add_c
-    },
-    ->{
-      e.get_component Entitas::Component::Index::A
-    },
-    ->{}
+  group "Get Component A", ->do
+    bench_n_times "#get_component", 10_000_000,
+      ->{
+        ctx = TestContext.new
+        e = ctx.create_entity.add_a.add_b.add_c
+      },
+      ->{
+        e.get_component Entitas::Component::Index::A
+      },
+      ->{}
 
-  bench_n_times "#a", 10_000_000,
-    ->{
-      ctx = TestContext.new
-      e = ctx.create_entity.add_a.add_b.add_c
-    },
-    ->{
-      e.a
-    },
-    ->{}
+    bench_n_times "#a", 10_000_000,
+      ->{
+        ctx = TestContext.new
+        e = ctx.create_entity.add_a.add_b.add_c
+      },
+      ->{
+        e.a
+      },
+      ->{}
+  end
 end
