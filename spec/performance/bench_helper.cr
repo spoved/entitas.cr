@@ -3,8 +3,11 @@ require "./fixtures"
 require "benchmark"
 require "colorize"
 
-Spoved.logger.level = Logger::UNKNOWN
+IPS_HEADER = "label | human_mean (itr/sec) | human_iteration_time | relative_stddev | bytes_per_op | human_compare".colorize(:yellow)
+IPS_WARMUP =  4
+IPS_CALC   = 10
 
+Spoved.logger.level = Logger::UNKNOWN
 LOGGER = Logger.new(STDOUT)
 
 # LOGGER.level = Logger::DEBUG
@@ -165,9 +168,9 @@ module Bencher
 
   def run_ips_tasks
     unless ips_tasks.empty?
-      puts "label | human_mean | human_iteration_time | relative_stddev | bytes_per_op | human_compare".colorize(:yellow)
+      puts IPS_HEADER
       ips_tasks.each do |t|
-        Benchmark.ips(warmup: 4, calculation: 10) do |x|
+        Benchmark.ips(warmup: IPS_WARMUP, calculation: IPS_CALC) do |x|
           t.call(x)
         end
       end
@@ -179,8 +182,8 @@ module Bencher
       ips_groups.each do |g, ts|
         next if ts.empty?
         puts "- #{g} -".colorize(:blue)
-        puts "label | human_mean | human_iteration_time | relative_stddev | bytes_per_op | human_compare".colorize(:yellow)
-        Benchmark.ips(warmup: 4, calculation: 10) do |x|
+        puts IPS_HEADER
+        Benchmark.ips(warmup: IPS_WARMUP, calculation: IPS_CALC) do |x|
           ts.each do |t|
             t.call(x)
           end
@@ -219,6 +222,7 @@ macro bench(name, before, task, after)
   end
 
   Bencher.add_task func
+  Bencher.add_ips_task func
 end
 
 macro bench_n_times(name, n, before, task, after)
@@ -236,8 +240,9 @@ macro bench_n_times(name, n, before, task, after)
   end
 
   Bencher.add_task func
+  # Bencher.add_ips_task func
 
-  ips_func = ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
+  Bencher.add_ips_task ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
     begin
       {{before.body}}
       x.report({{name}}) do
@@ -247,6 +252,4 @@ macro bench_n_times(name, n, before, task, after)
     end
     nil
   end
-
-  Bencher.add_ips_task ips_func
 end

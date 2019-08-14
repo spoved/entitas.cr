@@ -1,12 +1,25 @@
 require "./bench_helper"
 
 start_bench ::Entitas::Context, ->do
-  bench_n_times "#create_entity", 100_000,
-    ->{ ctx = TestContext.new },
-    ->{
-      ctx.create_entity
-    },
-    ->{ ctx.clear_component_pools }
+  group "Create Entity", ->do
+    bench_n_times "#create_entity w/o pre", 100_000,
+      ->{ ctx = TestContext.new },
+      ->{
+        ctx.create_entity
+      },
+      ->{ ctx.clear_component_pools }
+
+    bench_n_times "#create_entity w/ pre", 100_000,
+      ->{
+        ctx = TestContext.new
+        100_000.times { ctx.create_entity }
+        ctx.destroy_all_entities
+      },
+      ->{
+        ctx.create_entity
+      },
+      ->{ ctx.clear_component_pools }
+  end
 
   group "Destroy all entities", ->do
     bench "#get_entities &Entity.destroy!",
