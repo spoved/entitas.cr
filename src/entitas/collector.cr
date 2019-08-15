@@ -11,29 +11,29 @@ module Entitas
     include Enumerable(Entitas::Entity)
     getter entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
 
-    protected property groups : Array(Group) = Array(Group).new
-    protected property group_events : Array(Events::GroupEvent) = Array(Events::GroupEvent).new
+    protected property groups : Array(Entitas::Group) = Array(Entitas::Group).new
+    protected property group_events : Array(Entitas::Events::GroupEvent) = Array(Entitas::Events::GroupEvent).new
 
     protected property to_string_cache : String?
 
-    protected property add_entity_on_added_cache : Proc(Events::OnEntityAdded, Nil)
-    protected property add_entity_on_removed_cache : Proc(Events::OnEntityRemoved, Nil)
-    protected property add_entity_on_updated_cache : Proc(Events::OnEntityUpdated, Nil)
+    protected property add_entity_on_added_cache : Proc(Entitas::Events::OnEntityAdded, Nil)
+    protected property add_entity_on_removed_cache : Proc(Entitas::Events::OnEntityRemoved, Nil)
+    protected property add_entity_on_updated_cache : Proc(Entitas::Events::OnEntityUpdated, Nil)
 
     # Creates a Collector and will collect changed entities
     # based on the specified *group_event*.
-    def initialize(group : Group, group_event : Events::GroupEvent)
+    def initialize(group : Group, group_event : Entitas::Events::GroupEvent)
       @groups << group
       @group_events << group_event
-      @add_entity_on_added_cache = ->add_entity(Events::OnEntityAdded)
-      @add_entity_on_removed_cache = ->add_entity(Events::OnEntityRemoved)
-      @add_entity_on_updated_cache = ->add_entity(Events::OnEntityUpdated)
+      @add_entity_on_added_cache = ->add_entity(Entitas::Events::OnEntityAdded)
+      @add_entity_on_removed_cache = ->add_entity(Entitas::Events::OnEntityRemoved)
+      @add_entity_on_updated_cache = ->add_entity(Entitas::Events::OnEntityUpdated)
       activate
     end
 
     # Creates a Collector and will collect changed entities
     # based on the specified *group_events*.
-    def self.new(groups : Array(Group), group_events : Array(Events::GroupEvent))
+    def self.new(groups : Array(Group), group_events : Array(Entitas::Events::GroupEvent))
       if groups.size != group_events.size
         raise Error.new "Unbalanced count with groups (#{groups.size})" \
                         " and group events (#{group_events.size}). " \
@@ -44,9 +44,9 @@ module Entitas
       instance.groups = groups
       instance.group_events = group_events
 
-      instance.add_entity_on_added_cache = ->instance.add_entity(Events::OnEntityAdded)
-      instance.add_entity_on_removed_cache = ->instance.add_entity(Events::OnEntityRemoved)
-      instance.add_entity_on_updated_cache = ->instance.add_entity(Events::OnEntityUpdated)
+      instance.add_entity_on_added_cache = ->instance.add_entity(Entitas::Events::OnEntityAdded)
+      instance.add_entity_on_removed_cache = ->instance.add_entity(Entitas::Events::OnEntityRemoved)
+      instance.add_entity_on_updated_cache = ->instance.add_entity(Entitas::Events::OnEntityUpdated)
 
       instance.activate
       instance
@@ -59,13 +59,13 @@ module Entitas
 
       groups.each_with_index do |group, i|
         case group_events[i]
-        when Events::GroupEvent::Added
-          group.on_entity_added &add_entity_on_added_cache.as(Proc(Events::OnEntityAdded, Nil))
-        when Events::GroupEvent::Removed
-          group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Events::OnEntityRemoved, Nil))
-        when Events::GroupEvent::AddedOrRemoved
-          group.on_entity_added &add_entity_on_added_cache.as(Proc(Events::OnEntityAdded, Nil))
-          group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Events::OnEntityRemoved, Nil))
+        when Entitas::Events::GroupEvent::Added
+          group.on_entity_added &add_entity_on_added_cache.as(Proc(Entitas::Events::OnEntityAdded, Nil))
+        when Entitas::Events::GroupEvent::Removed
+          group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Entitas::Events::OnEntityRemoved, Nil))
+        when Entitas::Events::GroupEvent::AddedOrRemoved
+          group.on_entity_added &add_entity_on_added_cache.as(Proc(Entitas::Events::OnEntityAdded, Nil))
+          group.on_entity_removed &add_entity_on_removed_cache.as(Proc(Entitas::Events::OnEntityRemoved, Nil))
         else
           raise Error.new "Unknown group event : #{group_events[i]}"
         end

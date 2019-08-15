@@ -1,4 +1,5 @@
 require "./bench_helper"
 require "./*"
+require "json"
 
-Bencher.run
+BenchTest.run

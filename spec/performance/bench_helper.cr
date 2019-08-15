@@ -18,8 +18,9 @@ end
 
 alias BenchCall = Proc(Benchmark::IPS::Job | Benchmark::BM::Job, Nil)
 
-module Bencher
+module BenchTest
   extend self
+
   class_getter context : String? = nil
   class_getter group : String? = nil
 
@@ -196,17 +197,17 @@ module Bencher
 end
 
 macro start_bench(subject, block)
-  Bencher.context = {{subject}}
+  BenchTest.context = {{subject}}
 
   {{block.body}}
 end
 
 macro group(name, tasks)
-  Bencher.group = {{name}}
+  BenchTest.group = {{name}}
 
   {{tasks.body}}
 
-  Bencher.group = nil
+  BenchTest.group = nil
 end
 
 macro bench(name, before, task, after)
@@ -221,8 +222,8 @@ macro bench(name, before, task, after)
     nil
   end
 
-  Bencher.add_task func
-  Bencher.add_ips_task func
+  BenchTest.add_task func
+  BenchTest.add_ips_task func
 end
 
 macro bench_n_times(name, n, before, task, after)
@@ -239,10 +240,10 @@ macro bench_n_times(name, n, before, task, after)
     nil
   end
 
-  Bencher.add_task func
-  # Bencher.add_ips_task func
+  BenchTest.add_task func
+  # BenchTest.add_ips_task func
 
-  Bencher.add_ips_task ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
+  BenchTest.add_ips_task ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
     begin
       {{before.body}}
       x.report({{name}}) do

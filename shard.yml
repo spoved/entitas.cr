@@ -8,6 +8,10 @@ crystal: 0.29.0
 
 license: MIT
 
+targets:
+  benchmark:
+    main: spec/performance/bench.cr
+
 dependencies:
   spoved:
     github: spoved/spoved.cr
@@ -21,7 +25,6 @@ development_dependencies:
   ameba:
     github: veelenga/ameba
     version: ~> 0.10.0
-
-targets:
-  benchmark:
-    main: spec/performance/bench.cr
+  bencher:
+    github: spoved/bencher.cr
+    branch: master

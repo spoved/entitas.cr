@@ -1,6 +1,7 @@
 require "./*"
 require "./context/*"
 require "spoved/logger"
+require "./events"
 
 module Entitas
   # A context manages the lifecycle of entities and groups.
@@ -11,14 +12,14 @@ module Entitas
     spoved_logger
 
     protected property creation_index : Int32
-    protected setter context_info : Context::Info
-    protected getter entities = Array(Entity).new
-    protected property reusable_entities = Array(Entity).new
-    protected property retained_entities = Array(Entity).new
-    protected property entities_cache : Array(Entity)? = Array(Entity).new
+    protected setter context_info : Entitas::Context::Info
+    protected getter entities = Array(Entitas::Entity).new
+    protected property reusable_entities = Array(Entitas::Entity).new
+    protected property retained_entities = Array(Entitas::Entity).new
+    protected property entities_cache : Array(Entitas::Entity)? = Array(Entitas::Entity).new
 
-    protected property groups : Hash(String, Group) = Hash(String, Group).new
-    protected property groups_for_index : Array(Array(Group))
+    protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
+    protected property groups_for_index : Array(Array(::Entitas::Group))
 
     # component_pools is set by the context which created the entity and is used to reuse removed components.
     # Removed components will be pushed to the componentPool. Use entity.CreateComponent(index, type) to get
@@ -117,13 +118,13 @@ module Entitas
         ::Entitas::Component::COMPONENT_KLASSES)
     end
 
-    def context_info : Context::Info
+    def context_info : ::Entitas::Context::Info
       @context_info ||= create_default_context_info
     end
 
     # The contextInfo contains information about the context.
     # It's used to provide better error messages.
-    def info : Context::Info
+    def info : ::Entitas::Context::Info
       self.context_info
     end
 
@@ -142,7 +143,7 @@ module Entitas
     end
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
-    def create_entity : Entitas::Entity
+    def create_entity : ::Entitas::Entity
       logger.debug "Creating new entity", self.class
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
@@ -166,7 +167,6 @@ module Entitas
       self.entities_cache = nil
 
       emit_event OnEntityCreated, self, entity
-
       entity
     end
 
@@ -191,7 +191,7 @@ module Entitas
     end
 
     # Returns all entities which are currently in the context.
-    def get_entities : Array(Entity)
+    def get_entities : Array(Entitas::Entity)
       @entities_cache ||= entities.dup
     end
 
@@ -207,19 +207,19 @@ module Entitas
     # Event functions
     ############################
 
-    def on_component_added(event : Events::OnComponentAdded)
+    def on_component_added(event : Entitas::Events::OnComponentAdded)
       update_groups_component_added_or_removed(event.entity, event.index, event.component)
     end
 
-    def on_component_removed(event : Events::OnComponentRemoved)
+    def on_component_removed(event : Entitas::Events::OnComponentRemoved)
       update_groups_component_added_or_removed(event.entity, event.index, event.component)
     end
 
-    def on_component_replaced(event : Events::OnComponentReplaced)
+    def on_component_replaced(event : Entitas::Events::OnComponentReplaced)
       update_groups_component_replaced(event.entity, event.index, event.prev_component, event.new_component)
     end
 
-    def on_entity_released(event : Events::OnEntityReleased)
+    def on_entity_released(event : Entitas::Events::OnEntityReleased)
       logger.info "Processing OnEntityReleased: #{event}"
       entity = event.entity
 
@@ -233,7 +233,7 @@ module Entitas
       self.reusable_entities << entity
     end
 
-    def on_destroy_entity(event : Events::OnDestroyEntity)
+    def on_destroy_entity(event : Entitas::Events::OnDestroyEntity)
       entity = event.entity
       self.entities.delete(entity)
       self.entities_cache = nil
@@ -282,7 +282,7 @@ module Entitas
         {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
         if !{{meth.name.id}}.nil?
           logger.debug "Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class
-          entity.{{ent_meth_name}} &{{meth.name.id}}.as(Proc(Events::{{ent_meth_name.camelcase.id}}, Nil))
+          entity.{{ent_meth_name}} &{{meth.name.id}}.as(Proc(::Entitas::Events::{{ent_meth_name.camelcase.id}}, Nil))
         end
         {% end %}{% end %}
       end
@@ -290,7 +290,7 @@ module Entitas
       private def set_cache_hooks
         {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
         {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
-        @{{meth.name.id}} = ->{{ent_meth_name.id}}(Events::{{ent_meth_name.camelcase.id}})
+        @{{meth.name.id}} = ->{{ent_meth_name.id}}(::Entitas::Events::{{ent_meth_name.camelcase.id}})
         {% end %}{% end %}
       end
 

@@ -1,3 +1,7 @@
+{% if flag?(:benchmark) %}
+  require "bencher"
+{% end %}
+
 require "spoved/logger"
 
 # TODO: Write documentation for `Entitas`

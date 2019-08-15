@@ -71,7 +71,7 @@ end
 # obj.on_entity_created(event) # => does something with event
 # ```
 macro emits_event(name)
-  protected property {{name.id.underscore.id}}_event_cache : Proc(Events::{{name.id}}, Nil)? = nil
+  protected property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
 
   # Method to process event: `Entitas::Events::{{name}}` when emited. Will raise `Entitas::Error::MethodNotImplemented`
   # when not implimented if an `Entitas::Events::{{name}}` is emitted.
