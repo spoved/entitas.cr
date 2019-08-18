@@ -28,7 +28,6 @@ module Entitas
           ])
 
           class ::{{context_name.id}}Context < ::Entitas::Context
-
             {% i = 0 %}
 
             enum Index

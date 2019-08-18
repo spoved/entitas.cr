@@ -243,15 +243,15 @@ module Entitas
     end
 
     def to_s
-      if self.to_string_cache.nil?
-        self.to_string_cache = String::Builder.build do |builder|
+      if @to_string_cache.nil?
+        @to_string_cache = String::Builder.build do |builder|
           builder << "Entity_#{self.creation_index}("
           builder << get_components.map { |c| c.class.to_s }.join(",")
           builder << ")"
         end
       end
 
-      self.to_string_cache
+      @to_string_cache
     end
   end
 end
