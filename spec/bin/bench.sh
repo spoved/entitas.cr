@@ -8,7 +8,9 @@ coverage_dir=${HOME}/code/github.com/anykeyh/crystal-coverage
 source="./spec/performance/bench.cr"
 # source="./examples/hello_world/hello_world.cr"
 target="./bin/bench"
-args="--release -Dbenchmark --error-trace "
+args="--release --error-trace"
+# args="${args} -Dbenchmark"
+# args="${args} -Denable_logging"
 
 export BENCHER_DATA_DIR=${test_dir}
 export BENCHER_RAW_FILE=${test_dir}/bencher_raw.json
@@ -23,7 +25,7 @@ export BENCHER_DEBUG=true
 
 cleanup(){
   if [ -d ${test_dir} ];then
-    rm -rf ${test_dir}
+    rm -rf ${test_dir}/*
   fi
 
   mkdir -p ${test_dir}

@@ -80,7 +80,7 @@ macro emits_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(event : ::Entitas::Events::{{name.id}}) : Nil
-    logger.info "Processing OnEntityChanged: #{event}"
+    logger.info "Processing {{name.id}}: #{event}"
     raise Entitas::Error::MethodNotImplemented.new
   end
 
