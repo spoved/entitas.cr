@@ -6,7 +6,7 @@ module Entitas
         {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
         {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
         if !{{meth.name.id}}.nil?
-          logger.debug "Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class
+          {% if !flag?(:disable_logging) %}logger.debug("Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class){% end %}
           entity.{{ent_meth_name}} &@{{meth.name.id}}.as(Proc(::Entitas::Events::{{ent_meth_name.camelcase.id}}, Nil))
         end
         {% end %}{% end %}

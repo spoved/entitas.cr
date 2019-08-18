@@ -6,7 +6,7 @@ require "spoved/logger"
 
 # TODO: Write documentation for `Entitas`
 module Entitas
-  spoved_logger
+  {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
   alias ComponentPool = Array(::Entitas::Component)
   alias AERCFactory = Proc(::Entitas::Entity, ::Entitas::SafeAERC)

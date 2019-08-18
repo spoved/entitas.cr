@@ -58,7 +58,9 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
   end
 
   def execute(entities)
-    logger.warn "#{self} running execute(entities)"
+    {% if !flag?(:disable_logging) %}
+      logger.warn "#{self} running execute(entities)"
+    {% end %}
     self.did_execute += 1
     self.entities = entities.dup
 
@@ -89,7 +91,9 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   end
 
   def execute(entities)
-    logger.debug "#{self} running execute(entities)"
+    {% if !flag?(:disable_logging) %}
+      logger.debug "#{self} running execute(entities)"
+    {% end %}
 
     self.did_execute += 1
     self.entities = entities.dup
@@ -113,8 +117,9 @@ class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   end
 
   def execute(entities)
-    logger.debug "#{self} running execute(entities)"
-
+    {% if !flag?(:disable_logging) %}
+      logger.debug "#{self} running execute(entities)"
+    {% end %}
     self.did_execute += 1
     self.entities = entities.dup
 

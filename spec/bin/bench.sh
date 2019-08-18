@@ -9,8 +9,9 @@ source="./spec/performance/bench.cr"
 # source="./examples/hello_world/hello_world.cr"
 target="./bin/bench"
 args="--release --error-trace"
+args="${args} -Ddisable_logging"
+
 # args="${args} -Dbenchmark"
-# args="${args} -Denable_logging"
 
 export BENCHER_DATA_DIR=${test_dir}
 export BENCHER_RAW_FILE=${test_dir}/bencher_raw.json

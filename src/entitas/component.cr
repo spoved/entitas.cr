@@ -2,7 +2,7 @@ require "./macros/component"
 
 module Entitas
   abstract class Component
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     # Component error class raised when an issue is encountered
     class Error < Exception

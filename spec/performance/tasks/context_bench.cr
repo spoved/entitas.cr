@@ -1,5 +1,3 @@
-require "./bench_helper"
-
 start_bench ::Entitas::Context, ->do
   group "Create Entity", ->do
     bench_n_times "#create_entity w/o pre", 100_000,

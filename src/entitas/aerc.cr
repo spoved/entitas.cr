@@ -4,7 +4,7 @@ require "spoved/logger"
 
 module Entitas
   abstract class AERC
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     @_retain_count = 0
 
@@ -52,7 +52,7 @@ module Entitas
       if includes?(owner)
         raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
-        logger.debug "Retaining #{entity} for #{owner}", "SafeAERC"
+        {% if !flag?(:disable_logging) %}logger.debug("Retaining #{entity} for #{owner}", "SafeAERC"){% end %}
         owners.push owner.object_id
       end
     end
@@ -61,7 +61,7 @@ module Entitas
       if !includes?(owner)
         raise Entitas::Entity::Error::IsNotRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
-        logger.debug "Releasing #{entity} from #{owner}", "SafeAERC"
+        {% if !flag?(:disable_logging) %}logger.debug("Releasing #{entity} from #{owner}", "SafeAERC"){% end %}
         owners.delete owner.object_id
       end
     end

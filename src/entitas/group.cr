@@ -4,7 +4,7 @@ require "./group/*"
 
 module Entitas
   class Group
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated
 
@@ -26,7 +26,7 @@ module Entitas
 
     # This is used by the context to manage the group.
     def handle_entity_silently(entity : Entity)
-      logger.debug "Silently handling entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Silently handling entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
         add_entity_silently(entity)
@@ -36,7 +36,7 @@ module Entitas
     end
 
     def handle_entity(entity : Entity) : ::Entitas::Events::GroupChanged
-      logger.debug "Handling entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Handling entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
         add_entity_silently(entity) ? ::Entitas::Events::OnEntityAdded : nil
@@ -47,7 +47,7 @@ module Entitas
 
     # This is used by the context to manage the group.
     def handle_entity(entity : Entity, index : Int32, component : Entitas::Component)
-      logger.debug "Context handle entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Context handle entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
         add_entity(entity, index, component)
@@ -58,7 +58,7 @@ module Entitas
 
     # This is used by the context to manage the group.
     def update_entity(entity : Entitas::Entity, index : Int32, prev_component : Entitas::Component?, new_component : Entitas::Component?)
-      logger.debug "Update entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Update entity : #{entity}", self.to_s){% end %}
 
       if has_entity?(entity)
         emit_event OnEntityRemoved, self, entity, index, prev_component
@@ -73,7 +73,7 @@ module Entitas
     #
     # Removes: `OnEntityRemoved`, `OnEntityAdded`, and `OnEntityUpdated`
     def remove_all_event_handlers
-      logger.debug "Remove all event handlers", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Remove all event handlers", self.to_s){% end %}
 
       self.clear_on_entity_removed_event_hooks
       self.clear_on_entity_added_event_hooks
@@ -81,7 +81,7 @@ module Entitas
     end
 
     def add_entity_silently(entity : Entity) : Entity | Bool
-      logger.debug "Silently adding entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Silently adding entity : #{entity}", self.to_s){% end %}
       if entity.enabled? && !entities.includes?(entity)
         entities << entity
         self.entities_cache = nil
@@ -93,14 +93,14 @@ module Entitas
     end
 
     def add_entity(entity : Entity, index : Int32, component : Component)
-      logger.warn("Adding entity : #{entity}", self.to_s)
+      {% if !flag?(:disable_logging) %}logger.warn("Adding entity : #{entity}", self.to_s){% end %}
       if add_entity_silently(entity)
         emit_event OnEntityAdded, self, entity, index, component
       end
     end
 
     def remove_entity_silently(entity : Entity) : Entity?
-      logger.debug "Silently removing entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Silently removing entity : #{entity}", self.to_s){% end %}
 
       removed = self.entities.delete(entity)
       if removed
@@ -112,7 +112,7 @@ module Entitas
     end
 
     def remove_entity(entity : Entity, index : Int32, component : Component) : Entity?
-      logger.debug "Removing entity : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("Removing entity : #{entity}", self.to_s){% end %}
 
       removed = self.entities.delete(entity)
       if removed

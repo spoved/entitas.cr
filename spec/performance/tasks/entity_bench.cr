@@ -1,5 +1,3 @@
-require "./bench_helper"
-
 start_bench ::Entitas::Entity, ->do
   bench_n_times "#add_component", 10_000_000,
     ->{

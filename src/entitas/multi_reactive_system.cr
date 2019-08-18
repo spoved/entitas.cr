@@ -8,7 +8,7 @@ module Entitas
   # of an entity to update the gameObject.transform.position
   # of the related gameObject.
   abstract class MultiReactiveSystem
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     include Entitas::Systems::ReactiveSystem
 

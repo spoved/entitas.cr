@@ -6,7 +6,7 @@ module Entitas
   class Collector
     class Error < Exception; end
 
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     include Enumerable(Entitas::Entity)
     getter entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
@@ -55,7 +55,7 @@ module Entitas
     # Activates the Collector and will start collecting
     # changed entities. Collectors are activated by default.
     def activate
-      logger.info "activating collector with events : #{group_events}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.info("activating collector with events : #{group_events}", self.to_s){% end %}
 
       groups.each_with_index do |group, i|
         case group_events[i]
@@ -73,7 +73,7 @@ module Entitas
     end
 
     def deactivate
-      logger.info "deactivating collector", self.to_s
+      {% if !flag?(:disable_logging) %}logger.info("deactivating collector", self.to_s){% end %}
 
       self.groups.each do |group|
         group.remove_on_entity_added_hook add_entity_on_added_cache
@@ -113,7 +113,9 @@ module Entitas
     ############################
 
     def add_entity(event : Entitas::Events::OnEntityAdded) : Nil
-      logger.debug("Processing OnEntityAdded : #{event.entity}", self.to_s)
+      {% if !flag?(:disable_logging) %}
+        logger.debug("Processing OnEntityAdded : #{event.entity}", self.to_s)
+      {% end %}
       return if self.entities.includes?(event.entity)
 
       entities << event.entity
@@ -121,7 +123,9 @@ module Entitas
     end
 
     def add_entity(event : Entitas::Events::OnEntityRemoved) : Nil
-      logger.debug("Processing OnEntityRemoved : #{event.entity}", self.to_s)
+      {% if !flag?(:disable_logging) %}
+        logger.debug("Processing OnEntityRemoved : #{event.entity}", self.to_s)
+      {% end %}
       return if self.entities.includes?(event.entity)
 
       entities << event.entity
@@ -129,7 +133,9 @@ module Entitas
     end
 
     def add_entity(event : Entitas::Events::OnEntityUpdated) : Nil
-      logger.debug("Processing OnEntityUpdated : #{event.entity}", self.to_s)
+      {% if !flag?(:disable_logging) %}
+        logger.debug("Processing OnEntityUpdated : #{event.entity}", self.to_s)
+      {% end %}
       return if self.entities.includes?(event.entity)
 
       entities << event.entity

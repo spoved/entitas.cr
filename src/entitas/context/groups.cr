@@ -9,7 +9,7 @@ module Entitas
       else
         group = Group.new(matcher)
 
-        logger.debug("created new group: #{group}", self)
+        {% if !flag?(:disable_logging) %}logger.debug("created new group: #{group}", self){% end %}
 
         get_entities.each do |entity|
           group.handle_entity_silently(entity)
@@ -28,7 +28,7 @@ module Entitas
     end
 
     def update_groups_component_added_or_removed(entity : ::Entitas::Entity, index : Int32, component : ::Entitas::Component?)
-      logger.debug "update_groups_component_added_or_removed : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
       event_list = Hash(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class).new
 
@@ -56,7 +56,7 @@ module Entitas
 
     def update_groups_component_replaced(entity : ::Entitas::Entity, index : Int32,
                                          prev_component : ::Entitas::Component?, new_component : ::Entitas::Component?)
-      logger.debug "update_groups_component_replaced : #{entity}", self.to_s
+      {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_replaced : #{entity}", self.to_s){% end %}
       if groups_for_index[index]
         groups_for_index[index].each do |group|
           group.update_entity(entity, index, prev_component, new_component)

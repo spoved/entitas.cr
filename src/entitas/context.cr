@@ -10,7 +10,7 @@ module Entitas
   #  The prefered way to create a context is to use the generated methods
   #  from the code generator, e.g. var context = new GameContext();
   abstract class Context
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     protected property creation_index : Int32
     protected setter context_info : Entitas::Context::Info
@@ -106,7 +106,7 @@ module Entitas
     ############################
 
     private def create_default_context_info : Entitas::Context::Info
-      logger.debug "Creating default context", "Context"
+      {% if !flag?(:disable_logging) %}logger.debug("Creating default context", "Context"){% end %}
 
       component_names = Array(String).new
       prefix = "Index "
@@ -145,16 +145,16 @@ module Entitas
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
     def create_entity : ::Entitas::Entity
-      logger.debug "Creating new entity", self.class
+      {% if !flag?(:disable_logging) %}logger.debug("Creating new entity", self.class){% end %}
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
-                 logger.debug "Reusing entity: #{e}", self.to_s
+                 {% if !flag?(:disable_logging) %}logger.debug("Reusing entity: #{e}", self.to_s){% end %}
                  e.reactivate(self.creation_index)
                  self.creation_index += 1
                  e
                else
                  e = self.entity_factory
-                 logger.debug "Created new entity: #{e}", self.to_s
+                 {% if !flag?(:disable_logging) %}logger.debug("Created new entity: #{e}", self.to_s){% end %}
                  e.init(self.creation_index, self.context_info, self.aerc_factory(e))
                  self.creation_index += 1
                  e
@@ -221,7 +221,7 @@ module Entitas
     end
 
     def on_entity_released(event : Entitas::Events::OnEntityReleased)
-      logger.info "Processing OnEntityReleased: #{event}"
+      {% if !flag?(:disable_logging) %}logger.info("Processing OnEntityReleased: #{event}"){% end %}
       entity = event.entity
 
       if entity.enabled?

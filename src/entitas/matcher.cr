@@ -2,7 +2,7 @@ require "./matcher/*"
 
 module Entitas
   class Matcher
-    spoved_logger
+    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     class Error < Exception
       def initialize(@length : Int32); end
@@ -28,9 +28,11 @@ module Entitas
     end
 
     def matches?(entity : ::Entitas::Entity)
-      logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
-                   " && matches_any_of? #{matches_any_of?(entity)}" \
-                   " && matches_none_of? #{matches_none_of?(entity)}", self)
+      {% if !flag?(:disable_logging) %}
+        logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
+                     " && matches_any_of? #{matches_any_of?(entity)}" \
+                     " && matches_none_of? #{matches_none_of?(entity)}", self)
+      {% end %}
       matches_all_of?(entity) && matches_any_of?(entity) && matches_none_of?(entity)
     end
 

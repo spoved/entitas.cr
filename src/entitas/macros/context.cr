@@ -87,7 +87,7 @@ module Entitas
             end
 
             private def create_default_context_info : Entitas::Context::Info
-              logger.debug "Creating default context", CONTEXT_NAME
+              {% if !flag?(:disable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
 
               component_names = Array(String).new
               prefix = "Index "
