@@ -185,4 +185,5 @@ start_bench ::Entitas::Entity, ->do
       ctx.total_components
     },
     ->{}
+
 end
