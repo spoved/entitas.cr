@@ -126,12 +126,12 @@ module BenchmarkHelper
       run_groups
       puts ""
 
-      # puts ""
-      # puts "-- Instruction per second --".colorize(:green)
-      # puts ""
-      # run_ips_tasks
-      # puts ""
-      # run_ips_groups
+      puts ""
+      puts "-- Instruction per second --".colorize(:green)
+      puts ""
+      run_ips_tasks
+      puts ""
+      run_ips_groups
     end
   end
 
@@ -203,7 +203,7 @@ macro group(name, tasks)
   BenchmarkHelper.group = nil
 end
 
-macro bench(name, before, task, after)
+macro bench(name, before, task, after, ips = false)
   func = ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
     begin
       {{before.body}}
@@ -215,35 +215,38 @@ macro bench(name, before, task, after)
     nil
   end
 
-  BenchmarkHelper.add_task func
-  BenchmarkHelper.add_ips_task func
+  {% if ips == false %}
+    BenchmarkHelper.add_task func
+  {% else %}
+    BenchmarkHelper.add_ips_task func
+  {% end %}
 end
 
-macro bench_n_times(name, n, before, task, after)
-  func = ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
-    begin
-      {{before.body}}
-      x.report({{name}}) do
-        {{n}}.times do
+macro bench_n_times(name, n, before, task, after, ips = false)
+  {% if ips == false %}
+    func = ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
+      begin
+        {{before.body}}
+        x.report({{name}}) do
+          {{n}}.times do
+            {{task.body}}
+          end
+        end
+        {{after.body}}
+      end
+      nil
+    end
+    BenchmarkHelper.add_task func
+  {% else %}
+    BenchmarkHelper.add_ips_task ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
+      begin
+        {{before.body}}
+        x.report({{name}}) do
           {{task.body}}
         end
+        {{after.body}}
       end
-      {{after.body}}
+      nil
     end
-    nil
-  end
-
-  BenchmarkHelper.add_task func
-  # BenchmarkHelper.add_ips_task func
-
-  BenchmarkHelper.add_ips_task ->(x : Benchmark::IPS::Job | Benchmark::BM::Job) do
-    begin
-      {{before.body}}
-      x.report({{name}}) do
-        {{task.body}}
-      end
-      {{after.body}}
-    end
-    nil
-  end
+  {% end %}
 end
