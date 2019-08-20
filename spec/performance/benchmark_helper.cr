@@ -55,7 +55,7 @@ module BenchmarkHelper
   def tasks
     context_tasks[current_context_name]
   end
-  
+
   def tasks?
     !tasks.empty?
   end
@@ -142,7 +142,7 @@ module BenchmarkHelper
 
       if tasks? || groups?
         puts "-- Total execution time --".colorize(:green)
-        run_tasks   
+        run_tasks
         GC.collect
         puts ""
         run_groups
