@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 workdir=$(pwd)
 test_dir=${workdir}/test

@@ -55,17 +55,39 @@ module BenchmarkHelper
   def tasks
     context_tasks[current_context_name]
   end
+  
+  def tasks?
+    !tasks.empty?
+  end
 
   def ips_tasks
     context_ips_tasks[current_context_name]
+  end
+
+  def ips_tasks?
+    !ips_tasks.empty?
   end
 
   def groups
     context_groups[current_context_name]
   end
 
+  def groups?
+    groups.each do |_, v|
+      return true unless v.empty?
+    end
+    false
+  end
+
   def ips_groups
     context_ips_groups[current_context_name]
+  end
+
+  def ips_groups?
+    ips_groups.each do |_, v|
+      return true unless v.empty?
+    end
+    false
   end
 
   def current_context_name : String
@@ -118,20 +140,23 @@ module BenchmarkHelper
       puts ""
       puts "--## #{ctx} ##--".colorize(:green).mode(:bold)
 
-      puts ""
-      puts "-- Total execution time --".colorize(:green)
-      puts ""
-      run_tasks
-      puts ""
-      run_groups
-      puts ""
+      if tasks? || groups?
+        puts "-- Total execution time --".colorize(:green)
+        run_tasks   
+        GC.collect
+        puts ""
+        run_groups
+        GC.collect
+      end
 
-      puts ""
-      puts "-- Instruction per second --".colorize(:green)
-      puts ""
-      run_ips_tasks
-      puts ""
-      run_ips_groups
+      if ips_tasks? || ips_groups?
+        puts "-- Instruction per second --".colorize(:green)
+        run_ips_tasks
+        GC.collect
+        puts ""
+        run_ips_groups
+        GC.collect
+      end
     end
   end
 
@@ -139,6 +164,7 @@ module BenchmarkHelper
     Benchmark.bm do |x|
       tasks.each do |t|
         t.call(x)
+        GC.collect
       end
     end
   end
@@ -152,9 +178,10 @@ module BenchmarkHelper
         Benchmark.bm do |x|
           ts.each do |t|
             t.call(x)
+            GC.collect
           end
         end
-
+        GC.collect
         puts ""
       end
     end
@@ -166,7 +193,9 @@ module BenchmarkHelper
       ips_tasks.each do |t|
         Benchmark.ips(warmup: IPS_WARMUP, calculation: IPS_CALC) do |x|
           t.call(x)
+          GC.collect
         end
+        GC.collect
       end
     end
   end
@@ -180,9 +209,10 @@ module BenchmarkHelper
         Benchmark.ips(warmup: IPS_WARMUP, calculation: IPS_CALC) do |x|
           ts.each do |t|
             t.call(x)
+            GC.collect
           end
         end
-
+        GC.collect
         puts ""
       end
     end

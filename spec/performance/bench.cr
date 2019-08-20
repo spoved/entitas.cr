@@ -9,7 +9,7 @@ require "./fixtures"
 require "benchmark"
 require "colorize"
 require "json"
-require "./tasks/*"
+require "./tasks"
 
 Spoved.logger.level = Logger::UNKNOWN
 
