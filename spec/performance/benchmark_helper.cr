@@ -142,20 +142,34 @@ module BenchmarkHelper
 
       if tasks? || groups?
         puts "-- Total execution time --".colorize(:green)
-        run_tasks
-        GC.collect
-        puts ""
-        run_groups
-        GC.collect
+
+        if tasks?
+          puts ""
+          run_tasks
+          GC.collect
+        end
+
+        if groups?
+          puts ""
+          run_groups
+          GC.collect
+        end
       end
 
       if ips_tasks? || ips_groups?
         puts "-- Instruction per second --".colorize(:green)
-        run_ips_tasks
-        GC.collect
-        puts ""
-        run_ips_groups
-        GC.collect
+
+        if ips_tasks?
+          puts ""
+          run_ips_tasks
+          GC.collect
+        end
+
+        if ips_groups?
+          puts ""
+          run_ips_groups
+          GC.collect
+        end
       end
     end
   end
