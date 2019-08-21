@@ -16,7 +16,9 @@ module Entitas
 
   abstract class Context; end
 
-  abstract class Entity; end
+  abstract class Entity
+    abstract class Index(TKey); end
+  end
 
   class Systems; end
 

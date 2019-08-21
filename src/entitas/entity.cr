@@ -240,10 +240,6 @@ module Entitas
     end
 
     def to_s(io)
-      io << to_s
-    end
-
-    def to_s
       if @to_string_cache.nil?
         @to_string_cache = String::Builder.build do |builder|
           builder << "Entity_#{self.creation_index}("
@@ -252,7 +248,7 @@ module Entitas
         end
       end
 
-      @to_string_cache
+      io << @to_string_cache.as(String)
     end
   end
 end

@@ -560,7 +560,8 @@ describe Entitas::Entity do
           it "caches entity description" do
             entity = new_entity_with_a
             cache = entity.to_s
-            entity.to_s.should be cache
+            entity.to_s.should_not be cache
+            entity.to_s.should eq cache
           end
 
           it "updates cache when a new component was added" do
@@ -583,7 +584,7 @@ describe Entitas::Entity do
             entity = new_entity_with_a
             cache = entity.to_s
             entity.replace_component_a(A.new)
-            entity.to_s.should be cache
+            entity.to_s.should_not be cache
             entity.to_s.should eq cache
           end
 
