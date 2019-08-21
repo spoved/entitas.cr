@@ -4,6 +4,8 @@ module Entitas
   class Matcher
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
+    private class_property indices_cache = Array(Entitas::Component::Index).new
+
     class Error < Exception
       def initialize(@length : Int32); end
 
@@ -173,12 +175,12 @@ module Entitas
     end
 
     protected def self.merge_indicies(*matchers : Matcher) : Array(Entitas::Component::Index)
-      indices = Array(Entitas::Component::Index).new
+      self.indices_cache.clear
       matchers.each do |m|
         raise Error.new(m.indices.size) if m.indices.size != 1
-        indices += m.indices
+        self.indices_cache += m.indices
       end
-      indices.uniq.sort
+      self.indices_cache.uniq.sort
     end
 
     protected def self.get_component_names(*matchers : Matcher) : Array(String)?

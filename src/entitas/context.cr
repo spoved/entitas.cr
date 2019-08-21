@@ -18,6 +18,7 @@ module Entitas
     protected property reusable_entities = Array(Entitas::Entity).new
     protected property retained_entities = Array(Entitas::Entity).new
     protected property entities_cache : Array(Entitas::Entity)? = Array(Entitas::Entity).new
+    protected property component_names_cache : Array(String) = Array(String).new
 
     protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
     protected property groups_for_index : Array(Array(::Entitas::Group))
@@ -107,12 +108,6 @@ module Entitas
 
     private def create_default_context_info : Entitas::Context::Info
       {% if !flag?(:disable_logging) %}logger.debug("Creating default context", "Context"){% end %}
-
-      component_names = Array(String).new
-      prefix = "Index "
-      total_components.times do |i|
-        component_names << prefix + i.to_s
-      end
 
       Entitas::Context::Info.new("Unnamed Context",
         ::Entitas::Component::COMPONENT_NAMES,

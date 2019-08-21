@@ -89,13 +89,17 @@ module Entitas
             private def create_default_context_info : Entitas::Context::Info
               {% if !flag?(:disable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
 
-              component_names = Array(String).new
+              @component_names_cache.clear
               prefix = "Index "
               total_components.times do |i|
-                component_names << prefix + i.to_s
+                @component_names_cache << prefix + i.to_s
               end
 
-              Entitas::Context::Info.new(CONTEXT_NAME, component_names, COMPONENT_TO_INDEX_MAP.keys)
+              Entitas::Context::Info.new(
+                CONTEXT_NAME,
+                component_names_cache,
+                COMPONENT_TO_INDEX_MAP.keys
+              )
             end
 
             def entity_factory : ::{{context_name.id}}Entity
