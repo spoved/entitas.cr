@@ -1,5 +1,7 @@
 module Entitas
   abstract class Context
+    protected property group_events_cache = Hash(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class).new
+
     # Returns a group for the specified matcher.
     # Calling context.GetGroup(matcher) with the same matcher will always
     # return the same instance of the group.
@@ -30,27 +32,29 @@ module Entitas
     def update_groups_component_added_or_removed(entity : ::Entitas::Entity, index : Int32, component : ::Entitas::Component?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
-      event_list = Hash(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class).new
-
       if groups_for_index[index]
         groups_for_index[index].each do |group|
           event = group.handle_entity(entity)
 
           next if event.nil?
-          raise Error.new if event_list[group]?
-          event_list[group] = event
+          group_events_cache[group] = event
         end
       end
 
-      event_list.each do |group, event|
-        case event
-        when ::Entitas::Events::OnEntityAdded.class
-          group.receive_on_entity_added_event ::Entitas::Events::OnEntityAdded.new(group, entity, index, component)
-        when ::Entitas::Events::OnEntityRemoved.class
-          group.receive_on_entity_removed_event ::Entitas::Events::OnEntityRemoved.new(group, entity, index, component)
-        else
-          raise Error::UnknownEvent.new event.to_s
-        end
+      group_events_cache.each do |group, event|
+        emit_group_event(group, event, entity, index, component)
+      end
+      group_events_cache.clear
+    end
+
+    private def emit_group_event(group, event, entity, index, component)
+      case event
+      when ::Entitas::Events::OnEntityAdded.class
+        group.receive_on_entity_added_event ::Entitas::Events::OnEntityAdded.new(group, entity, index, component)
+      when ::Entitas::Events::OnEntityRemoved.class
+        group.receive_on_entity_removed_event ::Entitas::Events::OnEntityRemoved.new(group, entity, index, component)
+      else
+        raise Error::UnknownEvent.new event.to_s
       end
     end
 

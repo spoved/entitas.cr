@@ -92,7 +92,7 @@ end
 
 macro emit_event(event, *args)
   {% if !flag?(:disable_logging) %}logger.debug("Emitting event {{event.id}}", self.to_s){% end %}
-  self.{{event.id.underscore.id}}_event_hooks.reverse.each &.call(::Entitas::Events::{{event.id}}.new({{*args}}))
+  self.receive_{{event.id.underscore.id}}_event(::Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
 # Wrapper for multiple `accept_event` calls
@@ -162,6 +162,11 @@ macro accept_event(name)
 
   def receive_{{name.id.underscore.id}}_event(event : ::Entitas::Events::{{name.id}})
     {% if !flag?(:disable_logging) %}logger.debug("Receiving event {{name.id}}", self.to_s){% end %}
-    self.{{name.id.underscore.id}}_event_hooks.reverse.each &.call(event)
+
+    index = self.{{name.id.underscore.id}}_event_hooks.size - 1
+    while index >= 0
+      self.{{name.id.underscore.id}}_event_hooks[index].call(event)
+      index -= 1
+    end
   end
 end
