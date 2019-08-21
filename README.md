@@ -18,7 +18,7 @@ dependencies:
 require "entitas"
 ```
 
-TODO: Write usage instructions here
+Run `crystal docs` to generate API Docs and examples.
 
 ## Development
 
@@ -30,7 +30,7 @@ ln ./pre-commit .git/hooks/pre-commit
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/entitas/fork>)
+1. Fork it (<https://github.com/spoved/entitas.cr/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
