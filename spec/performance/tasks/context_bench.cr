@@ -20,6 +20,16 @@ start_bench ::Entitas::Context, ->do
   end
 
   group "Destroy all entities", ->do
+    bench "control",
+      ->{
+        array = Array(Nil).new(100_000, nil)
+      },
+      ->{
+        array.each do
+        end
+      },
+      ->{}
+
     bench "#get_entities &Entity.destroy!",
       ->{
         ctx = TestContext.new
