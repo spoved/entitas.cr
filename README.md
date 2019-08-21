@@ -9,7 +9,7 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   entitas:
-    github: your-github-user/entitas
+    github: kalinon/entitas.cr
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ ln ./pre-commit .git/hooks/pre-commit
 
 ## Contributing
 
-1. Fork it (<https://github.com/spoved/entitas.cr/fork>)
+1. Fork it (<https://github.com/kalinon/entitas.cr/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
