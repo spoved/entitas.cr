@@ -119,4 +119,47 @@ start_bench "Proc", ->do
       end
     }, ->{}, true
   end
+
+  group "Call", ->do
+    bench "control", ->{
+      event = Entitas::Events::EventOne.new("String")
+    }, ->{
+      ->(event : ::Entitas::Events::EventOne) {
+        nil
+      }.call(event)
+    }, ->{}, true
+
+    bench "const", ->{
+      event = Entitas::Events::EventOne.new("String")
+    }, ->{
+      EVENT_ONE_HOOK_CACHE.call(event)
+    }, ->{}, true
+
+    bench "instance var", ->{
+      test = TestProcs.new
+      event = Entitas::Events::EventOne.new("String")
+    }, ->{
+      test.event_one_instance_var.call(event)
+    }, ->{}, true
+
+    bench "each", ->{
+      event = Entitas::Events::EventOne.new("String")
+      data = Array(EventOneHook).new
+      data << ->(e : ::Entitas::Events::EventOne) {
+        nil
+      }
+    }, ->{
+      data.each &.call(event)
+    }, ->{}, true
+
+    bench "[]", ->{
+      event = Entitas::Events::EventOne.new("String")
+      data = Array(EventOneHook).new
+      data << ->(e : ::Entitas::Events::EventOne) {
+        nil
+      }
+    }, ->{
+      data[0].call(event)
+    }, ->{}, true
+  end
 end
