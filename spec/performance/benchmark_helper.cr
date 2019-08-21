@@ -29,11 +29,11 @@ module BenchmarkHelper
       @@context = nil
     else
       @@context = "#{value}"
-      contexts << current_context_name
-      context_tasks[current_context_name] = Array(BenchCall).new
-      context_ips_tasks[current_context_name] = Array(BenchCall).new
-      context_groups[current_context_name] = Hash(String, Array(BenchCall)).new
-      context_ips_groups[current_context_name] = Hash(String, Array(BenchCall)).new
+      contexts << current_context_name unless contexts.includes?(current_context_name)
+      context_tasks[current_context_name] = Array(BenchCall).new unless context_tasks[current_context_name]?
+      context_ips_tasks[current_context_name] = Array(BenchCall).new unless context_ips_tasks[current_context_name]?
+      context_groups[current_context_name] = Hash(String, Array(BenchCall)).new unless context_groups[current_context_name]?
+      context_ips_groups[current_context_name] = Hash(String, Array(BenchCall)).new unless context_ips_groups[current_context_name]?
 
       @@context
     end
@@ -45,8 +45,8 @@ module BenchmarkHelper
     else
       @@group = "#{value}"
 
-      groups[current_group_name] = Array(BenchCall).new
-      ips_groups[current_group_name] = Array(BenchCall).new
+      groups[current_group_name] = Array(BenchCall).new unless groups[current_group_name]?
+      ips_groups[current_group_name] = Array(BenchCall).new unless ips_groups[current_group_name]?
 
       current_group_name
     end
