@@ -38,4 +38,4 @@ ln ./pre-commit .git/hooks/pre-commit
 
 ## Contributors
 
-- [Holden Omans](https://github.com/kalinon) Holden Omans - creator, maintainer
+- [Holden Omans](https://github.com/kalinon) - creator, maintainer
