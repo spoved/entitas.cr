@@ -6,6 +6,7 @@ module ::Entitas::Events
   # ```
   #
   # This will create the code:
+  #
   # ```
   #   struct ::Entitas::Events::{{name.id}}
   #
@@ -74,6 +75,7 @@ macro emits_event(name)
 
   # Method to process event: `Entitas::Events::{{name}}` when emited. Will raise `Entitas::Error::MethodNotImplemented`
   # when not implimented if an `Entitas::Events::{{name}}` is emitted.
+  #
   # ```
   # def {{name.id.underscore.id}}(event : ::Entitas::Events::{{name.id}}) : Nil
   #   # do something with event
@@ -130,9 +132,10 @@ end
 macro accept_event(name)
 
   # Array of event hooks to trigger when an `Entitas::Events::{{name.id}}` is emitted
-  protected getter {{name.id.underscore.id}}_event_hooks : Array(Proc(::Entitas::Events::{{name.id}}, Nil)) = Array(Proc(::Entitas::Events::{{name.id}}, Nil)).new
+  getter {{name.id.underscore.id}}_event_hooks : Array(Proc(::Entitas::Events::{{name.id}}, Nil)) = Array(Proc(::Entitas::Events::{{name.id}}, Nil)).new
 
   # Will append the `&block` to the `#{{name.id.underscore.id}}_event_hooks` array
+  #
   # ```
   # {{name.id.underscore.id}} do |event|
   #   # do something with event
@@ -144,6 +147,7 @@ macro accept_event(name)
   end
 
   # Will clear all the event hooks on this instance
+  #
   # ```
   # obj.clear_{{name.id.underscore.id}}_event_hooks
   # ```
