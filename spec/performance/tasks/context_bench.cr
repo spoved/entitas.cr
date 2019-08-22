@@ -45,6 +45,7 @@ start_bench ::Entitas::Context, ->do
       },
       ->{ ctx.destroy_all_entities },
       ->{ ctx.clear_component_pools }
+
     bench "#destroy_all_entities (pre-destroy)",
       ->{
         ctx = TestContext.new
@@ -55,6 +56,7 @@ start_bench ::Entitas::Context, ->do
       ->{ ctx.destroy_all_entities },
       ->{ ctx.clear_component_pools }
   end
+
   group "#get_group", ->do
     bench_n_times "#get_group by Int32", 100_000,
       ->{ ctx = TestContext.new },

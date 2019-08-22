@@ -75,7 +75,7 @@ module Entitas
     def execute
       self.collectors.each do |collector|
         unless collector.empty?
-          self.collected_buffer += collector.entities
+          self.collected_buffer += collector.entities.to_a
           collector.clear
         end
       end

@@ -10,7 +10,7 @@ module Entitas
 
     include Enumerable(Entitas::Entity)
 
-    getter entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
+    getter entities : Set(Entitas::Entity) = Set(Entitas::Entity).new
     protected property entities_cache : Array(Entitas::Entity)? = nil
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?
@@ -102,26 +102,30 @@ module Entitas
     def remove_entity_silently(entity : Entity) : Entity?
       {% if !flag?(:disable_logging) %}logger.debug("Silently removing entity : #{entity}", self.to_s){% end %}
 
-      removed = self.entities.delete(entity)
-      if removed
+      if self.entities.includes?(entity)
+        self.entities.delete(entity)
         self.entities_cache = nil
         self.single_entitie_cache = nil
         entity.release(self)
+        entity
+      else
+        nil
       end
-      removed
     end
 
     def remove_entity(entity : Entity, index : Int32, component : Component) : Entity?
       {% if !flag?(:disable_logging) %}logger.debug("Removing entity : #{entity}", self.to_s){% end %}
 
-      removed = self.entities.delete(entity)
-      if removed
+      if self.entities.includes?(entity)
+        self.entities.delete(entity)
         self.entities_cache = nil
         self.single_entitie_cache = nil
         emit_event OnEntityRemoved, self, entity, index, component
         entity.release(self)
+        entity
+      else
+        nil
       end
-      removed
     end
 
     # Determines whether this group has the specified entity.
@@ -137,7 +141,7 @@ module Entitas
     # Returns all entities which are currently in this group.
     # TODO: Do we need buffer?
     def get_entities : Array(Entitas::Entity)
-      self.entities_cache ||= self.entities.dup
+      self.entities_cache ||= self.entities.to_a
     end
 
     def get_entities(buff : Array(Entitas::Entity)) : Array(Entitas::Entity)

@@ -9,7 +9,7 @@ module Entitas
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     include Enumerable(Entitas::Entity)
-    getter entities : Array(Entitas::Entity) = Array(Entitas::Entity).new
+    getter entities : Set(Entitas::Entity) = Set(Entitas::Entity).new
 
     protected property groups : Array(Entitas::Group) = Array(Entitas::Group).new
     protected property group_events : Array(Entitas::Events::GroupEvent) = Array(Entitas::Events::GroupEvent).new

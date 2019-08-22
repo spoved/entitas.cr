@@ -16,6 +16,22 @@ start_bench "Array vs Hash", ->do
       ->{ ctx.clear_component_pools },
       true
 
+    bench "Set[]",
+      ->{
+        data = Set(Entitas::Entity).new
+        ctx = TestContext.new
+        10.times do
+          data.push ctx.create_entity
+        end
+      },
+      ->{
+        10.times do |_|
+          data.first
+        end
+      },
+      ->{ ctx.clear_component_pools },
+      true
+
     bench "Hash[]",
       ->{
         data = Hash(Int32, Entitas::Entity).new
@@ -45,6 +61,17 @@ start_bench "Array vs Hash", ->do
       ->{ ctx.clear_component_pools },
       true
 
+    bench "Set[]",
+      ->{
+        data = Set(Entitas::Entity).new
+        ctx = TestContext.new
+      },
+      ->{
+        data.add ctx.create_entity
+      },
+      ->{ ctx.clear_component_pools },
+      true
+
     bench "Hash[]",
       ->{
         data = Hash(Int32, Entitas::Entity).new
@@ -64,6 +91,20 @@ start_bench "Array vs Hash", ->do
         ctx = TestContext.new
         10.times do
           data.push ctx.create_entity
+        end
+      },
+      ->{
+        data.clear
+      },
+      ->{ ctx.clear_component_pools },
+      true
+
+    bench "Set[]",
+      ->{
+        data = Set(Entitas::Entity).new
+        ctx = TestContext.new
+        10.times do
+          data.add ctx.create_entity
         end
       },
       ->{

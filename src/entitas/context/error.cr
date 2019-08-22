@@ -17,7 +17,7 @@ module Entitas
 
       class StillHasRetainedEntities < Error
         getter context : Context
-        getter retained_entities : Array(Entity)
+        getter retained_entities : Set(Entity)
 
         def initialize(@context, @retained_entities)
         end

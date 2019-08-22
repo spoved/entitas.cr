@@ -29,7 +29,7 @@ module Entitas
   # retained or released. It's slower, but you keep the information
   # about the owners.
   class SafeAERC < Entitas::AERC
-    @_owners = Array(UInt64).new
+    @_owners : Set(UInt64) = Set(UInt64).new
     @_entity : Entitas::Entity
 
     private def entity
@@ -53,7 +53,7 @@ module Entitas
         raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       else
         {% if !flag?(:disable_logging) %}logger.debug("Retaining #{entity} for #{owner}", "SafeAERC"){% end %}
-        owners.push owner.object_id
+        owners.add owner.object_id
       end
     end
 

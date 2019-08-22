@@ -14,9 +14,10 @@ module Entitas
 
     protected property creation_index : Int32
     protected setter context_info : Entitas::Context::Info
-    protected getter entities = Array(Entitas::Entity).new
+
+    protected getter entities = Set(Entitas::Entity).new
     protected property reusable_entities = Array(Entitas::Entity).new
-    protected property retained_entities = Array(Entitas::Entity).new
+    protected property retained_entities = Set(Entitas::Entity).new
     protected property entities_cache : Array(Entitas::Entity)? = Array(Entitas::Entity).new
     protected property component_names_cache : Array(String) = Array(String).new
 
@@ -188,7 +189,7 @@ module Entitas
 
     # Returns all entities which are currently in the context.
     def get_entities : Array(Entitas::Entity)
-      @entities_cache ||= entities.dup
+      @entities_cache ||= entities.to_a
     end
 
     # TODO: add_entity_index
@@ -231,6 +232,7 @@ module Entitas
 
     def on_destroy_entity(event : Entitas::Events::OnDestroyEntity)
       entity = event.entity
+
       self.entities.delete(entity)
       self.entities_cache = nil
 
