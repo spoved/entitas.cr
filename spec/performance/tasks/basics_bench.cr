@@ -21,7 +21,7 @@ start_bench "Array vs Hash", ->do
         data = Set(Entitas::Entity).new
         ctx = TestContext.new
         10.times do
-          data.push ctx.create_entity
+          data.add ctx.create_entity
         end
       },
       ->{
