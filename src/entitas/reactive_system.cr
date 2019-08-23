@@ -101,11 +101,8 @@ module Entitas
     end
 
     def to_s(io)
+      self.to_string_cache = "ReactiveSystem(#{self.class})" if self.to_string_cache.nil?
       io << self.to_string_cache
-    end
-
-    def to_s : String
-      self.to_string_cache ||= "ReactiveSystem(#{self.class})"
     end
   end
 end

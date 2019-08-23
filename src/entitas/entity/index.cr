@@ -1,8 +1,16 @@
 require "./error"
 
 module Entitas
+  module EntityIndex
+    abstract def name : String
+    abstract def activate : Nil
+    abstract def deactivate : Nil
+  end
+
   abstract class Entity
     abstract class Index(TKey)
+      include EntityIndex
+
       protected property group : Entitas::Group
       protected property get_key : Proc(Entitas::Entity, Entitas::Component?, TKey)
       protected property get_keys : Proc(Entitas::Entity, Entitas::Component?, Array(TKey))

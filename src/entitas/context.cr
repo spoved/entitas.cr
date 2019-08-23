@@ -269,8 +269,8 @@ module Entitas
     # Misc functions
     ############################
 
-    def to_s
-      info.name
+    def to_s(io)
+      io << self.context_info.name
     end
   end
 end

@@ -147,14 +147,8 @@ module Entitas
     ############################
 
     def to_s(io)
-      io << self.to_s
-    end
-
-    def to_s
-      if to_string_cache.nil?
-        self.to_string_cache = "Collector(#{groups.join(", ")})"
-      end
-      to_string_cache
+      self.to_string_cache = "Collector(#{groups.join(", ")})" if self.to_string_cache.nil?
+      io << self.to_string_cache
     end
   end
 end

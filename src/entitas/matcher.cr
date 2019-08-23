@@ -9,8 +9,8 @@ module Entitas
     class Error < Exception
       def initialize(@length : Int32); end
 
-      def to_s
-        "matcher.indices.size must be 1 but was #{@length}"
+      def to_s(io)
+        io << "matcher.indices.size must be 1 but was #{@length}"
       end
     end
 

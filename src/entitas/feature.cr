@@ -6,8 +6,8 @@ module Entitas
 
     def initialize(@name); end
 
-    def to_s
-      name
+    def to_s(io)
+      io << name
     end
   end
 end

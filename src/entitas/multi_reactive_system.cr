@@ -100,14 +100,8 @@ module Entitas
     end
 
     def to_s(io)
+      self.to_string_cache = "MultiReactiveSystem(#{self.class})" if to_string_cache.nil?
       io << to_string_cache
-    end
-
-    def to_s
-      if to_string_cache.nil?
-        self.to_string_cache = "MultiReactiveSystem(#{self.class})"
-      end
-      to_string_cache
     end
   end
 end

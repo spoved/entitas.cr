@@ -191,12 +191,5 @@ module Entitas
       matcher.to_s(io)
       io << ")"
     end
-
-    def to_s
-      if to_string_cache.nil?
-        self.to_string_cache = "Group(#{matcher})"
-      end
-      to_string_cache
-    end
   end
 end
