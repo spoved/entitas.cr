@@ -41,7 +41,7 @@ end
 private def assert_not_contains(group, entity)
   group.size.should eq 0
   group.get_entities.should be_empty
-  group.contains_entity?(entity).should be_false
+  group.has_entity?(entity).should be_false
 end
 
 module Entitas
@@ -96,7 +96,7 @@ describe Entitas::Group do
 
     it "doesn't contain entity" do
       e_a1 = new_entity
-      new_group_a.contains_entity?(e_a1).should be_false
+      new_group_a.has_entity?(e_a1).should be_false
     end
   end
 

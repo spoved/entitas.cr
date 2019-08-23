@@ -3,6 +3,7 @@
 {% end %}
 
 require "spoved/logger"
+require "./ext/*"
 
 # TODO: Write documentation for `Entitas`
 module Entitas
@@ -25,6 +26,12 @@ module Entitas
   class Group; end
 
   class Collector; end
+
+  # This is the base interface for all systems.
+  # It's not meant to be implemented.
+  # Use `Systems::InitializeSystem`, `Systems::ExecuteSystem`,
+  # `Systems::CleanupSystem` or `Systems::TearDownSystem`.
+  module Entitas::System; end
 end
 
 require "./entitas/*"

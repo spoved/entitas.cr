@@ -44,6 +44,10 @@ module Entitas
                 "No EntityIndex with this name has been added."
         end
       end
+
+      class Index < Error; end
+
+      class IndexDoesNotExist < Index; end
     end
   end
 end

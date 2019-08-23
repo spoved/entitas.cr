@@ -1,6 +1,8 @@
 module Entitas
   abstract class Context
-    protected property group_events_cache = Hash(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class).new
+    protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
+    protected property groups_for_index : Array(Set(::Entitas::Group))
+    protected property group_events_buffer = Set(Tuple(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
 
     # Returns a group for the specified matcher.
     # Calling context.GetGroup(matcher) with the same matcher will always
@@ -20,7 +22,7 @@ module Entitas
         self.groups[matcher.to_s] = group
 
         matcher.indices.each do |i|
-          groups_for_index[global_index_to_local(i).value] << group
+          groups_for_index[component_index_value(i)] << group
         end
 
         emit_event OnGroupCreated, self, group
@@ -37,14 +39,14 @@ module Entitas
           event = group.handle_entity(entity)
 
           next if event.nil?
-          group_events_cache[group] = event
+          group_events_buffer.add({group, event})
         end
       end
 
-      group_events_cache.each do |group, event|
+      group_events_buffer.each do |group, event|
         emit_group_event(group, event, entity, index, component)
       end
-      group_events_cache.clear
+      group_events_buffer.clear
     end
 
     private def emit_group_event(group, event, entity, index, component)

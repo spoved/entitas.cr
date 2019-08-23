@@ -22,7 +22,7 @@ private def new_entities
   {e_a, e_b, e_c, e_ab, e_abc}
 end
 
-private def assert_indices_contain(indices, expected_indices)
+private def assert_indices_contain(indices, expected_indices : Set)
   indices.size.should eq expected_indices.size
   indices.should eq expected_indices
 end
@@ -65,14 +65,14 @@ describe Entitas::Matcher do
   describe "#all_of" do
     it "has all indices" do
       m = new_matcher_all_of
-      assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
+      assert_indices_contain m.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
     end
 
     it "has all indices without duplicates" do
       m = Entitas::Matcher.all_of(A, A, B, B)
-      assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
+      assert_indices_contain m.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
     end
 
     it "caches indices" do
@@ -97,12 +97,12 @@ describe Entitas::Matcher do
 
       merged_matcher = Entitas::Matcher.all_of(m1, m2, m3)
 
-      assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
-                                                      ::Entitas::Component::Index::B,
-                                                      ::Entitas::Component::Index::C]
-      assert_indices_contain merged_matcher.all_of_indices, [::Entitas::Component::Index::A,
-                                                             ::Entitas::Component::Index::B,
-                                                             ::Entitas::Component::Index::C]
+      assert_indices_contain merged_matcher.indices, Set{::Entitas::Component::Index::A,
+                                                         ::Entitas::Component::Index::B,
+                                                         ::Entitas::Component::Index::C}
+      assert_indices_contain merged_matcher.all_of_indices, Set{::Entitas::Component::Index::A,
+                                                                ::Entitas::Component::Index::B,
+                                                                ::Entitas::Component::Index::C}
     end
 
     it "merges matchers to new matcher without duplicates" do
@@ -112,10 +112,10 @@ describe Entitas::Matcher do
 
       merged_matcher = Entitas::Matcher.all_of(m1, m2, m3)
 
-      assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
-                                                      ::Entitas::Component::Index::B]
-      assert_indices_contain merged_matcher.all_of_indices, [::Entitas::Component::Index::A,
-                                                             ::Entitas::Component::Index::B]
+      assert_indices_contain merged_matcher.indices, Set{::Entitas::Component::Index::A,
+                                                         ::Entitas::Component::Index::B}
+      assert_indices_contain merged_matcher.all_of_indices, Set{::Entitas::Component::Index::A,
+                                                                ::Entitas::Component::Index::B}
     end
 
     it "throws when merging matcher with more than one index" do
@@ -150,14 +150,14 @@ describe Entitas::Matcher do
   describe "#any_of" do
     it "has all indices" do
       m = new_matcher_any_of
-      assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
+      assert_indices_contain m.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
     end
 
     it "has all indices without duplicates" do
       m = Entitas::Matcher.any_of(A, A, B, B)
-      assert_indices_contain m.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
+      assert_indices_contain m.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
     end
 
     it "caches indices" do
@@ -183,12 +183,12 @@ describe Entitas::Matcher do
 
       merged_matcher = Entitas::Matcher.any_of(m1, m2, m3)
 
-      assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
-                                                      ::Entitas::Component::Index::B,
-                                                      ::Entitas::Component::Index::C]
-      assert_indices_contain merged_matcher.any_of_indices, [::Entitas::Component::Index::A,
-                                                             ::Entitas::Component::Index::B,
-                                                             ::Entitas::Component::Index::C]
+      assert_indices_contain merged_matcher.indices, Set{::Entitas::Component::Index::A,
+                                                         ::Entitas::Component::Index::B,
+                                                         ::Entitas::Component::Index::C}
+      assert_indices_contain merged_matcher.any_of_indices, Set{::Entitas::Component::Index::A,
+                                                                ::Entitas::Component::Index::B,
+                                                                ::Entitas::Component::Index::C}
     end
 
     it "merges matchers to new matcher without duplicates" do
@@ -198,10 +198,10 @@ describe Entitas::Matcher do
 
       merged_matcher = Entitas::Matcher.any_of(m1, m2, m3)
 
-      assert_indices_contain merged_matcher.indices, [::Entitas::Component::Index::A,
-                                                      ::Entitas::Component::Index::B]
-      assert_indices_contain merged_matcher.any_of_indices, [::Entitas::Component::Index::A,
-                                                             ::Entitas::Component::Index::B]
+      assert_indices_contain merged_matcher.indices, Set{::Entitas::Component::Index::A,
+                                                         ::Entitas::Component::Index::B}
+      assert_indices_contain merged_matcher.any_of_indices, Set{::Entitas::Component::Index::A,
+                                                                ::Entitas::Component::Index::B}
     end
 
     it "throws when merging matcher with more than one index" do
@@ -219,25 +219,26 @@ describe Entitas::Matcher do
   describe "#all_of.none_of" do
     it "has all indices" do
       m = all_of_none_of
-      assert_indices_contain m.indices, [
+
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
         ::Entitas::Component::Index::D,
-      ]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.none_of_indices, [::Entitas::Component::Index::C, ::Entitas::Component::Index::D]
+      }
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.none_of_indices, Set{::Entitas::Component::Index::C, ::Entitas::Component::Index::D}
     end
 
     it "has all indices without duplicates" do
       m = Entitas::Matcher.all_of(A, A, B).none_of(B, C, C)
-      assert_indices_contain m.indices, [
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
-      ]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.none_of_indices, [::Entitas::Component::Index::B, ::Entitas::Component::Index::C]
+      }
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.none_of_indices, Set{::Entitas::Component::Index::B, ::Entitas::Component::Index::C}
     end
 
     it "caches indices" do
@@ -268,9 +269,9 @@ describe Entitas::Matcher do
 
       m3.should be m4
 
-      assert_indices_contain m3.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m3.all_of_indices, [::Entitas::Component::Index::A]
-      assert_indices_contain m3.none_of_indices, [::Entitas::Component::Index::B]
+      assert_indices_contain m3.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m3.all_of_indices, Set{::Entitas::Component::Index::A}
+      assert_indices_contain m3.none_of_indices, Set{::Entitas::Component::Index::B}
     end
 
     it "can to_s" do
@@ -288,26 +289,26 @@ describe Entitas::Matcher do
     it "has all indices" do
       m = any_of_none_of
 
-      assert_indices_contain m.indices, [
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
         ::Entitas::Component::Index::D,
-      ]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.none_of_indices, [::Entitas::Component::Index::C, ::Entitas::Component::Index::D]
+      }
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.none_of_indices, Set{::Entitas::Component::Index::C, ::Entitas::Component::Index::D}
     end
 
     it "has all indices without duplicates" do
       m = Entitas::Matcher.any_of(A, A, B).none_of(B, C, C)
 
-      assert_indices_contain m.indices, [
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
-      ]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.none_of_indices, [::Entitas::Component::Index::B, ::Entitas::Component::Index::C]
+      }
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.none_of_indices, Set{::Entitas::Component::Index::B, ::Entitas::Component::Index::C}
     end
 
     it "caches indices" do
@@ -330,12 +331,12 @@ describe Entitas::Matcher do
       m2 = m1.none_of(B)
       m1.should be m2
 
-      assert_indices_contain m1.indices, [
+      assert_indices_contain m1.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
-      ]
-      assert_indices_contain m1.any_of_indices, [::Entitas::Component::Index::A]
-      assert_indices_contain m1.none_of_indices, [::Entitas::Component::Index::B]
+      }
+      assert_indices_contain m1.any_of_indices, Set{::Entitas::Component::Index::A}
+      assert_indices_contain m1.none_of_indices, Set{::Entitas::Component::Index::B}
     end
 
     it "mutates existing merged matcher" do
@@ -346,9 +347,9 @@ describe Entitas::Matcher do
 
       m3.should be m4
 
-      assert_indices_contain m3.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m3.any_of_indices, [::Entitas::Component::Index::A]
-      assert_indices_contain m3.none_of_indices, [::Entitas::Component::Index::B]
+      assert_indices_contain m3.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m3.any_of_indices, Set{::Entitas::Component::Index::A}
+      assert_indices_contain m3.none_of_indices, Set{::Entitas::Component::Index::B}
     end
 
     it "can to_s" do
@@ -365,25 +366,25 @@ describe Entitas::Matcher do
   describe "#all_of.any_of" do
     it "has all indices" do
       m = all_of_any_of
-      assert_indices_contain m.indices, [
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
         ::Entitas::Component::Index::D,
-      ]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::C, ::Entitas::Component::Index::D]
+      }
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::C, ::Entitas::Component::Index::D}
     end
 
     it "has all indices without duplicates" do
       m = Entitas::Matcher.all_of(A, A, B).any_of(B, C, C)
-      assert_indices_contain m.indices, [
+      assert_indices_contain m.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
         ::Entitas::Component::Index::C,
-      ]
-      assert_indices_contain m.all_of_indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m.any_of_indices, [::Entitas::Component::Index::B, ::Entitas::Component::Index::C]
+      }
+      assert_indices_contain m.all_of_indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m.any_of_indices, Set{::Entitas::Component::Index::B, ::Entitas::Component::Index::C}
     end
 
     it "caches indices" do
@@ -404,12 +405,12 @@ describe Entitas::Matcher do
       m1 = Entitas::Matcher.all_of(A)
       m2 = m1.any_of(B)
       m1.should be m2
-      assert_indices_contain m1.indices, [
+      assert_indices_contain m1.indices, Set{
         ::Entitas::Component::Index::A,
         ::Entitas::Component::Index::B,
-      ]
-      assert_indices_contain m1.all_of_indices, [::Entitas::Component::Index::A]
-      assert_indices_contain m1.any_of_indices, [::Entitas::Component::Index::B]
+      }
+      assert_indices_contain m1.all_of_indices, Set{::Entitas::Component::Index::A}
+      assert_indices_contain m1.any_of_indices, Set{::Entitas::Component::Index::B}
     end
 
     it "mutates existing merged matcher" do
@@ -420,9 +421,9 @@ describe Entitas::Matcher do
 
       m3.should be m4
 
-      assert_indices_contain m3.indices, [::Entitas::Component::Index::A, ::Entitas::Component::Index::B]
-      assert_indices_contain m3.all_of_indices, [::Entitas::Component::Index::A]
-      assert_indices_contain m3.any_of_indices, [::Entitas::Component::Index::B]
+      assert_indices_contain m3.indices, Set{::Entitas::Component::Index::A, ::Entitas::Component::Index::B}
+      assert_indices_contain m3.all_of_indices, Set{::Entitas::Component::Index::A}
+      assert_indices_contain m3.any_of_indices, Set{::Entitas::Component::Index::B}
     end
 
     it "can to_s" do

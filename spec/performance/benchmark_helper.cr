@@ -172,6 +172,10 @@ module BenchmarkHelper
         end
       end
     end
+
+    puts ""
+    puts "DONE".colorize(:green)
+    puts ""
   end
 
   def run_tasks

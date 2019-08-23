@@ -1,5 +1,3 @@
-require "../system"
-
 module Entitas::Systems::TearDownSystem
   include Entitas::System
 

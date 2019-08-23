@@ -1,4 +1,3 @@
-require "../system"
 require "./execute"
 
 module Entitas::Systems::ReactiveSystem

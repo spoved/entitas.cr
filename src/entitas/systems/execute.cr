@@ -1,5 +1,3 @@
-require "../system"
-
 module Entitas::Systems::ExecuteSystem
   include Entitas::System
 

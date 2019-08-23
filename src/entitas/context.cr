@@ -1,8 +1,10 @@
 require "./*"
-require "./context/macros"
+require "./macros/context"
 require "./context/*"
 require "spoved/logger"
 require "./events"
+require "./helpers/entities"
+require "./helpers/component_pools"
 
 module Entitas
   # A context manages the lifecycle of entities and groups.
@@ -12,23 +14,24 @@ module Entitas
   abstract class Context
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
+    include Entitas::Helper::Entities
+    include Entitas::Helper::ComponentPools
+
+    ############################
+    # Abstract functions
+    ############################
+
+    abstract def total_components : Int32
+    abstract def component_index_value(klass) : Int32
+    abstract def entity_factory : Entitas::Entity
+    abstract def component_pools : Array(Entitas::ComponentPool)
+
     protected property creation_index : Int32
     protected setter context_info : Entitas::Context::Info
 
-    protected getter entities = Set(Entitas::Entity).new
     protected property reusable_entities = Array(Entitas::Entity).new
     protected property retained_entities = Set(Entitas::Entity).new
-    protected property entities_cache : Array(Entitas::Entity)? = Array(Entitas::Entity).new
     protected property component_names_cache : Array(String) = Array(String).new
-
-    protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
-    protected property groups_for_index : Array(Array(::Entitas::Group))
-
-    # component_pools is set by the context which created the entity and is used to reuse removed components.
-    # Removed components will be pushed to the componentPool. Use entity.CreateComponent(index, type) to get
-    # a new or reusable component from the componentPool. Use entity.GetComponentPool(index) to get a
-    # componentPool for a specific component index.
-    getter component_pools : Array(::Entitas::ComponentPool)
 
     accept_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
@@ -46,8 +49,8 @@ module Entitas
         ::Entitas::ComponentPool.new
       end
 
-      @groups_for_index = Array(Array(Group)).new(total_components) do
-        Array(Group).new
+      @groups_for_index = Array(Set(Group)).new(total_components) do
+        Set(Group).new
       end
 
       if self.context_info.component_names.size != self.total_components
@@ -64,43 +67,6 @@ module Entitas
       self.on_entity_will_be_destroyed_event_cache = nil
       self.on_entity_destroyed_event_cache = nil
       self.on_group_created_event_cache = nil
-    end
-
-    ############################
-    # Abstract functions
-    ############################
-
-    abstract def total_components : Int32
-    abstract def klass_to_index(klass) : Int32
-    abstract def entity_factory : Entitas::Entity
-
-    ############################
-    # ComponentPool functions
-    ############################
-
-    # Returns the `ComponentPool` for the specified component index. `component_pools` is set by the context which
-    # created the entity and is used to reuse removed components. Removed components will be pushed to the
-    # componentPool. Use entity.create_component(index, type) to get a new or reusable component
-    # from the `ComponentPool`.
-    def component_pool(index : Int32) : ComponentPool
-      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
-      self.component_pools[index]
-    end
-
-    # Clears the `ComponentPool` at the specified index.
-    def clear_component_pool(index : Int32)
-      component_pools[index].clear
-    end
-
-    def clear_component_pool(index : ::Entitas::Component.class)
-      component_pool(klass_to_index(index)).clear
-    end
-
-    # Clears all `ComponentPool`s.
-    def clear_component_pools
-      component_pools.each do |pool|
-        pool.clear
-      end
     end
 
     ############################
@@ -128,16 +94,6 @@ module Entitas
     ############################
     # Entity functions
     ############################
-
-    # Returns the total number of `Entitas::Entity` in this `Context`
-    def size
-      self.entities.size
-    end
-
-    # See `size`
-    def count
-      self.size
-    end
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
     def create_entity : ::Entitas::Entity
@@ -180,16 +136,6 @@ module Entitas
       if retained_entities.size != 0
         raise Error::StillHasRetainedEntities.new self, retained_entities
       end
-    end
-
-    # Determines whether the context has the specified entity.
-    def has_entity?(entity : Entitas::Entity) : Bool
-      self.entities.includes?(entity)
-    end
-
-    # Returns all entities which are currently in the context.
-    def get_entities : Array(Entitas::Entity)
-      @entities_cache ||= entities.to_a
     end
 
     # TODO: add_entity_index

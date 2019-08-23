@@ -49,8 +49,6 @@ module Entitas
       self._filter.call(entity)
     end
 
-    # abstract def filter(entity : Entitas::Entity) : Bool
-
     abstract def execute(entities : Array(Entitas::Entity))
 
     # Activates the `ReactiveSystem` and starts observing changes

@@ -1,6 +1,7 @@
 require "spoved/logger"
 require "./events"
 require "./group/*"
+require "./helpers/entities"
 
 module Entitas
   class Group
@@ -8,18 +9,12 @@ module Entitas
 
     accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated
 
-    include Enumerable(Entitas::Entity)
+    include Entitas::Helper::Entities
 
-    getter entities : Set(Entitas::Entity) = Set(Entitas::Entity).new
-    protected property entities_cache : Array(Entitas::Entity)? = nil
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?
 
     protected getter matcher : Entitas::Matcher
-
-    def contains_entity?(entity : Entitas::Entity) : Bool
-      self.entities.includes?(entity)
-    end
 
     def initialize(@matcher : Entitas::Matcher)
     end
@@ -82,11 +77,14 @@ module Entitas
 
     def add_entity_silently(entity : Entity) : Entity | Bool
       {% if !flag?(:disable_logging) %}logger.debug("Silently adding entity : #{entity}", self.to_s){% end %}
-      if entity.enabled? && !entities.includes?(entity)
-        entities << entity
+      if entity.enabled? && !self.has_entity?(entity)
+        self.entities << entity
+
         self.entities_cache = nil
         self.single_entitie_cache = nil
+
         entity.retain(self) unless entity.retained_by?(self)
+
         return entity
       end
       false
@@ -99,13 +97,18 @@ module Entitas
       end
     end
 
+    private def _remove_entity(entity : Entity)
+      self.entities.delete(entity)
+      self.entities_cache = nil
+      self.single_entitie_cache = nil
+    end
+
     def remove_entity_silently(entity : Entity) : Entity?
       {% if !flag?(:disable_logging) %}logger.debug("Silently removing entity : #{entity}", self.to_s){% end %}
 
-      if self.entities.includes?(entity)
-        self.entities.delete(entity)
-        self.entities_cache = nil
-        self.single_entitie_cache = nil
+      if self.has_entity?(entity)
+        self._remove_entity(entity)
+
         entity.release(self)
         entity
       else
@@ -116,32 +119,16 @@ module Entitas
     def remove_entity(entity : Entity, index : Int32, component : Component) : Entity?
       {% if !flag?(:disable_logging) %}logger.debug("Removing entity : #{entity}", self.to_s){% end %}
 
-      if self.entities.includes?(entity)
-        self.entities.delete(entity)
-        self.entities_cache = nil
-        self.single_entitie_cache = nil
+      if self.has_entity?(entity)
+        self._remove_entity(entity)
+
         emit_event OnEntityRemoved, self, entity, index, component
+
         entity.release(self)
         entity
       else
         nil
       end
-    end
-
-    # Determines whether this group has the specified entity.
-    def contains_entity?(entity : Entity) : Bool
-      has_entity?(entity)
-    end
-
-    # Determines whether this group has the specified entity.
-    def has_entity?(entity : Entity) : Bool
-      self.entities.includes?(entity)
-    end
-
-    # Returns all entities which are currently in this group.
-    # TODO: Do we need buffer?
-    def get_entities : Array(Entitas::Entity)
-      self.entities_cache ||= self.entities.to_a
     end
 
     def get_entities(buff : Array(Entitas::Entity)) : Array(Entitas::Entity)
@@ -165,21 +152,6 @@ module Entitas
       end
 
       single_entitie_cache
-    end
-
-    ############################
-    # Enumerable funcs
-    ############################
-
-    # Returns the total number of `Entitas::Entity` in this `Group`
-    def size
-      self.entities.size
-    end
-
-    def each
-      self.entities.each do |entity|
-        yield entity
-      end
     end
 
     ############################

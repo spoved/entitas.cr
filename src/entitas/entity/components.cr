@@ -1,29 +1,28 @@
 module Entitas
   abstract class Entity
+    include Entitas::Helper::ComponentPools
+
+    ############################
+    # Abstract functions
+    ############################
+
+    abstract def component_index_value(klass) : Int32
+    abstract def component_index_class(index) : Entitas::Component.class
+    abstract def component_pools : Array(Entitas::ComponentPool)
+
     ############################
     # Component functions
     ############################
 
-    # Returns the `ComponentPool` for the specified component index.
-    # `component_pools` is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.create_component(index, type) to get a new or
-    # reusable component from the `ComponentPool`.
-    def component_pool(index : Int32) : ComponentPool
-      self.component_pools[index] = ComponentPool.new unless self.component_pools[index]?
-      self.component_pools[index]
-    end
-
-    def component_pool(index : ::Entitas::Component::Index) : ComponentPool
-      component_pool self.index_value(index)
-    end
+    private property components_buffer = Set(Entitas::Component).new
+    private property components_indices_buffer = Set(Int32).new
+    private property components_index_indices_buffer = Set(::Entitas::Component::Index).new
 
     def create_component(index : ::Entitas::Component::Index, **args)
       pool = component_pool(index)
 
       if pool.empty?
-        self.index_class(index).new.init(**args)
+        self.component_index_class(index).new.init(**args)
       else
         pool.pop.reset.init(**args)
       end
@@ -58,11 +57,11 @@ module Entitas
     end
 
     def add_component(index : ::Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
-      add_component(self.index_value(index), component)
+      add_component(self.component_index_value(index), component)
     end
 
     def add_component(component : Entitas::Component) : Entitas::Component
-      add_component(klass_to_index(component.class), component)
+      add_component(component_index_value(component.class), component)
     end
 
     # Removes a component at the specified index.
@@ -84,7 +83,7 @@ module Entitas
     end
 
     def remove_component(index : ::Entitas::Component::Index) : Nil
-      remove_component(self.index_value(index))
+      remove_component(self.component_index_value(index))
     end
 
     # Replaces an existing component at the specified index
@@ -103,11 +102,11 @@ module Entitas
     end
 
     def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
-      replace_component self.index_value(index), component
+      replace_component self.component_index_value(index), component
     end
 
     def replace_component(component : Entitas::Component?)
-      replace_component(klass_to_index(component.class), component)
+      replace_component(component_index_value(component.class), component)
     end
 
     # Will return the `Entitas::Component` at the provided index.
@@ -124,60 +123,77 @@ module Entitas
     end
 
     def get_component(index : ::Entitas::Component::Index) : Entitas::Component
-      get_component(self.index_value(index))
+      get_component(self.component_index_value(index))
     end
 
     # Returns all added components.
-    def get_components : Array(Entitas::Component)
+    def get_components : Enumerable(Entitas::Component)
       # if the cache is empty, repopulate it
-      if components_cache.empty?
-        self.components_cache = self.components.reject(Nil)
+      if components_cache.nil?
+        self.components.each do |c|
+          components_buffer << c unless c.nil?
+        end
+        self.components_cache = components_buffer.to_a
+        components_buffer.clear
       end
-      components_cache
+
+      components_cache.as(Array(Entitas::Component))
     end
 
     # Returns all indices of added components.
-    def get_component_indices : Array(Int32)
-      if component_indices_cache.empty?
-        self.component_indices_cache = self.components.map_with_index { |c, i| c.nil? ? nil : i }.reject(Nil)
+    def get_component_indices : Enumerable(Int32)
+      if component_indices_cache.nil?
+        self.components.each_with_index do |c, i|
+          components_indices_buffer << i unless c.nil?
+          components_index_indices_buffer << ::Entitas::Component::Index.new(i)
+        end
+        self.component_indices_cache = components_indices_buffer.to_a
+        components_indices_buffer.clear
       end
-      component_indices_cache
+
+      component_indices_cache.as(Array(Int32))
     end
 
     # Determines whether this entity has a component
     # at the specified index.
     def has_component?(index : Int32) : Bool
-      (self.components[index]? && !self.components[index].nil?) ? true : false
+      (self.components[index]? != nil) ? true : false
     end
 
     def has_component?(index : ::Entitas::Component::Index) : Bool
-      has_component? self.index_value(index)
+      has_component? self.component_index_value(index)
     end
 
     # Determines whether this entity has components
     # at all the specified indices.
-    def has_components?(indices : Array(Int32)) : Bool
+    def has_components?(indices : Enumerable(Int32)) : Bool
       indices.each do |index|
         return false unless self.has_component?(index)
       end
       true
     end
 
-    def has_components?(indices : Array(::Entitas::Component::Index)) : Bool
-      has_components? indices.map &.value
+    def has_components?(indices : Enumerable(::Entitas::Component::Index)) : Bool
+      indices.each do |index|
+        return false unless self.has_component?(index)
+      end
+      true
     end
 
     # Determines whether this entity has a component
     # at any of the specified indices.
-    def has_any_component?(indices : Array(Int32)) : Bool
+    def has_any_component?(indices : Enumerable(Int32)) : Bool
       indices.each do |index|
         return true if self.has_component?(index)
       end
       false
     end
 
-    def has_any_component?(indices : Array(::Entitas::Component::Index)) : Bool
-      has_any_component? indices.map { |i| self.index_value(i) }
+    def has_any_component?(indices : Enumerable(::Entitas::Component::Index)) : Bool
+      indices.each do |index|
+        return true if self.has_component?(index)
+      end
+      false
     end
 
     # Removes all components.

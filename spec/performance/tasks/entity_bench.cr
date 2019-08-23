@@ -12,13 +12,43 @@ start_bench ::Entitas::Entity, ->do
     ->{}
 
   group "Get Component A", ->do
-    bench_n_times "#get_component", 10_000_000,
+    bench_n_times "#get_component(Entitas::Component::Index)", 10_000_000,
       ->{
         ctx = TestContext.new
         e = ctx.create_entity.add_a.add_b.add_c
       },
       ->{
         e.get_component Entitas::Component::Index::A
+      },
+      ->{}
+
+    bench_n_times "#get_component(Int32)", 10_000_000,
+      ->{
+        ctx = TestContext.new
+        e = ctx.create_entity.add_a.add_b.add_c
+      },
+      ->{
+        e.get_component 0
+      },
+      ->{}
+
+    bench_n_times "#get_component(A::INDEX)", 10_000_000,
+      ->{
+        ctx = TestContext.new
+        e = ctx.create_entity.add_a.add_b.add_c
+      },
+      ->{
+        e.get_component ::A::INDEX
+      },
+      ->{}
+
+    bench_n_times "#get_component(A::INDEX_VALUE)", 10_000_000,
+      ->{
+        ctx = TestContext.new
+        e = ctx.create_entity.add_a.add_b.add_c
+      },
+      ->{
+        e.get_component ::A::INDEX_VALUE
       },
       ->{}
 
@@ -140,7 +170,6 @@ start_bench ::Entitas::Entity, ->do
       },
       ->{}
   end
-
   bench_n_times "#replace_component", 10_000_000,
     ->{
       ctx = TestContext.new

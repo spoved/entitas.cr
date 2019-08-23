@@ -21,23 +21,14 @@ module Entitas
     # Active entities are enabled, destroyed entities are not.
     protected property is_enabled : Bool = false
 
-    protected property components_cache = Array(Entitas::Component).new
-    protected property component_indices_cache = Array(Int32).new
+    protected property components_cache : Array(Entitas::Component)? = nil
+    protected property component_indices_cache : Array(Int32)? = nil
     protected property to_string_cache : String? = nil
 
     protected getter components : Array(Entitas::Component?)
 
     # The total amount of components an entity can possibly have.
     getter total_components : Int32
-
-    # component_pools is set by the context which created the entity and
-    # is used to reuse removed components.
-    # Removed components will be pushed to the componentPool.
-    # Use entity.CreateComponent(index, type) to get a new or
-    # reusable component from the componentPool.
-    # Use entity.GetComponentPool(index) to get a componentPool for
-    # a specific component index.
-    getter component_pools : Array(::Entitas::ComponentPool)
 
     accept_events OnEntityWillBeDestroyed, OnComponentAdded, OnComponentReplaced,
       OnComponentRemoved, OnEntityReleased, OnEntityCreated, OnEntityDestroyed,
@@ -71,13 +62,6 @@ module Entitas
       self.reactivate(ct_index)
       self
     end
-
-    ############################
-    # Abstract functions
-    ############################
-
-    abstract def klass_to_index(klass) : Int32
-    abstract def index(i : ::Entitas::Component::Index) : Int32
 
     ############################
     # State functions
@@ -208,9 +192,9 @@ module Entitas
 
       case cache
       when :components
-        self.components_cache = Array(Entitas::Component).new
+        self.components_cache = nil
       when :indicies
-        self.component_indices_cache = Array(Int32).new
+        self.component_indices_cache = nil
       when :strings
         self.to_string_cache = nil
       else
