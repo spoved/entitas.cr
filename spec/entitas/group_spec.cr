@@ -216,8 +216,8 @@ describe Entitas::Group do
         event.component.should eq comp
       end
 
-      group_a.on_entity_removed { true.should be_false }
-      group_a.on_entity_updated { true.should be_false }
+      group_a.on_entity_removed { fail("Should not trigger #on_entity_removed") }
+      group_a.on_entity_updated { fail("Should not trigger #on_entity_updated") }
 
       group_a.handle_add_ea(e_a1)
       did_dispatch.should eq 1
@@ -226,9 +226,9 @@ describe Entitas::Group do
     it "doesn't dispatches OnEntityAdded when matching entity already has been added" do
       group_a, e_a1 = new_group_a_w_e
 
-      group_a.on_entity_added { true.should be_false }
-      group_a.on_entity_removed { true.should be_false }
-      group_a.on_entity_updated { true.should be_false }
+      group_a.on_entity_added { fail("Should not trigger #on_entity_added") }
+      group_a.on_entity_removed { fail("Should not trigger #on_entity_removed") }
+      group_a.on_entity_updated { fail("Should not trigger #on_entity_updated") }
 
       group_a.handle_add_ea(e_a1)
     end
@@ -239,9 +239,9 @@ describe Entitas::Group do
       e_b1 = new_entity
       e_b1.add_b
 
-      group_a.on_entity_added { true.should be_false }
-      group_a.on_entity_removed { true.should be_false }
-      group_a.on_entity_updated { true.should be_false }
+      group_a.on_entity_added { fail("Should not trigger #on_entity_added") }
+      group_a.on_entity_removed { fail("Should not trigger #on_entity_removed") }
+      group_a.on_entity_updated { fail("Should not trigger #on_entity_updated") }
 
       group_a.handle_add_eb(e_b1)
     end
@@ -258,7 +258,7 @@ describe Entitas::Group do
         event.index.should eq Entitas::Component::Index::A.value
         event.component.should eq comp
       end
-      group_a.on_entity_updated { true.should be_false }
+      group_a.on_entity_updated { fail("Should not trigger #on_entity_updated") }
 
       e_a1.del_a
 

@@ -77,16 +77,15 @@ module Entitas
 
     def add_entity_silently(entity : Entity) : Entity | Bool
       {% if !flag?(:disable_logging) %}logger.debug("Silently adding entity : #{entity}", self.to_s){% end %}
-      if entity.enabled? && !self.has_entity?(entity)
-        self.entities << entity
 
+      if entity.enabled? && self.entities.add?(entity)
         self.entities_cache = nil
         self.single_entitie_cache = nil
-
-        entity.retain(self) unless entity.retained_by?(self)
+        entity.retain(self)
 
         return entity
       end
+
       false
     end
 

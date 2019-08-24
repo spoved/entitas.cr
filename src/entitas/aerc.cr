@@ -49,21 +49,21 @@ module Entitas
     end
 
     def retain(owner)
-      if includes?(owner)
+      {% if !flag?(:disable_logging) %}logger.debug("Retaining #{entity} for #{owner}", "SafeAERC"){% end %}
+      unless owners.add?(owner.object_id)
         raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
-      else
-        {% if !flag?(:disable_logging) %}logger.debug("Retaining #{entity} for #{owner}", "SafeAERC"){% end %}
-        owners.add owner.object_id
       end
     end
 
     def release(owner)
-      if !includes?(owner)
+      {% if !flag?(:disable_logging) %}logger.debug("Releasing #{entity} from #{owner}", "SafeAERC"){% end %}
+      unless owners.delete?(owner.object_id)
         raise Entitas::Entity::Error::IsNotRetainedByOwner.new "entity: #{entity} owner: #{owner}"
-      else
-        {% if !flag?(:disable_logging) %}logger.debug("Releasing #{entity} from #{owner}", "SafeAERC"){% end %}
-        owners.delete owner.object_id
       end
+    end
+
+    def includes?(id : UInt64)
+      owners.includes?(id)
     end
 
     def includes?(owner)

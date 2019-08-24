@@ -8,7 +8,8 @@ coverage_dir=${HOME}/code/github.com/anykeyh/crystal-coverage
 source="./spec/performance/bench.cr"
 # source="./examples/hello_world/hello_world.cr"
 target="./bin/bench"
-args="--release --error-trace"
+args="--release"
+args="${args} --error-trace"
 args="${args} -Ddisable_logging"
 
 # args="${args} -Dbenchmark"
@@ -40,6 +41,17 @@ build_bench(){
   crystal build ${args} ${source} -o ${target}
 }
 
+build_for_linux(){
+  crystal build ${args} ${source} -o ${target} --cross-compile --target "x86_64-unknown-linux-gnu"
+
+  # On linux
+  # cc './bench.o' -o './bench'  -rdynamic  -lpcre \
+  #   -lm /home/linuxbrew/.linuxbrew/Cellar/crystal/0.30.1/embedded/lib/libgc.a \
+  #   -lpthread /home/linuxbrew/.linuxbrew/Cellar/crystal/0.30.1/src/ext/libcrystal.a \
+  #   -levent -lrt -ldl \
+  #   -L/home/linuxbrew/.linuxbrew/Cellar/crystal/0.30.1/embedded/lib -L/usr/lib -L/usr/local/lib
+}
+
 run_bench(){
   echo ""
   echo "Starting Benchmarking"
@@ -49,3 +61,4 @@ run_bench(){
 cleanup
 build_bench
 run_bench
+# build_for_linux
