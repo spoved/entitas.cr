@@ -42,4 +42,12 @@ class Entitas::PrimaryEntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
       entity.release(self)
     end
   end
+
+  def to_s(io)
+    if self.to_string_cache.nil?
+      self.to_string_cache = "PrimaryEntityIndex(#{self.name})"
+    else
+      io << self.to_string_cache
+    end
+  end
 end

@@ -82,7 +82,7 @@ describe Entitas::PrimaryEntityIndex do
 
       it "can to_s" do
         _, index = new_index
-        index.to_s.should eq "Entitas::PrimaryEntityIndex(String)(TestIndex)"
+        index.to_s.should eq "PrimaryEntityIndex(TestIndex)"
       end
     end
 
