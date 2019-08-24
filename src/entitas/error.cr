@@ -7,8 +7,5 @@ module Entitas
 
     class ContextInfo < Error
     end
-
-    class Matcher < Error
-    end
   end
 end

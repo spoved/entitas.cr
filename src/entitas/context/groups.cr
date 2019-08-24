@@ -34,19 +34,20 @@ module Entitas
     def update_groups_component_added_or_removed(entity : ::Entitas::Entity, index : Int32, component : ::Entitas::Component?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
-      if groups_for_index[index]?
-        groups_for_index[index].each do |group|
+      _groups = self.groups_for_index[index]?
+
+      if !_groups.nil?
+        _groups.each do |group|
           event = group.handle_entity(entity)
           next if event.nil?
           group_events_buffer.add({group, event})
         end
-      end
 
-      group_events_buffer.each do |group, event|
-        emit_group_event(group, event, entity, index, component)
+        group_events_buffer.each do |group, event|
+          emit_group_event(group, event, entity, index, component)
+        end
+        group_events_buffer.clear
       end
-
-      group_events_buffer.clear
     end
 
     private def emit_group_event(group, event, entity, index, component)

@@ -37,13 +37,15 @@ cleanup(){
 
 build_bench(){
   echo ""
-  echo "Building"
+  echo "Building for local"
   crystal build ${args} ${source} -o ${target}
 }
 
 build_for_linux(){
+  echo "Cross-Compile for linux"
   crystal build ${args} ${source} -o ${target} --cross-compile --target "x86_64-unknown-linux-gnu"
 
+  scp ./bin/bench.o 192.168.1.206:
   # On linux
   # cc './bench.o' -o './bench'  -rdynamic  -lpcre \
   #   -lm /home/linuxbrew/.linuxbrew/Cellar/crystal/0.30.1/embedded/lib/libgc.a \
@@ -59,6 +61,8 @@ run_bench(){
 }
 
 cleanup
+
+# build_for_linux
+
 build_bench
 run_bench
-# build_for_linux

@@ -3,7 +3,7 @@ require "./entity"
 require "spoved/logger"
 
 module Entitas
-  abstract class AERC
+  abstract struct AERC
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     @_retain_count = 0
@@ -28,8 +28,9 @@ module Entitas
   # SafeAERC checks if the entity has already been
   # retained or released. It's slower, but you keep the information
   # about the owners.
-  class SafeAERC < Entitas::AERC
-    @_owners : Set(UInt64) = Set(UInt64).new
+  struct SafeAERC < Entitas::AERC
+    # @_owners : Set(UInt64) = Set(UInt64).new
+    @_owners : Array(UInt64) = Array(UInt64).new(4)
     @_entity : Entitas::Entity
 
     private def entity
@@ -48,16 +49,24 @@ module Entitas
       @_entity = entity
     end
 
+    private def add?(id : UInt64)
+      !!(owners.push(id) unless includes?(id))
+    end
+
+    private def delete?(id : UInt64)
+      !!(owners.delete(id) if includes?(id))
+    end
+
     def retain(owner)
       {% if !flag?(:disable_logging) %}logger.debug("Retaining #{entity} for #{owner}", "SafeAERC"){% end %}
-      unless owners.add?(owner.object_id)
+      unless self.add?(owner.object_id)
         raise Entitas::Entity::Error::IsAlreadyRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       end
     end
 
     def release(owner)
       {% if !flag?(:disable_logging) %}logger.debug("Releasing #{entity} from #{owner}", "SafeAERC"){% end %}
-      unless owners.delete?(owner.object_id)
+      unless self.delete?(owner.object_id)
         raise Entitas::Entity::Error::IsNotRetainedByOwner.new "entity: #{entity} owner: #{owner}"
       end
     end
@@ -71,7 +80,7 @@ module Entitas
     end
   end
 
-  class UnsafeAERC < Entitas::AERC
+  struct UnsafeAERC < Entitas::AERC
     def retain(obj)
       @_retain_count += 1
     end

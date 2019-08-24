@@ -96,7 +96,7 @@ start_bench ::Entitas::Entity, ->do
   end
 
   group "Remove and Add Component", ->do
-    bench_n_times "#remove_component & #add_component", 10_000_000,
+    bench_n_times "#remove_component & #add_component", 1_000_000,
       ->{
         ctx = TestContext.new
         ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
@@ -133,7 +133,7 @@ start_bench ::Entitas::Entity, ->do
       },
       ->{}
 
-    bench_n_times "#del_a & #add_a", 10_000_000,
+    bench_n_times "#del_a & #add_a", 1_000_000,
       ->{
         ctx = TestContext.new
         ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))
@@ -170,7 +170,8 @@ start_bench ::Entitas::Entity, ->do
       },
       ->{}
   end
-  bench_n_times "#replace_component", 10_000_000,
+
+  bench_n_times "#replace_component", 1_000_000,
     ->{
       ctx = TestContext.new
       ctx.get_group(Entitas::Matcher.all_of(Entitas::Component::Index::A))

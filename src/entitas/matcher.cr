@@ -4,7 +4,7 @@ module Entitas
   class Matcher
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    class Error < Entitas::Error::Matcher
+    class Error < Exception
       def initialize(@length : Int32); end
 
       def to_s(io)
