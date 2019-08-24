@@ -657,5 +657,58 @@ describe Entitas::Context do
     describe "entitas cache" do
       # TODO: Finish groups
     end
+
+    describe "unique components" do
+      it "should have none by default" do
+        ctx = new_context
+        ctx.unique_comp?.should be_falsey
+      end
+
+      it "should allow setting of the component" do
+        ctx = new_context
+        comp = UniqueComp.new
+        ctx.unique_comp = comp
+        ctx.unique_comp?.should be_true
+        ctx.unique_comp.should be comp
+      end
+
+      describe "with a pre-existing component" do
+        it "can replace" do
+          ctx = new_context
+          comp = UniqueComp.new
+          ctx.unique_comp = comp
+          ctx.unique_comp?.should be_true
+          ctx.unique_comp.should be comp
+
+          comp2 = UniqueComp.new
+          ctx.replace_unique_comp comp2
+          ctx.unique_comp.should be comp2
+        end
+
+        it "raises an error when setting component " do
+          ctx = new_context
+          comp = UniqueComp.new
+          ctx.unique_comp = comp
+          comp2 = UniqueComp.new
+          expect_raises Entitas::Context::Error do
+            ctx.unique_comp = comp2
+          end
+        end
+
+        it "raises an error when creating an entity with another unique component" do
+          ctx = new_context
+          comp = UniqueComp.new
+          ctx.unique_comp = comp
+          comp2 = UniqueComp.new
+
+          entity = ctx.create_entity
+          entity.add_component(comp2)
+
+          expect_raises Entitas::Group::Error::SingleEntity do
+            ctx.unique_comp
+          end
+        end
+      end
+    end
   end
 end
