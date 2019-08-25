@@ -1,32 +1,44 @@
 require "./context/*"
 
 class Entitas::Context
+  # This macro creates the `::Contexts` which can be instantiated to give access to each availble context.
   macro create_contexts_klass(*contexts)
     class ::Contexts
       private class_property _shared_instance : ::Contexts? = nil
+      private property _all_contexts : Array(Entitas::Context)? = nil
 
+      {% for context_name in contexts %}
+        property {{context_name.id.underscore.id}} : ::{{context_name.id}}Context = ::{{context_name.id}}Context.new
+      {% end %}
+
+
+      # This returns a pre-instantiated `Contexts` instance which is available at the global scope.
+      #
+      # ```
+      # Contexts.shared_instance # => Contexts
+      # ```
       def self.shared_instance
         self._shared_instance ||= ::Contexts.new
       end
 
-    {% for context_name in contexts %}
-      property {{context_name.id.underscore.id}} : ::{{context_name.id}}Context = ::{{context_name.id}}Context.new
-    {% end %}
-
+      # Returns an array containing each available context
       def all_contexts : Array(Entitas::Context)
-        [
+       @_all_contexts ||= [
           {% for context_name in contexts %}
           self.{{context_name.id.underscore.id}},
           {% end %}
-        ]
+        ] of Entitas::Context
       end
 
+      # Will call `Entitas::Context#reset` on each context.
       def reset
         self.all_contexts.each &.reset
       end
     end
   end
 
+  # This macro creates a sub class of `::Entitas::Context` with the corresponding
+  # name and provided components
   macro create_sub_context(context_name, *components)
     class ::{{context_name.id}}Context < ::Entitas::Context
       CONTEXT_NAME = "{{context_name.id}}Context"
@@ -51,6 +63,12 @@ class Entitas::Context
         )
       end
 
+      # Default `#entity_factory` for `{{context_name.id}}Context`
+      #
+      # ```
+      # ctx = {{context_name.id}}Context.new
+      # ctx.entity_factory # => {{context_name.id}}Entity
+      # ```
       def entity_factory : ::{{context_name.id}}Entity
         ::{{context_name.id}}Entity.new(
           creation_index,
@@ -61,6 +79,7 @@ class Entitas::Context
     end
   end
 
+  # This macro will add unique component functions to the context provided
   macro add_unique_component(context_name, *components)
     class ::{{context_name.id}}Context < ::Entitas::Context
 
@@ -182,7 +201,6 @@ class Entitas::Component
           {{comp.name.id}},
           {% end %}
         )
-
 
         Entitas::Context.add_unique_component({{context_name}},
           {% for comp in unique_comps %}

@@ -21,7 +21,7 @@ abstract class Entitas::AbstractEntityIndex(TKey)
     @get_keys.as(Proc(Entitas::Entity, Entitas::Component?, Array(TKey)))
   end
 
-  getter name : String | Nil
+  getter name : String
 
   private property to_string_cache : String? = nil
 

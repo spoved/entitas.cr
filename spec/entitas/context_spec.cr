@@ -16,6 +16,13 @@ private def ctx_and_entities
   {ctx, eab1, eab2, ea}
 end
 
+private def entity_index(ctx)
+  group = ctx.get_group(Entitas::Matcher.all_of(A))
+  Entitas::PrimaryEntityIndex(String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
+    (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
+  })
+end
+
 describe Entitas::Context do
   describe "when created" do
     it "increments creation index" do
@@ -267,7 +274,7 @@ describe Entitas::Context do
       it "doesn't dispatch OnGroupCreated when group alredy exists" do
         ctx, _ = context_with_entity
         ctx.get_group(Entitas::Matcher.all_of(A))
-        ctx.on_group_created { true.should be_false }
+        ctx.on_group_created { fail "Should not be called" }
         ctx.get_group(Entitas::Matcher.all_of(A))
       end
 
@@ -378,10 +385,18 @@ describe Entitas::Context do
       end
 
       it "sets up entity from pool" do
-        # ctx, e = context_with_entity
-        # c_index = e.creation_index
-        # e.destroy
-        # TODO: FINISH GROUPS
+        ctx, e = context_with_entity
+        c_index = e.creation_index
+        e.destroy
+        g = ctx.get_group(Entitas::Matcher.all_of(A))
+
+        e = ctx.create_entity
+
+        e.creation_index.should eq (c_index + 1)
+        e.enabled?.should be_true
+
+        e.add_a
+        g.get_entities.should contain(e)
       end
 
       describe "when entity gets destroyed" do
@@ -538,7 +553,7 @@ describe Entitas::Context do
           e = ctx.create_entity.add_a.add_b
           matcher = Entitas::Matcher.all_of(B).all_of(A)
           g = ctx.get_group(matcher)
-          g.on_entity_added { true.should be_false }
+          g.on_entity_added { fail "Should not be called" }
           e.destroy!
         end
 
@@ -571,7 +586,28 @@ describe Entitas::Context do
     end
 
     describe "entity index" do
-      # TODO
+      it "throws when EntityIndex for key doesn't exist" do
+        expect_raises Entitas::EntityIndex::Error::DoesNotExist do
+          ctx = new_context
+          ctx.get_entity_index "unknown_index"
+        end
+      end
+
+      it "adds and EntityIndex" do
+        ctx = new_context
+        index = entity_index(ctx)
+        ctx.add_entity_index(index)
+        ctx.get_entity_index(index.name).should be index
+      end
+
+      it "throws when adding an EntityIndex with same name" do
+        ctx = new_context
+        index = entity_index(ctx)
+        ctx.add_entity_index(index)
+        expect_raises Entitas::EntityIndex::Error::AlreadyExists do
+          ctx.add_entity_index(index)
+        end
+      end
     end
 
     describe "reset" do
@@ -585,27 +621,30 @@ describe Entitas::Context do
         describe "removes all event handlers" do
           it "removes OnEntityCreated" do
             ctx = new_context
-            ctx.on_entity_created { true.should be_false }
+            ctx.on_entity_created { fail "Should not be called" }
             ctx.remove_all_event_handlers
             ctx.create_entity
           end
 
           it "removes OnEntityWillBeDestroyed" do
             ctx = new_context
-            ctx.on_entity_will_be_destroyed { true.should be_false }
+            ctx.on_entity_will_be_destroyed { fail "Should not be called" }
             ctx.remove_all_event_handlers
             ctx.create_entity.destroy!
           end
 
           it "removes OnEntityDestroyed" do
             ctx = new_context
-            ctx.on_entity_destroyed { true.should be_false }
+            ctx.on_entity_destroyed { fail "Should not be called" }
             ctx.remove_all_event_handlers
             ctx.create_entity.destroy!
           end
 
           it "removes OnGroupCreated" do
-            # TODO finish
+            ctx = new_context
+            ctx.on_group_created { fail "Should not be called" }
+            ctx.remove_all_event_handlers
+            ctx.get_group(Entitas::Matcher.all_of(A))
           end
         end
       end
@@ -655,7 +694,32 @@ describe Entitas::Context do
     end
 
     describe "entitas cache" do
-      # TODO: Finish groups
+      it "pops new list from list pool" do
+        ctx = new_context
+        group_a = ctx.get_group(Entitas::Matcher.all_of(A))
+        group_ab = ctx.get_group(Entitas::Matcher.any_of(A, B))
+        group_abc = ctx.get_group(Entitas::Matcher.any_of(A, B, C))
+
+        did_execute = 0
+
+        group_a.on_entity_added do |event|
+          did_execute += 1
+          entity = event.entity
+          entity.del_a
+        end
+
+        group_ab.on_entity_added do |_|
+          did_execute += 1
+        end
+
+        group_abc.on_entity_added do |_|
+          did_execute += 1
+        end
+
+        ctx.create_entity.add_a
+
+        did_execute.should eq 3
+      end
     end
 
     describe "unique components" do

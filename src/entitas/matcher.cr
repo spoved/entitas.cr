@@ -4,14 +4,6 @@ module Entitas
   class Matcher
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    class Error < Exception
-      def initialize(@length : Int32); end
-
-      def to_s(io)
-        io << "matcher.indices.size must be 1 but was #{@length}"
-      end
-    end
-
     getter all_of_indices : Set(Entitas::Component::Index)
     getter any_of_indices : Set(Entitas::Component::Index)
     getter none_of_indices : Set(Entitas::Component::Index)

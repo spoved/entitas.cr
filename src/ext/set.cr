@@ -16,7 +16,6 @@ struct Set(T)
   # s.delete? 5   # => false
   # ```
   def delete?(object) : Bool
-    # TODO: optimize the hash lookup call
     !!(delete(object) if includes?(object))
   end
 end

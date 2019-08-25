@@ -1,3 +1,4 @@
+require "./error"
 require "./entity_index/*"
 
 class Entitas::EntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)

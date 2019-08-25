@@ -1,4 +1,4 @@
-require "./*"
+require "./error"
 require "./macros/context"
 require "./context/*"
 require "spoved/logger"
@@ -137,9 +137,6 @@ module Entitas
         raise Error::StillHasRetainedEntities.new self, retained_entities
       end
     end
-
-    # TODO: add_entity_index
-    # TODO: get_entity_index
 
     # Resets the creationIndex back to 0.
     def reset_creation_index

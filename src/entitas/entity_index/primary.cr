@@ -20,8 +20,8 @@ class Entitas::PrimaryEntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
 
   def add_entity(key : TKey, entity : Entitas::Entity)
     if self.index[key]?
-      raise Entitas::Entity::Index::Error.new "Entity for key '#{key}' already exists! " \
-                                              "Only one entity for a primary key is allowed."
+      raise Entitas::EntityIndex::Error.new "Entity for key '#{key}' already exists! " \
+                                            "Only one entity for a primary key is allowed."
     end
 
     self.index[key] = entity

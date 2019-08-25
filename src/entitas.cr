@@ -9,9 +9,7 @@ require "./ext/*"
 module Entitas
   {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-  alias ComponentPool = Array(::Entitas::Component)
-  alias AERCFactory = Proc(::Entitas::Entity, ::Entitas::SafeAERC)
-  alias EntityFactory = Proc(::Entitas::Entity)
+  class Error < Exception; end
 
   abstract class Component; end
 
@@ -27,11 +25,23 @@ module Entitas
 
   class Collector; end
 
+  class Matcher; end
+
   # This is the base interface for all systems.
   # It's not meant to be implemented.
   # Use `Systems::InitializeSystem`, `Systems::ExecuteSystem`,
   # `Systems::CleanupSystem` or `Systems::TearDownSystem`.
-  module Entitas::System; end
+  module System; end
+
+  abstract class AbstractEntityIndex(TKey); end
+
+  class EntityIndex(TKey) < AbstractEntityIndex(TKey); end
+
+  class PrimaryEntityIndex(TKey) < AbstractEntityIndex(TKey); end
+
+  alias ComponentPool = Array(::Entitas::Component)
+  alias AERCFactory = Proc(::Entitas::Entity, ::Entitas::SafeAERC)
+  alias EntityFactory = Proc(::Entitas::Entity)
 end
 
 require "./entitas/*"

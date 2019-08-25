@@ -1,11 +1,10 @@
+require "./error"
 require "./entity"
 
 module Entitas
   # A Collector can observe one or more groups from the same context
   # and collects changed entities based on the specified groupEvent.
   class Collector
-    class Error < Exception; end
-
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
     include Enumerable(Entitas::Entity)

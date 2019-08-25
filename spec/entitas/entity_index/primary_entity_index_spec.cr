@@ -72,7 +72,7 @@ describe Entitas::PrimaryEntityIndex do
       end
 
       it "throws when adding an entity for the same key" do
-        expect_raises Entitas::Entity::Index::Error do
+        expect_raises Entitas::EntityIndex::Error do
           _, _, _, ctx = new_index
           c = NameAge.new(name: name)
           entity = ctx.create_entity

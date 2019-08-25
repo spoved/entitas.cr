@@ -596,8 +596,20 @@ describe Entitas::Entity do
             entity.to_s.should_not eq cache
           end
 
-          # TODO: it "doesn't update cache when entity gets retained" do
-          # TODO: it "released entity doesn't have updated cache" do
+          it "doesn't update cache when entity gets retained" do
+            entity = new_entity_with_a
+            cache = entity.to_s
+            entity.retain(cache)
+            entity.to_s.should eq cache
+          end
+
+          it "released entity doesn't have updated cache" do
+            entity = new_entity_with_a
+            cache = entity.to_s
+            entity.retain(cache)
+            entity.release(cache)
+            entity.to_s.should eq cache
+          end
 
           it "updates cache when remove_all_components is called, even if entity has no components" do
             entity = new_entity_with_a

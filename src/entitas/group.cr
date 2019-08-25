@@ -1,6 +1,6 @@
 require "spoved/logger"
+require "./error"
 require "./events"
-require "./group/*"
 require "./helpers/entities"
 
 module Entitas

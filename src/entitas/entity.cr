@@ -1,13 +1,12 @@
-require "./*"
+require "./error"
+require "./events"
+require "./helpers/*"
 require "./entity/*"
 require "./context/info"
 
 module Entitas
   abstract class Entity
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
-
-    class Error < Exception
-    end
 
     # Each entity has its own unique `creation_index` which will be set by
     # the context when you create the entity.
