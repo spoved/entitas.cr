@@ -1,6 +1,32 @@
 # entitas
 
+A Entity Component System Framework for Crystal. Ported from: [Entitas-CSharp](https://github.com/sschmid/Entitas-CSharp)
+
+Entitas is a super fast Entity Component System Framework (ECS). Internal caching and blazing fast component access makes it second to none. Several design decisions have been made to work optimal in a garbage collected environment and to go easy on the garbage collector. Utilizing Crystal's macro system, all code generation is done compile time. No need for a code generator!
+
 [![Build Status](https://travis-ci.com/kalinon/entitas.cr.svg?token=Shp7EsY9qyrwFK1NgezB&branch=master)](https://travis-ci.com/kalinon/entitas.cr)
+
+## First glimpse
+
+```crystal
+public def create_red_gem(context : GameContext, position)
+  entity.is_game_board_element = true
+  entity.is_movable = true
+  entity = context.create_entity
+  entity.add_position(position)
+  entity.add_asset("RedGem")
+  entity.is_interactive = true
+  entity
+end
+```
+
+```crystal
+entities = context.get_entities(Entitas::Matcher.all_of(Position, Velocity))
+entities.each do |e|
+  pos = e.position
+  vel = e.velocity
+end
+```
 
 ## Installation
 

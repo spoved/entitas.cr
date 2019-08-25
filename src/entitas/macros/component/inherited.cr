@@ -16,13 +16,11 @@ class Entitas::Component
         \{% end %}
       \{% end %}
 
-      \{% if comp_methods.empty? %}
-        class ::Entitas::Entity
-          def {{@type.name.id.underscore}}? : Bool
-            has_component_{{@type.name.id.underscore}}?
-          end
-        end
-      \{% end %}
+      Entitas::Component.create_comp_module(
+        \{{@type.name.id}},
+        \{% if comp_methods.empty? %}true\{% else %}false\{% end %},
+        \{% if @type.annotation(::Component::Unique) %}true\{% else %}false\{% end %}
+      )
 
       def initialize(
       \{% for var_name, meth in comp_methods %}
@@ -48,7 +46,6 @@ class Entitas::Component
 
         self
       end
-
 
       def init(**args)
         args.each do |k,v|
