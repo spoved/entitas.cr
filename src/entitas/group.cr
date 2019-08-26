@@ -9,7 +9,7 @@ module Entitas
 
     accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated
 
-    include Entitas::Helper::Entities
+    include Entitas::Helper::Entities(Entitas::Entity)
 
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?

@@ -86,7 +86,7 @@ macro emits_event(name)
     raise Entitas::Error::MethodNotImplemented.new
   end
 
-  protected property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
+  property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
 
 end
 

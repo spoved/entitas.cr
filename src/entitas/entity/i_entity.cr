@@ -18,9 +18,11 @@ module Entitas::IEntity
   getter creation_index : Int32
 
   protected setter context_info : Entitas::Context::Info? = nil
+
   abstract def context_info : Entitas::Context::Info
 
   protected setter aerc : SafeAERC? = nil
+
   abstract def aerc : AERC
   abstract def retain_count : Int32
   abstract def retained_by?(owner)

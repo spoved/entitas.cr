@@ -14,17 +14,10 @@ module Entitas
   abstract class Context
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    include Entitas::Helper::Entities
+    include IContext(Entitas::Entity)
+
+    include Entitas::Helper::Entities(Entitas::Entity)
     include Entitas::Helper::ComponentPools
-
-    ############################
-    # Abstract functions
-    ############################
-
-    abstract def total_components : Int32
-    abstract def component_index_value(klass) : Int32
-    abstract def entity_factory : Entitas::Entity
-    abstract def component_pools : Array(Entitas::ComponentPool)
 
     protected property creation_index : Int32
     protected setter context_info : Entitas::Context::Info
@@ -33,7 +26,6 @@ module Entitas
     protected property retained_entities = Set(Entitas::Entity).new
     protected property component_names_cache : Array(String) = Array(String).new
 
-    accept_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
       OnComponentAdded, OnComponentRemoved, OnComponentReplaced,
       OnEntityReleased, OnDestroyEntity
@@ -96,7 +88,7 @@ module Entitas
     ############################
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
-    def create_entity : ::Entitas::Entity
+    def create_entity : Entitas::Entity
       {% if !flag?(:disable_logging) %}logger.debug("Creating new entity", self.class){% end %}
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
