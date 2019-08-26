@@ -1,20 +1,16 @@
 require "spoved/logger"
 require "./error"
+require "./group/*"
 require "./events"
 require "./helpers/entities"
 
 module Entitas
   class Group
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
-
-    accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated
-
+    include Entitas::IGroup(Entitas::Entity)
     include Entitas::Helper::Entities(Entitas::Entity)
 
     protected property single_entitie_cache : Entitas::Entity?
     protected property to_string_cache : String?
-
-    protected getter matcher : Entitas::Matcher
 
     def initialize(@matcher : Entitas::Matcher)
     end
