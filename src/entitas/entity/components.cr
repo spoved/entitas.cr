@@ -3,14 +3,6 @@ module Entitas
     include Entitas::Helper::ComponentPools
 
     ############################
-    # Abstract functions
-    ############################
-
-    abstract def component_index_value(klass) : Int32
-    abstract def component_index_class(index) : Entitas::Component.class
-    abstract def component_pools : Array(Entitas::ComponentPool)
-
-    ############################
     # Component functions
     ############################
 
@@ -26,10 +18,6 @@ module Entitas
       else
         pool.pop.reset.init(**args)
       end
-    end
-
-    def create_component(_type, **args)
-      create_component(_type.index, **args)
     end
 
     # Will add the `Entitas::Component` at the provided index.
@@ -56,14 +44,6 @@ module Entitas
       component
     end
 
-    def add_component(index : ::Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
-      add_component(self.component_index_value(index), component)
-    end
-
-    def add_component(component : Entitas::Component) : Entitas::Component
-      add_component(component_index_value(component.class), component)
-    end
-
     # Removes a component at the specified index.
     # You can only remove a component at an index if it exists.
     def remove_component(index : Int32) : Nil
@@ -82,10 +62,6 @@ module Entitas
       self._replace_component(index, nil)
     end
 
-    def remove_component(index : ::Entitas::Component::Index) : Nil
-      remove_component(self.component_index_value(index))
-    end
-
     # Replaces an existing component at the specified index
     # or adds it if it doesn't exist yet.
     def replace_component(index : Int32, component : Entitas::Component?)
@@ -101,14 +77,6 @@ module Entitas
       end
     end
 
-    def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
-      replace_component self.component_index_value(index), component
-    end
-
-    def replace_component(component : Entitas::Component?)
-      replace_component(component_index_value(component.class), component)
-    end
-
     # Will return the `Entitas::Component` at the provided index.
     # You can only get a component at an index if it exists.
     def get_component(index : Int32) : Entitas::Component
@@ -120,10 +88,6 @@ module Entitas
                                                                "You should check if an entity has the component " \
                                                                "before getting it."
       end
-    end
-
-    def get_component(index : ::Entitas::Component::Index) : Entitas::Component
-      get_component(self.component_index_value(index))
     end
 
     # Returns all added components.
@@ -158,10 +122,6 @@ module Entitas
     # at the specified index.
     def has_component?(index : Int32) : Bool
       (self.components[index]? != nil) ? true : false
-    end
-
-    def has_component?(index : ::Entitas::Component::Index) : Bool
-      has_component? self.component_index_value(index)
     end
 
     # Determines whether this entity has components

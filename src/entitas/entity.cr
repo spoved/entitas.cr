@@ -6,32 +6,13 @@ require "./context/info"
 
 module Entitas
   abstract class Entity
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
-
-    # Each entity has its own unique `creation_index` which will be set by
-    # the context when you create the entity.
-    getter creation_index : Int32 = -1
-    protected setter creation_index
-
-    protected setter context_info : Entitas::Context::Info? = nil
-    protected setter aerc : SafeAERC? = nil
-
-    # The context manages the state of an entity.
-    # Active entities are enabled, destroyed entities are not.
-    protected property is_enabled : Bool = false
+    include IEntity
 
     protected property components_cache : Array(Entitas::Component)? = nil
     protected property component_indices_cache : Array(Int32)? = nil
     protected property to_string_cache : String? = nil
 
     protected getter components : Array(Entitas::Component?)
-
-    # The total amount of components an entity can possibly have.
-    getter total_components : Int32
-
-    accept_events OnEntityWillBeDestroyed, OnComponentAdded, OnComponentReplaced,
-      OnComponentRemoved, OnEntityReleased, OnEntityCreated, OnEntityDestroyed,
-      OnDestroyEntity, OnGroupCreated
 
     def initialize(
       @creation_index : Int32,
@@ -53,7 +34,7 @@ module Entitas
 
       self.aerc = _aerc
       self.context_info = ctx_info
-      self.creation_index = ct_index
+      @creation_index = ct_index
 
       # Clear caches
       self.clear_caches!
@@ -66,17 +47,11 @@ module Entitas
     # State functions
     ############################
 
-    # The context manages the state of an entity.
-    # Active entities are enabled, destroyed entities are not.
-    def enabled?
-      self.is_enabled
-    end
-
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32) : Entity
       {% if !flag?(:disable_logging) %}logger.debug("Reactivating Entity: #{self.object_id}", self.to_s){% end %}
       # Set our passed variables
-      self.creation_index = creation_index
+      @creation_index = creation_index
       self.is_enabled = true
 
       # Clear caches
