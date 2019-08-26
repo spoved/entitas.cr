@@ -1,4 +1,5 @@
 require "./error"
+require "./interfaces/i_entity"
 require "./events"
 require "./helpers/*"
 require "./entity/*"

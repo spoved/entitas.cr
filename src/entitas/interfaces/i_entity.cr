@@ -1,3 +1,4 @@
+require "../events"
 require "../context/info"
 
 module Entitas::IEntity

@@ -1,7 +1,9 @@
+require "spoved/logger"
+
 require "./error"
+require "./interfaces/i_context"
 require "./macros/context"
 require "./context/*"
-require "spoved/logger"
 require "./events"
 require "./helpers/entities"
 require "./helpers/component_pools"

@@ -1,6 +1,6 @@
 require "spoved/logger"
 require "./error"
-require "./group/*"
+require "./interfaces/i_group"
 require "./events"
 require "./helpers/entities"
 

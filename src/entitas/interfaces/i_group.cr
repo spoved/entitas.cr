@@ -1,3 +1,4 @@
+require "../events"
 require "../helpers/entities"
 require "../matcher"
 

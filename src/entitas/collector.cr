@@ -1,3 +1,4 @@
+require "./interfaces/i_collector"
 require "./error"
 require "./entity"
 
@@ -7,8 +8,7 @@ module Entitas
   class Collector
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    include Enumerable(Entitas::Entity)
-    getter entities : Set(Entitas::Entity) = Set(Entitas::Entity).new
+    include ICollector(Entitas::Entity)
 
     protected property groups : Array(Entitas::Group) = Array(Entitas::Group).new
     protected property group_events : Array(Entitas::Events::GroupEvent) = Array(Entitas::Events::GroupEvent).new

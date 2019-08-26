@@ -1,3 +1,5 @@
+require "../events"
+
 module Entitas::IContext(TEntity)
   {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
