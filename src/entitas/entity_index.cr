@@ -1,8 +1,8 @@
 require "./error"
 require "./entity_index/*"
 
-class Entitas::EntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
-  getter index : Hash(TKey, Array(Entitas::Entity)) = Hash(TKey, Array(Entitas::Entity)).new
+class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity, TKey)
+  getter index : Hash(TKey, Array(TEntity)) = Hash(TKey, Array(TEntity)).new
 
   def clear
     index.values.each do |entities|
@@ -17,7 +17,7 @@ class Entitas::EntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
     index.clear
   end
 
-  def add_entity(key : TKey, entity : Entitas::Entity)
+  def add_entity(key : TKey, entity : TEntity)
     get_entities(key) << entity
 
     if entity.aerc.is_a?(Entitas::SafeAERC)
@@ -27,7 +27,7 @@ class Entitas::EntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
     end
   end
 
-  def del_entity(key : TKey, entity : Entitas::Entity)
+  def del_entity(key : TKey, entity : TEntity)
     get_entities(key).delete(entity)
 
     if entity.aerc.is_a?(Entitas::SafeAERC)
@@ -37,9 +37,9 @@ class Entitas::EntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
     end
   end
 
-  def get_entities(key : TKey) : Array(Entitas::Entity)
+  def get_entities(key : TKey) : Array(TEntity)
     unless self.index.has_key?(key)
-      self.index[key] = Array(Entitas::Entity).new
+      self.index[key] = Array(TEntity).new
     end
     self.index[key]
   end

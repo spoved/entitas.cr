@@ -7,7 +7,7 @@ end
 private def new_index
   ctx = new_context
   group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-  index = Entitas::PrimaryEntityIndex(String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
+  index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
     (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
   })
   name_age = NameAge.new(name: name)
@@ -19,7 +19,7 @@ end
 private def new_mk_index
   ctx = new_context
   group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-  index = Entitas::PrimaryEntityIndex(String).new(
+  index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new(
     "TestIndex",
     group,
     ->(entity : Entitas::Entity, component : Entitas::Component?) {
@@ -58,7 +58,7 @@ describe Entitas::PrimaryEntityIndex do
 
       it "has existing entity" do
         e, _, group = new_index
-        index = Entitas::PrimaryEntityIndex(String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
+        index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
           (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
         })
         index.get_entity(name).should be e

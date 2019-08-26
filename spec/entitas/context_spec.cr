@@ -18,7 +18,7 @@ end
 
 private def entity_index(ctx)
   group = ctx.get_group(Entitas::Matcher.all_of(A))
-  Entitas::PrimaryEntityIndex(String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
+  Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
     (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
   })
 end

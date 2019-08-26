@@ -1,9 +1,9 @@
 require "./abstract"
 
-class Entitas::PrimaryEntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
-  getter index : Hash(TKey, Entitas::Entity) = Hash(TKey, Entitas::Entity).new
+class Entitas::PrimaryEntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity, TKey)
+  getter index : Hash(TKey, TEntity) = Hash(TKey, TEntity).new
 
-  def get_entity(key : TKey) : Entitas::Entity?
+  def get_entity(key : TKey) : TEntity?
     self.index[key]?
   end
 
@@ -18,7 +18,7 @@ class Entitas::PrimaryEntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
     index.clear
   end
 
-  def add_entity(key : TKey, entity : Entitas::Entity)
+  def add_entity(key : TKey, entity : TEntity)
     if self.index[key]?
       raise Entitas::EntityIndex::Error.new "Entity for key '#{key}' already exists! " \
                                             "Only one entity for a primary key is allowed."
@@ -33,7 +33,7 @@ class Entitas::PrimaryEntityIndex(TKey) < Entitas::AbstractEntityIndex(TKey)
     end
   end
 
-  def del_entity(key : TKey, entity : Entitas::Entity)
+  def del_entity(key : TKey, entity : TEntity)
     self.index.delete(key)
 
     if entity.aerc.is_a?(Entitas::SafeAERC)

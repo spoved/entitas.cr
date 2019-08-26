@@ -1,24 +1,25 @@
-require "./interface"
+require "../interfaces/i_entity_index"
+require "../group"
 
-abstract class Entitas::AbstractEntityIndex(TKey)
+abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   include Entitas::IEntityIndex
 
   abstract def clear
-  abstract def add_entity(key : TKey, entity : Entitas::Entity)
-  abstract def del_entity(key : TKey, entity : Entitas::Entity)
+  abstract def add_entity(key : TKey, entity : TEntity)
+  abstract def del_entity(key : TKey, entity : TEntity)
 
   protected property group : Entitas::Group
-  protected setter get_key : Proc(Entitas::Entity, Entitas::Component?, TKey)? = nil
-  protected setter get_keys : Proc(Entitas::Entity, Entitas::Component?, Array(TKey))? = nil
+  protected setter get_key : Proc(TEntity, Entitas::Component?, TKey)? = nil
+  protected setter get_keys : Proc(TEntity, Entitas::Component?, Array(TKey))? = nil
 
-  def get_key : Proc(Entitas::Entity, Entitas::Component?, TKey)
+  def get_key : Proc(TEntity, Entitas::Component?, TKey)
     raise Exception.new("Must set get_key for #{self}") if @get_key.nil?
-    @get_key.as(Proc(Entitas::Entity, Entitas::Component?, TKey))
+    @get_key.as(Proc(TEntity, Entitas::Component?, TKey))
   end
 
-  def get_keys : Proc(Entitas::Entity, Entitas::Component?, Array(TKey))
+  def get_keys : Proc(TEntity, Entitas::Component?, Array(TKey))
     raise Exception.new("Must set get_keys for #{self}") if @get_keys.nil?
-    @get_keys.as(Proc(Entitas::Entity, Entitas::Component?, Array(TKey)))
+    @get_keys.as(Proc(TEntity, Entitas::Component?, Array(TKey)))
   end
 
   getter name : String
@@ -44,15 +45,15 @@ abstract class Entitas::AbstractEntityIndex(TKey)
 
   def initialize(
     @name : String, @group : Entitas::Group,
-    @get_key : Proc(Entitas::Entity, Entitas::Component?, TKey)?,
-    @get_keys : Proc(Entitas::Entity, Entitas::Component?, Array(TKey))?,
+    @get_key : Proc(TEntity, Entitas::Component?, TKey)?,
+    @get_keys : Proc(TEntity, Entitas::Component?, Array(TKey))?,
     @is_single_key : Bool
   )
     @on_entity_added = ->self.on_entity_added(Entitas::Events::OnEntityAdded)
     @on_entity_removed = ->self.on_entity_removed(Entitas::Events::OnEntityRemoved)
   end
 
-  def self.new(name : String, group : Entitas::Group, get_key : Proc(Entitas::Entity, Entitas::Component?, TKey))
+  def self.new(name : String, group : Entitas::Group, get_key : Proc(TEntity, Entitas::Component?, TKey))
     instance = self.allocate
     instance.initialize(
       name: name,
@@ -65,7 +66,7 @@ abstract class Entitas::AbstractEntityIndex(TKey)
     instance
   end
 
-  def self.new(name : String, group : Entitas::Group, get_keys : Proc(Entitas::Entity, Entitas::Component?, Array(TKey)))
+  def self.new(name : String, group : Entitas::Group, get_keys : Proc(TEntity, Entitas::Component?, Array(TKey)))
     instance = self.allocate
     instance.initialize(
       name: name,

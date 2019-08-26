@@ -15,9 +15,7 @@ module Entitas
 
   abstract class Context; end
 
-  abstract class Entity
-    abstract class Index(TKey); end
-  end
+  abstract class Entity; end
 
   class Systems; end
 
@@ -33,11 +31,11 @@ module Entitas
   # `Systems::CleanupSystem` or `Systems::TearDownSystem`.
   module System; end
 
-  abstract class AbstractEntityIndex(TKey); end
+  abstract class AbstractEntityIndex(TEntity, TKey); end
 
-  class EntityIndex(TKey) < AbstractEntityIndex(TKey); end
+  class EntityIndex(TEntity, TKey) < AbstractEntityIndex(TEntity, TKey); end
 
-  class PrimaryEntityIndex(TKey) < AbstractEntityIndex(TKey); end
+  class PrimaryEntityIndex(TEntity, TKey) < AbstractEntityIndex(TEntity, TKey); end
 
   alias ComponentPool = Array(Entitas::Component)
   alias AERCFactory = Proc(Entitas::Entity, Entitas::SafeAERC)
