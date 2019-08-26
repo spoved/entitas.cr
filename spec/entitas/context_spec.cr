@@ -185,7 +185,7 @@ describe Entitas::Context do
         did_dispatch = 0
         ctx = new_context
 
-        event_entity : ::Entitas::Entity? = nil
+        event_entity : Entitas::Entity? = nil
         ctx.on_entity_created do |event|
           did_dispatch += 1
           event_entity = event.entity

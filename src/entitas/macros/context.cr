@@ -37,10 +37,10 @@ class Entitas::Context
     end
   end
 
-  # This macro creates a sub class of `::Entitas::Context` with the corresponding
+  # This macro creates a sub class of `Entitas::Context` with the corresponding
   # name and provided components
   macro create_sub_context(context_name, *components)
-    class ::{{context_name.id}}Context < ::Entitas::Context
+    class ::{{context_name.id}}Context < Entitas::Context
       CONTEXT_NAME = "{{context_name.id}}Context"
 
       Entitas::Component.create_index({{*components}})
@@ -81,7 +81,7 @@ class Entitas::Context
 
   # This macro will add unique component functions to the context provided
   macro add_unique_component(context_name, *components)
-    class ::{{context_name.id}}Context < ::Entitas::Context
+    class ::{{context_name.id}}Context < Entitas::Context
 
       # def has_unique_component_already?(comp : Entitas::Component.class)
       #   case comp
@@ -95,7 +95,7 @@ class Entitas::Context
       # end
 
       {% for component in components %}
-        def {{component.id.underscore.id}}_entity : ::Entitas::Entity?
+        def {{component.id.underscore.id}}_entity : Entitas::Entity?
           self.get_group(::{{context_name.id}}Matcher.{{component.id.underscore.id}}).get_single_entity
         end
 
@@ -122,7 +122,7 @@ class Entitas::Context
           entity
         end
 
-        def {{component.id.underscore.id}}=(value : {{component.id}}) : ::Entitas::Entity
+        def {{component.id.underscore.id}}=(value : {{component.id}}) : Entitas::Entity
           set_{{component.id.underscore.id}}(value)
         end
 

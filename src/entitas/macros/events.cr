@@ -1,4 +1,4 @@
-module ::Entitas::Events
+module Entitas::Events
   # Will create `Entitas::Events` struct for the provided `name`. `opts` defines the struct variables.
   #
   # ```
@@ -8,7 +8,7 @@ module ::Entitas::Events
   # This will create the code:
   #
   # ```
-  #   struct ::Entitas::Events::{{name.id}}
+  #   struct Entitas::Events::{{name.id}}
   #
   #     getter context : Context
   #     getter entity : Entity
@@ -18,7 +18,7 @@ module ::Entitas::Events
   #   end
   # ```
   macro create_event(name, opts)
-    struct ::Entitas::Events::{{name.id}}
+    struct Entitas::Events::{{name.id}}
       {% for a, t in opts %}
       getter {{a.id}} : {{t.id}}
       {% end %}
@@ -40,7 +40,7 @@ end
 #   emits_events OnEntityCreated, OnEntityDestroyed
 #
 #   # override event methods
-#   def on_entity_created(event : ::Entitas::Events::OnEntityCreated)
+#   def on_entity_created(event : Entitas::Events::OnEntityCreated)
 #     # do something with event
 #   end
 # end
@@ -63,7 +63,7 @@ end
 #   emits_event OnEntityCreated
 #
 #   # override event methods
-#   def on_entity_created(event : ::Entitas::Events::OnEntityCreated)
+#   def on_entity_created(event : Entitas::Events::OnEntityCreated)
 #     # do something with event
 #   end
 # end
@@ -77,11 +77,11 @@ macro emits_event(name)
   # when not implimented if an `Entitas::Events::{{name}}` is emitted.
   #
   # ```
-  # def {{name.id.underscore.id}}(event : ::Entitas::Events::{{name.id}}) : Nil
+  # def {{name.id.underscore.id}}(event : Entitas::Events::{{name.id}}) : Nil
   #   # do something with event
   # end
   # ```
-  def {{name.id.underscore.id}}(event : ::Entitas::Events::{{name.id}}) : Nil
+  def {{name.id.underscore.id}}(event : Entitas::Events::{{name.id}}) : Nil
     {% if !flag?(:disable_logging) %}logger.info("Processing {{name.id}}: #{event}"){% end %}
     raise Entitas::Error::MethodNotImplemented.new
   end
@@ -92,7 +92,7 @@ end
 
 macro emit_event(event, *args)
   {% if !flag?(:disable_logging) %}logger.debug("Emitting event {{event.id}}", self.to_s){% end %}
-  self.receive_{{event.id.underscore.id}}_event(::Entitas::Events::{{event.id}}.new({{*args}}))
+  self.receive_{{event.id.underscore.id}}_event(Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
 # Wrapper for multiple `accept_event` calls
@@ -132,7 +132,7 @@ end
 macro accept_event(name)
 
   # Array of event hooks to trigger when an `Entitas::Events::{{name.id}}` is emitted
-  getter {{name.id.underscore.id}}_event_hooks : Array(Proc(::Entitas::Events::{{name.id}}, Nil)) = Array(Proc(::Entitas::Events::{{name.id}}, Nil)).new
+  getter {{name.id.underscore.id}}_event_hooks : Array(Proc(Entitas::Events::{{name.id}}, Nil)) = Array(Proc(Entitas::Events::{{name.id}}, Nil)).new
 
   # Will append the `&block` to the `#{{name.id.underscore.id}}_event_hooks` array
   #
@@ -141,7 +141,7 @@ macro accept_event(name)
   #   # do something with event
   # end
   # ```
-  def {{name.id.underscore.id}}(&block : ::Entitas::Events::{{name.id}} -> Nil)
+  def {{name.id.underscore.id}}(&block : Entitas::Events::{{name.id}} -> Nil)
     {% if !flag?(:disable_logging) %}logger.debug("Setting event {{name.id}} hook #{block}", self.to_s){% end %}
     self.{{name.id.underscore.id}}_event_hooks << block
   end
@@ -155,12 +155,12 @@ macro accept_event(name)
     self.{{name.id.underscore.id}}_event_hooks.clear
   end
 
-  def remove_{{name.id.underscore.id}}_hook(hook : Proc(::Entitas::Events::{{name.id}}, Nil))
+  def remove_{{name.id.underscore.id}}_hook(hook : Proc(Entitas::Events::{{name.id}}, Nil))
     {% if !flag?(:disable_logging) %}logger.debug("Removing event {{name.id}} hook #{hook}", self.to_s){% end %}
     self.{{name.id.underscore.id}}_event_hooks.delete hook
   end
 
-  def receive_{{name.id.underscore.id}}_event(event : ::Entitas::Events::{{name.id}})
+  def receive_{{name.id.underscore.id}}_event(event : Entitas::Events::{{name.id}})
     {% if !flag?(:disable_logging) %}logger.debug("Receiving event {{name.id}}", self.to_s){% end %}
 
     index = self.{{name.id.underscore.id}}_event_hooks.size - 1

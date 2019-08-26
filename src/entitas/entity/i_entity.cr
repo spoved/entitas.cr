@@ -34,7 +34,7 @@ module Entitas::IEntity
   abstract def component_index_class(index) : Entitas::Component.class
   abstract def component_pools : Array(Entitas::ComponentPool)
 
-  abstract def create_component(index : ::Entitas::Component::Index, **args)
+  abstract def create_component(index : Entitas::Component::Index, **args)
 
   def create_component(_type, **args)
     self.create_component(_type.index, **args)
@@ -42,7 +42,7 @@ module Entitas::IEntity
 
   abstract def add_component(index : Int32, component : Entitas::Component)
 
-  def add_component(index : ::Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
+  def add_component(index : Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
     self.add_component(self.component_index_value(index), component)
   end
 
@@ -52,13 +52,13 @@ module Entitas::IEntity
 
   abstract def remove_component(index : Int32)
 
-  def remove_component(index : ::Entitas::Component::Index) : Nil
+  def remove_component(index : Entitas::Component::Index) : Nil
     self.remove_component(self.component_index_value(index))
   end
 
   abstract def replace_component(index : Int32, component : Entitas::Component?)
 
-  def replace_component(index : ::Entitas::Component::Index, component : Entitas::Component?)
+  def replace_component(index : Entitas::Component::Index, component : Entitas::Component?)
     self.replace_component(self.component_index_value(index), component)
   end
 
@@ -70,7 +70,7 @@ module Entitas::IEntity
   # You can only get a component at an index if it exists.
   abstract def get_component(index : Int32)
 
-  def get_component(index : ::Entitas::Component::Index) : Entitas::Component
+  def get_component(index : Entitas::Component::Index) : Entitas::Component
     self.get_component(self.component_index_value(index))
   end
 
@@ -83,7 +83,7 @@ module Entitas::IEntity
   # at the specified index.
   abstract def has_component?(index : Int32) : Bool
 
-  def has_component?(index : ::Entitas::Component::Index) : Bool
+  def has_component?(index : Entitas::Component::Index) : Bool
     self.has_component?(self.component_index_value(index))
   end
 

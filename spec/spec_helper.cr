@@ -7,13 +7,13 @@ Spoved.logger.level = Logger::UNKNOWN
 # Spoved.logger.level = Logger::DEBUG
 
 def component_pools
-  Array(Entitas::ComponentPool).new(::Entitas::Component::TOTAL_COMPONENTS) do
+  Array(Entitas::ComponentPool).new(Entitas::Component::TOTAL_COMPONENTS) do
     Entitas::ComponentPool.new
   end
 end
 
 def new_entity
-  TestEntity.new(1, ::Entitas::Component::TOTAL_COMPONENTS, component_pools)
+  TestEntity.new(1, Entitas::Component::TOTAL_COMPONENTS, component_pools)
 end
 
 def new_entity_with_a

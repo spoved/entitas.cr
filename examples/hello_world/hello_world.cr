@@ -11,7 +11,7 @@ class DebugMessage < Entitas::Component
   end
 end
 
-class DebugMessageSystem < ::Entitas::ReactiveSystem
+class DebugMessageSystem < Entitas::ReactiveSystem
   # getter logger = ::Logger.new(STDOUT)
   spoved_logger
 

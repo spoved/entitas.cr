@@ -1,10 +1,10 @@
-module ::Entitas::Events
+module Entitas::Events
   create_event EventOne, {name: String}
 end
 
-alias EventOneHook = Proc(::Entitas::Events::EventOne, Nil)
+alias EventOneHook = Proc(Entitas::Events::EventOne, Nil)
 
-EVENT_ONE_HOOK_CACHE = ->(event : ::Entitas::Events::EventOne) {
+EVENT_ONE_HOOK_CACHE = ->(event : Entitas::Events::EventOne) {
   nil
 }
 
@@ -14,7 +14,7 @@ class TestProcs
 
   @data = Array(EventOneHook | Nil).new(1, nil)
   @data_empty = Array(EventOneHook | Nil).new
-  @event_one_instance_var : EventOneHook = ->(event : ::Entitas::Events::EventOne) {
+  @event_one_instance_var : EventOneHook = ->(event : Entitas::Events::EventOne) {
     nil
   }
 
@@ -41,7 +41,7 @@ end
 
 # puts "Trying to allocate some mem"
 # begin
-#   Array(EventOneHook | Nil).new(100_000, ->(event : ::Entitas::Events::EventOne) {
+#   Array(EventOneHook | Nil).new(100_000, ->(event : Entitas::Events::EventOne) {
 #     nil
 #   })
 # rescue exception
@@ -64,7 +64,7 @@ start_bench "Proc", ->do
     bench "using dynamic", ->{
       data = Array(EventOneHook | Nil).new(1, nil)
     }, ->{
-      data[0] = ->(event : ::Entitas::Events::EventOne) {
+      data[0] = ->(event : Entitas::Events::EventOne) {
         nil
       }
     }, ->{}, true
@@ -98,7 +98,7 @@ start_bench "Proc", ->do
 
     bench "using dynamic", ->{}, ->{
       data = Array(EventOneHook | Nil).new
-      data << ->(event : ::Entitas::Events::EventOne) {
+      data << ->(event : Entitas::Events::EventOne) {
         nil
       }
     }, ->{}, true
@@ -124,7 +124,7 @@ start_bench "Proc", ->do
     bench "control", ->{
       event = Entitas::Events::EventOne.new("String")
     }, ->{
-      ->(event : ::Entitas::Events::EventOne) {
+      ->(event : Entitas::Events::EventOne) {
         nil
       }.call(event)
     }, ->{}, true
@@ -145,7 +145,7 @@ start_bench "Proc", ->do
     bench "each", ->{
       event = Entitas::Events::EventOne.new("String")
       data = Array(EventOneHook).new
-      data << ->(e : ::Entitas::Events::EventOne) {
+      data << ->(e : Entitas::Events::EventOne) {
         nil
       }
     }, ->{
@@ -155,7 +155,7 @@ start_bench "Proc", ->do
     bench "[]", ->{
       event = Entitas::Events::EventOne.new("String")
       data = Array(EventOneHook).new
-      data << ->(e : ::Entitas::Events::EventOne) {
+      data << ->(e : Entitas::Events::EventOne) {
         nil
       }
     }, ->{

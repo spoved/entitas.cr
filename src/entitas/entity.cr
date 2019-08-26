@@ -186,7 +186,7 @@ module Entitas
 
     # This will create a default `Entitas::Context::Info`
     private def create_default_context_info : Entitas::Context::Info
-      Entitas::Context::Info.new("No Context", ::Entitas::Component::COMPONENT_NAMES, ::Entitas::Component::COMPONENT_KLASSES)
+      Entitas::Context::Info.new("No Context", Entitas::Component::COMPONENT_NAMES, Entitas::Component::COMPONENT_KLASSES)
     end
 
     ############################

@@ -30,13 +30,13 @@ module Entitas
       end
     end
 
-    def handle_entity(entity : Entity) : ::Entitas::Events::GroupChanged
+    def handle_entity(entity : Entity) : Entitas::Events::GroupChanged
       {% if !flag?(:disable_logging) %}logger.debug("Handling entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
-        add_entity_silently(entity) ? ::Entitas::Events::OnEntityAdded : nil
+        add_entity_silently(entity) ? Entitas::Events::OnEntityAdded : nil
       else
-        remove_entity_silently(entity) ? ::Entitas::Events::OnEntityRemoved : nil
+        remove_entity_silently(entity) ? Entitas::Events::OnEntityRemoved : nil
       end
     end
 

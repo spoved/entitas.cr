@@ -22,7 +22,7 @@ class Entitas::Component
       {% end %}
     }
 
-    # The total number of `::Entitas::Component` subclases in this context
+    # The total number of `Entitas::Component` subclases in this context
     TOTAL_COMPONENTS = {{components.size}}
 
     # The total amount of components an entity can possibly have.
@@ -50,7 +50,7 @@ class Entitas::Component
 
   macro create_class_helpers(*components)
 
-    def self.component_index(index) : ::Entitas::Component::Index
+    def self.component_index(index) : Entitas::Component::Index
       case index
       {% i = 0 %}
       {% for comp in components %}
@@ -92,7 +92,7 @@ class Entitas::Component
   end
 
   macro create_instance_helpers(context)
-    def component_index(index) : ::Entitas::Component::Index
+    def component_index(index) : Entitas::Component::Index
       {{context.id}}.component_index(index)
     end
 

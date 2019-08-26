@@ -7,11 +7,11 @@ class Entitas::Error < Exception
 end
 
 # Component error class raised when an issue is encountered
-class Entitas::Component::Error < ::Entitas::Error; end
+class Entitas::Component::Error < Entitas::Error; end
 
-class Entitas::Collector::Error < ::Entitas::Error; end
+class Entitas::Collector::Error < Entitas::Error; end
 
-class Entitas::Entity::Error < ::Entitas::Error
+class Entitas::Entity::Error < Entitas::Error
   class IsNotEnabled < Error; end
 
   class DoesNotHaveComponent < Error; end
@@ -25,7 +25,7 @@ class Entitas::Entity::Error < ::Entitas::Error
   class IsNotDestroyedException < Error; end
 end
 
-class Entitas::Group::Error < ::Entitas::Error
+class Entitas::Group::Error < Entitas::Error
   class SingleEntity < Error; end
 end
 

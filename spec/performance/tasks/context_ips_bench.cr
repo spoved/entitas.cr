@@ -1,7 +1,7 @@
 class DumbKlass
 end
 
-start_bench ::Entitas::Context, ->do
+start_bench Entitas::Context, ->do
   group "inititalize", ->do
     bench "control", ->{}, ->{
       DumbKlass.new

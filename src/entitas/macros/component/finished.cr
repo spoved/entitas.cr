@@ -32,7 +32,7 @@ class Entitas::Component
     create_index({{*components}})
 
     alias KlassList = Array(
-      ::Entitas::Component.class
+      Entitas::Component.class
       {% if @type.subclasses.size == 1 %}
         )? | Array(
         {% for sub_klass in @type.subclasses %}

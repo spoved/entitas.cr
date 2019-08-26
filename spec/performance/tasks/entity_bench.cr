@@ -1,4 +1,4 @@
-start_bench ::Entitas::Entity, ->do
+start_bench Entitas::Entity, ->do
   bench_n_times "#add_component", 10_000_000,
     ->{
       ctx = TestContext.new

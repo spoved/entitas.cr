@@ -19,7 +19,7 @@ module Entitas
       @indices ||= Set(Entitas::Component::Index).new.concat(self.all_of_indices).concat(self.any_of_indices).concat(self.none_of_indices)
     end
 
-    def matches?(entity : ::Entitas::Entity)
+    def matches?(entity : Entitas::Entity)
       {% if !flag?(:disable_logging) %}
         logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
                      " && matches_any_of? #{matches_any_of?(entity)}" \
@@ -28,15 +28,15 @@ module Entitas
       matches_all_of?(entity) && matches_any_of?(entity) && matches_none_of?(entity)
     end
 
-    private def matches_all_of?(entity : ::Entitas::Entity)
+    private def matches_all_of?(entity : Entitas::Entity)
       self.all_of_indices.empty? || entity.has_components?(self.all_of_indices)
     end
 
-    private def matches_any_of?(entity : ::Entitas::Entity)
+    private def matches_any_of?(entity : Entitas::Entity)
       self.any_of_indices.empty? || entity.has_any_component?(self.any_of_indices)
     end
 
-    private def matches_none_of?(entity : ::Entitas::Entity)
+    private def matches_none_of?(entity : Entitas::Entity)
       self.none_of_indices.empty? || !entity.has_any_component?(self.none_of_indices)
     end
 
@@ -74,12 +74,12 @@ module Entitas
       # ```
       def {{match.id}}_of(*indices : Int32) : Matcher
         self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices.size)
-        indices.each { |i| self.{{match.id}}_of_indices << ::Entitas::Component::Index.new(i) }
+        indices.each { |i| self.{{match.id}}_of_indices << Entitas::Component::Index.new(i) }
         self
       end
 
       # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
-      # in the provided `::Entitas::Component::Index` indices to merge
+      # in the provided `Entitas::Component::Index` indices to merge
       #
       # ```
       # Entitas::Matcher.new.{{match.id}}_of(Entitas::Component::Index::A)

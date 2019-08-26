@@ -39,9 +39,9 @@ module Entitas
 
   class PrimaryEntityIndex(TKey) < AbstractEntityIndex(TKey); end
 
-  alias ComponentPool = Array(::Entitas::Component)
-  alias AERCFactory = Proc(::Entitas::Entity, ::Entitas::SafeAERC)
-  alias EntityFactory = Proc(::Entitas::Entity)
+  alias ComponentPool = Array(Entitas::Component)
+  alias AERCFactory = Proc(Entitas::Entity, Entitas::SafeAERC)
+  alias EntityFactory = Proc(Entitas::Entity)
 end
 
 require "./entitas/*"

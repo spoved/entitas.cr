@@ -61,7 +61,7 @@ class Entitas::Component
       # ```
       # entity.add_{{component_name.id.underscore}}
       # ```
-      def add_{{component_name.id.underscore}}(**args) : ::Entitas::Entity
+      def add_{{component_name.id.underscore}}(**args) : Entitas::Entity
         self.add_component_{{component_name.id.underscore}}(**args)
       end
 
@@ -69,7 +69,7 @@ class Entitas::Component
       # ```
       # entity.add_component_{{component_name.id.underscore}}
       # ```
-      def add_component_{{component_name.id.underscore}}(**args) : ::Entitas::Entity
+      def add_component_{{component_name.id.underscore}}(**args) : Entitas::Entity
         component = self.create_component({{component_name.id}}, **args)
         self.add_component(self.component_index_value({{component_name.id}}), component)
         self
@@ -80,7 +80,7 @@ class Entitas::Component
       # entity.del_{{component_name.id.underscore}}
       # entity.{{component_name.id.underscore}} # => nil
       # ```
-      def del_{{component_name.id.underscore}} : ::Entitas::Entity
+      def del_{{component_name.id.underscore}} : Entitas::Entity
         self.del_component_{{component_name.id.underscore}}
         self
       end
@@ -90,7 +90,7 @@ class Entitas::Component
       # entity.del_{{component_name.id.underscore}}
       # entity.{{component_name.id.underscore}} # => nil
       # ```
-      def del_component_{{component_name.id.underscore}} : ::Entitas::Entity
+      def del_component_{{component_name.id.underscore}} : Entitas::Entity
         self.remove_component(self.component_index_value({{component_name.id}}))
         self
       end

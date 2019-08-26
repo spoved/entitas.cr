@@ -8,9 +8,9 @@ module Entitas
 
     private property components_buffer = Set(Entitas::Component).new
     private property components_indices_buffer = Set(Int32).new
-    private property components_index_indices_buffer = Set(::Entitas::Component::Index).new
+    private property components_index_indices_buffer = Set(Entitas::Component::Index).new
 
-    def create_component(index : ::Entitas::Component::Index, **args)
+    def create_component(index : Entitas::Component::Index, **args)
       pool = component_pool(index)
 
       if pool.empty?
@@ -109,7 +109,7 @@ module Entitas
       if component_indices_cache.nil?
         self.components.each_with_index do |c, i|
           components_indices_buffer << i unless c.nil?
-          components_index_indices_buffer << ::Entitas::Component::Index.new(i)
+          components_index_indices_buffer << Entitas::Component::Index.new(i)
         end
         self.component_indices_cache = components_indices_buffer.to_a
         components_indices_buffer.clear
@@ -133,7 +133,7 @@ module Entitas
       true
     end
 
-    def has_components?(indices : Enumerable(::Entitas::Component::Index)) : Bool
+    def has_components?(indices : Enumerable(Entitas::Component::Index)) : Bool
       indices.each do |index|
         return false unless self.has_component?(index)
       end
@@ -149,7 +149,7 @@ module Entitas
       false
     end
 
-    def has_any_component?(indices : Enumerable(::Entitas::Component::Index)) : Bool
+    def has_any_component?(indices : Enumerable(Entitas::Component::Index)) : Bool
       indices.each do |index|
         return true if self.has_component?(index)
       end

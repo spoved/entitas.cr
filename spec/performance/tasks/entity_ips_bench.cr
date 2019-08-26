@@ -1,4 +1,4 @@
-start_bench ::Entitas::Entity, ->do
+start_bench Entitas::Entity, ->do
   bench "#reactivate", ->{
     ctx = TestContext.new
     e = ctx.create_entity

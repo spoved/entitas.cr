@@ -37,8 +37,8 @@ module Entitas
       set_cache_hooks
 
       @context_info = context_info || create_default_context_info
-      @component_pools = Array(::Entitas::ComponentPool).new(total_components) do
-        ::Entitas::ComponentPool.new
+      @component_pools = Array(Entitas::ComponentPool).new(total_components) do
+        Entitas::ComponentPool.new
       end
 
       @groups_for_index = Array(Set(Group)).new(total_components) do
@@ -69,17 +69,17 @@ module Entitas
       {% if !flag?(:disable_logging) %}logger.debug("Creating default context", "Context"){% end %}
 
       Entitas::Context::Info.new("Unnamed Context",
-        ::Entitas::Component::COMPONENT_NAMES,
-        ::Entitas::Component::COMPONENT_KLASSES)
+        Entitas::Component::COMPONENT_NAMES,
+        Entitas::Component::COMPONENT_KLASSES)
     end
 
-    def context_info : ::Entitas::Context::Info
+    def context_info : Entitas::Context::Info
       @context_info ||= create_default_context_info
     end
 
     # The contextInfo contains information about the context.
     # It's used to provide better error messages.
-    def info : ::Entitas::Context::Info
+    def info : Entitas::Context::Info
       self.context_info
     end
 
