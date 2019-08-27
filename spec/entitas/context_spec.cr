@@ -202,9 +202,10 @@ describe Entitas::Context do
         ctx.on_entity_will_be_destroyed do |event|
           did_dispatch += 1
           event.context.should be ctx
-          event.entity.should be e
-          event.entity.has_a?.should be_true
-          event.entity.enabled?.should be_true
+          entity = event.entity.as(TestEntity)
+          entity.should be e
+          entity.has_a?.should be_true
+          entity.enabled?.should be_true
           event.context.get_entities.size.should eq 0
         end
 
@@ -218,9 +219,11 @@ describe Entitas::Context do
         ctx, e = context_with_entity
         ctx.on_entity_destroyed do |event|
           did_dispatch += 1
+          entity = event.entity.as(TestEntity)
+
           event.context.should be ctx
           event.entity.should be e
-          event.entity.has_a?.should be_false
+          entity.has_a?.should be_false
           event.entity.enabled?.should be_false
         end
 
@@ -236,7 +239,7 @@ describe Entitas::Context do
           event.entity.retain_count.should eq 1
           new_e = ctx.create_entity
           new_e.should_not be_nil
-          new_e.should_not be event.entity
+          new_e.should_not be event.entity.as(TestEntity)
         end
 
         e.destroy
@@ -653,7 +656,7 @@ describe Entitas::Context do
         it "cant add component not in context" do
           ctx = InputContext.new
           expect_raises Entitas::Entity::Error::DoesNotHaveComponent do
-            ctx.create_entity.add_a
+            ctx.create_entity.add_component(Entitas::Component::Index::A, A.new)
           end
         end
 
@@ -704,7 +707,7 @@ describe Entitas::Context do
 
         group_a.on_entity_added do |event|
           did_execute += 1
-          entity = event.entity
+          entity = event.entity.as(TestEntity)
           entity.del_a
         end
 

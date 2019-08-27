@@ -28,12 +28,12 @@ class Entitas::Component
       # entity.replace_{{component_name.id.underscore}}(new_comp)
       # entity.get_{{component_name.id.underscore}} # => (new_comp)
       # ```
-      def replace_{{component_name.id.underscore}}(component : {{component_name.id}})
+      def replace_{{component_name.id.underscore}}(component : ::{{component_name.id}})
         self.replace_component(component)
       end
 
       # Alias. See `#replace_{{component_name.id.underscore}}`
-      def replace_component_{{component_name.id.underscore}}(component : {{component_name.id}})
+      def replace_component_{{component_name.id.underscore}}(component : ::{{component_name.id}})
         self.replace_{{component_name.id.underscore}}(component)
       end
 
@@ -44,7 +44,7 @@ class Entitas::Component
 
       # Will return true if the entity has an component `{{component_name}}` or false if it does not
       def has_component_{{component_name.id.underscore}}? : Bool
-        self.has_component?(self.component_index_value({{component_name.id}}))
+        self.has_component?(self.component_index_value(::{{component_name.id}}))
       end
 
       # Will return the component that is a `{{component_name.id}}` or raise
@@ -53,8 +53,8 @@ class Entitas::Component
       end
 
       # Will return the component that is a `{{component_name.id}}` or raise
-      def get_component_{{component_name.id.underscore}} : {{component_name.id}}
-        self.get_component(self.component_index_value({{component_name.id}})).as({{component_name.id}})
+      def get_component_{{component_name.id.underscore}} : ::{{component_name.id}}
+        self.get_component(self.component_index_value(::{{component_name.id}})).as(::{{component_name.id}})
       end
 
       # Add a `{{component_name.id}}` to the entity. Returns `self` to allow chainables
@@ -70,8 +70,8 @@ class Entitas::Component
       # entity.add_component_{{component_name.id.underscore}}
       # ```
       def add_component_{{component_name.id.underscore}}(**args) : Entitas::Entity
-        component = self.create_component({{component_name.id}}, **args)
-        self.add_component(self.component_index_value({{component_name.id}}), component)
+        component = self.create_component(::{{component_name.id}}, **args)
+        self.add_component(self.component_index_value(::{{component_name.id}}), component)
         self
       end
 
@@ -91,7 +91,7 @@ class Entitas::Component
       # entity.{{component_name.id.underscore}} # => nil
       # ```
       def del_component_{{component_name.id.underscore}} : Entitas::Entity
-        self.remove_component(self.component_index_value({{component_name.id}}))
+        self.remove_component(self.component_index_value(::{{component_name.id}}))
         self
       end
 

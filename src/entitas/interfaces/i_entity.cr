@@ -35,9 +35,11 @@ module Entitas::IEntity
   abstract def component_index_class(index) : Entitas::Component.class
   abstract def component_pools : Array(Entitas::ComponentPool)
 
-  abstract def create_component(index : Entitas::Component::Index, **args)
+  macro finished
+    abstract def create_component(index : Entitas::Component::Index, **args)
+  end
 
-  def create_component(_type, **args)
+  def create_component(_type : Entitas::Component.class, **args)
     self.create_component(_type.index, **args)
   end
 

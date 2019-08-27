@@ -98,7 +98,7 @@ describe Entitas::ReactiveSystem do
     it "collects changed entities in execute" do
       ctx, sys = new_system
       e = create_entity_ab(ctx)
-      sys.execute_action = ->(entities : Array(Entitas::IEntity)) { entities.first.replace_a(A.new); nil }
+      sys.execute_action = ->(entities : Array(Entitas::IEntity)) { entities.first.as(TestEntity).replace_a(A.new); nil }
       sys.execute
       sys.execute
       assert_entities(sys, e, 2)
@@ -284,7 +284,7 @@ describe Entitas::ReactiveSystem do
     it "clears reactive system after execute" do
       ctx, sys = new_system
       sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
-        entities[0].replace_a(A.new)
+        entities[0].as(TestEntity).replace_a(A.new)
         nil
       end
 

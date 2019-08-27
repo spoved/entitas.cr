@@ -5,7 +5,7 @@ def before
   sys = MultiReactiveSystemSpy.new(contexts: contexts)
   sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
     entities.each do |e|
-      e.name_age.age += 10
+      e.as(TestEntity).name_age.age += 10
     end
   end
 

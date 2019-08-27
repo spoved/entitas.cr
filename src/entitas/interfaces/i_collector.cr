@@ -1,6 +1,8 @@
 module Entitas::ICollector
-  include Enumerable(IEntity)
-  getter entities : Set(IEntity) = Set(IEntity).new
+  macro included
+    include Enumerable(TEntity)
+    getter entities : Set(TEntity) = Set(TEntity).new
+  end
 
   abstract def activate
   abstract def deactivate
