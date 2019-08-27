@@ -1,22 +1,28 @@
+require "./interfaces/i_matcher"
 require "./matcher/*"
 
 module Entitas
   class Matcher
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    getter all_of_indices : Set(Entitas::Component::Index)
-    getter any_of_indices : Set(Entitas::Component::Index)
-    getter none_of_indices : Set(Entitas::Component::Index)
+    include IAllOfMatcher
 
     property component_names : Array(String) = Array(String).new
 
     protected setter all_of_indices : Set(Entitas::Component::Index) = Set(Entitas::Component::Index).new
     protected setter any_of_indices : Set(Entitas::Component::Index) = Set(Entitas::Component::Index).new
     protected setter none_of_indices : Set(Entitas::Component::Index) = Set(Entitas::Component::Index).new
+
     protected setter indices : Set(Entitas::Component::Index)? = nil
 
     def indices : Set(Entitas::Component::Index)
-      @indices ||= Set(Entitas::Component::Index).new.concat(self.all_of_indices).concat(self.any_of_indices).concat(self.none_of_indices)
+      @indices ||= Set(Entitas::Component::Index).new.concat(
+        self.all_of_indices
+      ).concat(
+        self.any_of_indices
+      ).concat(
+        self.none_of_indices
+      )
     end
 
     def matches?(entity : Entitas::Entity)
@@ -53,14 +59,16 @@ module Entitas
     ####################
 
     macro finished
-      {% begin %}{% for match in ["all", "any", "none"] %}
+      {% begin %}{% for match, interface in {"all"  => "IAllOfMatcher",
+                                             "any"  => "IAnyOfMatcher",
+                                             "none" => "INoneOfMatcher"} %}
 
       # Create a matcher to match entities with {{match.upcase}} of the provided `Entitas::Component` classes
       #
       # ```
       # Entitas::Matcher.new.{{match.id}}_of(A, B)
       # ```
-      def {{match.id}}_of(*comps : Entitas::Component.class) : Matcher
+      def {{match.id}}_of(*comps : Entitas::Component.class) : {{interface.id}}
         self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(comps.size)
         comps.each { |c| self.{{match.id}}_of_indices << c.index }
         self
@@ -72,7 +80,7 @@ module Entitas
       # ```
       # Entitas::Matcher.new.{{match.id}}_of(0)
       # ```
-      def {{match.id}}_of(*indices : Int32) : Matcher
+      def {{match.id}}_of(*indices : Int32) : {{interface.id}}
         self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices.size)
         indices.each { |i| self.{{match.id}}_of_indices << Entitas::Component::Index.new(i) }
         self
@@ -84,7 +92,7 @@ module Entitas
       # ```
       # Entitas::Matcher.new.{{match.id}}_of(Entitas::Component::Index::A)
       # ```
-      def {{match.id}}_of(*indices : Entitas::Component::Index) : Matcher
+      def {{match.id}}_of(*indices : Entitas::Component::Index) : {{interface.id}}
         self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices)
         self
       end
@@ -97,7 +105,7 @@ module Entitas
       # m2 = Entitas::Matcher.new.{{match.id}}_of(B)
       # matcher = Entitas::Matcher.new.{{match.id}}_of(m1, m2)
       # ```
-      def {{match.id}}_of(*matchers : Matcher) : Matcher
+      def {{match.id}}_of(*matchers : IMatcher) : {{interface.id}}
         self.{{match.id}}_of_indices.concat(self.class.merge_indicies(*matchers))
         self.class.set_component_names(self, *matchers)
         self
@@ -109,7 +117,7 @@ module Entitas
     # Class methods
     ####################
 
-    protected def self.merge(*matchers : Matcher) : Matcher
+    protected def self.merge(*matchers : IMatcher) : IMatcher
       matcher = Entitas::Matcher.new
 
       matchers.each do |m|
@@ -121,7 +129,7 @@ module Entitas
       matcher
     end
 
-    protected def self.merge_indicies(*matchers : Matcher) : Set(Entitas::Component::Index)
+    protected def self.merge_indicies(*matchers : IMatcher) : Set(Entitas::Component::Index)
       indices_cache = Set(Entitas::Component::Index).new(matchers.size)
       matchers.each do |m|
         raise Error.new(m.indices.size) if m.indices.size != 1
@@ -130,14 +138,14 @@ module Entitas
       indices_cache
     end
 
-    protected def self.get_component_names(*matchers : Matcher) : Enumerable(String)?
+    protected def self.get_component_names(*matchers : IMatcher) : Enumerable(String)?
       matchers.each do |m|
         return m.component_names unless m.component_names.empty?
       end
       nil
     end
 
-    protected def self.set_component_names(matcher : Matcher, *matchers : Matcher) : Nil
+    protected def self.set_component_names(matcher : IMatcher, *matchers : IMatcher) : Nil
       names = get_component_names(*matchers)
       unless names.nil?
         matcher.component_names = names
