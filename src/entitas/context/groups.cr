@@ -1,7 +1,7 @@
 require "../group"
 
 module Entitas
-  abstract class Context
+  abstract class Context(TEntity)
     protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
     protected property groups_for_index : Array(Set(Entitas::Group))
     private property group_events_buffer = Set(Tuple(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
@@ -33,7 +33,7 @@ module Entitas
       end
     end
 
-    def update_groups_component_added_or_removed(entity : Entitas::Entity, index : Int32, component : Entitas::Component?)
+    def update_groups_component_added_or_removed(entity : TEntity, index : Int32, component : Entitas::Component?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
       _groups = self.groups_for_index[index]?
@@ -66,7 +66,7 @@ module Entitas
       end
     end
 
-    def update_groups_component_replaced(entity : Entitas::Entity, index : Int32,
+    def update_groups_component_replaced(entity : TEntity, index : Int32,
                                          prev_component : Entitas::Component?,
                                          new_component : Entitas::Component?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_replaced : #{entity}", self.to_s){% end %}

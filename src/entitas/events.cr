@@ -13,9 +13,9 @@ module Entitas::Events
     AddedOrRemoved
   end
 
-  create_event OnEntityCreated, {context: Context, entity: Entity}
-  create_event OnEntityWillBeDestroyed, {context: Context, entity: Entity}
-  create_event OnEntityDestroyed, {context: Context, entity: Entity}
+  create_event OnEntityCreated, {context: IContext, entity: Entity}
+  create_event OnEntityWillBeDestroyed, {context: IContext, entity: Entity}
+  create_event OnEntityDestroyed, {context: IContext, entity: Entity}
   create_event OnEntityReleased, {entity: Entity}
   create_event OnEntityChanged, {entity: Entity, index: Int32, component: Entitas::Component?}
 
@@ -25,7 +25,7 @@ module Entitas::Events
 
   create_event OnDestroyEntity, {entity: Entity}
 
-  create_event OnGroupCreated, {context: Context, group: Group}
+  create_event OnGroupCreated, {context: IContext, group: Group}
 
   struct TriggerOn
     getter matcher : Entitas::Matcher

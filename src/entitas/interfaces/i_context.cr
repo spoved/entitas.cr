@@ -1,6 +1,6 @@
 require "../events"
 
-module Entitas::IContext(TEntity)
+module Entitas::IContext
   {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
   abstract def total_components : Int32
@@ -21,9 +21,9 @@ module Entitas::IContext(TEntity)
   abstract def remove_all_event_handlers
   abstract def reset
 
-  abstract def create_entity : TEntity
-  abstract def has_entity?(entity : TEntity) : Bool
-  abstract def get_entities : Array(TEntity)
+  abstract def create_entity : IEntity
+  abstract def has_entity?(entity) : Bool
+  abstract def get_entities : Array(IEntity)
 
   abstract def size : Int32
   abstract def each(&block : TEntity -> Nil)

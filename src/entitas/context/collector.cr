@@ -1,4 +1,4 @@
-class Entitas::Context
+class Entitas::Context(TEntity)
   def create_collector(matcher : Entitas::Matcher) : Entitas::Collector
     self.create_collector Entitas::Events::TriggerOn.new(matcher, Entitas::Events::GroupEvent::Added)
   end

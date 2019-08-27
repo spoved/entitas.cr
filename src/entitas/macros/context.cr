@@ -40,7 +40,7 @@ class Entitas::Context
   # This macro creates a sub class of `Entitas::Context` with the corresponding
   # name and provided components
   macro create_sub_context(context_name, *components)
-    class ::{{context_name.id}}Context < Entitas::Context
+    class ::{{context_name.id}}Context < Entitas::Context({{context_name.id}}Entity)
       CONTEXT_NAME = "{{context_name.id}}Context"
 
       Entitas::Component.create_index({{*components}})
@@ -81,7 +81,7 @@ class Entitas::Context
 
   # This macro will add unique component functions to the context provided
   macro add_unique_component(context_name, *components)
-    class ::{{context_name.id}}Context < Entitas::Context
+    class ::{{context_name.id}}Context < Entitas::Context({{context_name.id}}Entity)
 
       # def has_unique_component_already?(comp : Entitas::Component.class)
       #   case comp

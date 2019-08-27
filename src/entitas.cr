@@ -13,7 +13,7 @@ module Entitas
 
   abstract class Component; end
 
-  abstract class Context; end
+  abstract class Context(TEntity); end
 
   abstract class Entity; end
 

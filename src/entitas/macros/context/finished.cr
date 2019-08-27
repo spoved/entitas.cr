@@ -1,4 +1,4 @@
-class Entitas::Context
+class Entitas::Context(TEntity)
   macro finished
     {% begin %}
     private def set_entity_event_hooks(entity)

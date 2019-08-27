@@ -31,7 +31,7 @@ end
 
 class Entitas::EntityIndex::Error < Entitas::Error
   private class ContextError < Error
-    getter context : Context
+    getter context : IContext
     getter name : String
 
     def initialize(@context, @name); end
@@ -56,7 +56,7 @@ end
 
 class Entitas::Context::Error < Entitas::Error
   class Info < Error
-    getter context : Entitas::Context
+    getter context : Entitas::IContext
     getter context_info : Entitas::Context::Info
 
     def initialize(@context, @context_info)
@@ -70,8 +70,8 @@ class Entitas::Context::Error < Entitas::Error
   end
 
   class StillHasRetainedEntities < Error
-    getter context : Context
-    getter retained_entities : Set(Entity)
+    getter context : IContext
+    getter retained_entities : Set(IEntity)
 
     def initialize(@context, @retained_entities); end
   end

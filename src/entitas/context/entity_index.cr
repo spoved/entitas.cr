@@ -1,4 +1,4 @@
-class Entitas::Context
+class Entitas::Context(TEntity)
   protected property entity_indices : Hash(String, Entitas::IEntityIndex) = Hash(String, Entitas::IEntityIndex).new
 
   def add_entity_index(entity_index : Entitas::IEntityIndex)

@@ -1,7 +1,7 @@
 require "../component"
 
 module Entitas
-  abstract class Context
+  abstract class Context(TEntity)
     class Info
       getter name : String
       getter component_names : Array(String)

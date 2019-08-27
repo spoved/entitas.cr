@@ -13,19 +13,19 @@ module Entitas
   #  You can create and destroy entities and get groups of entities.
   #  The prefered way to create a context is to use the generated methods
   #  from the code generator, e.g. var context = new GameContext();
-  abstract class Context
+  abstract class Context(TEntity)
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    include IContext(Entitas::Entity)
+    include IContext
 
-    include Entitas::Helper::Entities(Entitas::Entity)
+    include Entitas::Helper::Entities(TEntity)
     include Entitas::Helper::ComponentPools
 
     protected property creation_index : Int32
     protected setter context_info : Entitas::Context::Info
 
-    protected property reusable_entities = Array(Entitas::Entity).new
-    protected property retained_entities = Set(Entitas::Entity).new
+    protected property reusable_entities = Array(TEntity).new
+    protected property retained_entities = Set(IEntity).new
     protected property component_names_cache : Array(String) = Array(String).new
 
     emits_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated,
@@ -90,7 +90,7 @@ module Entitas
     ############################
 
     # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
-    def create_entity : Entitas::Entity
+    def create_entity : TEntity
       {% if !flag?(:disable_logging) %}logger.debug("Creating new entity", self.class){% end %}
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
@@ -117,7 +117,7 @@ module Entitas
       entity
     end
 
-    def aerc_factory(entity : Entitas::Entity) : Entitas::SafeAERC
+    def aerc_factory(entity : TEntity) : Entitas::SafeAERC
       Entitas::SafeAERC.new(entity)
     end
 
@@ -128,7 +128,7 @@ module Entitas
       self.entities.clear
 
       if retained_entities.size != 0
-        raise Error::StillHasRetainedEntities.new self, retained_entities
+        raise Error::StillHasRetainedEntities.new(self, retained_entities)
       end
     end
 
@@ -142,20 +142,20 @@ module Entitas
     ############################
 
     def on_component_added(event : Entitas::Events::OnComponentAdded)
-      update_groups_component_added_or_removed(event.entity, event.index, event.component)
+      update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
     def on_component_removed(event : Entitas::Events::OnComponentRemoved)
-      update_groups_component_added_or_removed(event.entity, event.index, event.component)
+      update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
     def on_component_replaced(event : Entitas::Events::OnComponentReplaced)
-      update_groups_component_replaced(event.entity, event.index, event.prev_component, event.new_component)
+      update_groups_component_replaced(event.entity.as(TEntity), event.index, event.prev_component, event.new_component)
     end
 
     def on_entity_released(event : Entitas::Events::OnEntityReleased)
       {% if !flag?(:disable_logging) %}logger.info("Processing OnEntityReleased: #{event}"){% end %}
-      entity = event.entity
+      entity = event.entity.as(TEntity)
 
       if entity.enabled?
         raise Entity::Error::IsNotDestroyedException.new "Cannot release #{entity}!"
@@ -168,7 +168,7 @@ module Entitas
     end
 
     def on_destroy_entity(event : Entitas::Events::OnDestroyEntity)
-      entity = event.entity
+      entity = event.entity.as(TEntity)
 
       self.entities.delete(entity)
       self.entities_cache = nil
