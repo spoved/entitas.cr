@@ -5,18 +5,18 @@ require "./events"
 require "./helpers/entities"
 
 module Entitas
-  class Group
-    include Entitas::IGroup(Entitas::Entity)
-    include Entitas::Helper::Entities(Entitas::Entity)
+  class Group(TEntity)
+    include Entitas::IGroup
+    include Entitas::Helper::Entities(TEntity)
 
-    protected property single_entitie_cache : Entitas::Entity?
+    protected property single_entitie_cache : TEntity?
     protected property to_string_cache : String?
 
     def initialize(@matcher : Entitas::Matcher)
     end
 
     # This is used by the context to manage the group.
-    def handle_entity_silently(entity : Entity)
+    def handle_entity_silently(entity : IEntity)
       {% if !flag?(:disable_logging) %}logger.debug("Silently handling entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
@@ -26,7 +26,7 @@ module Entitas
       end
     end
 
-    def handle_entity(entity : Entity) : Entitas::Events::GroupChanged
+    def handle_entity(entity : IEntity) : Entitas::Events::GroupChanged
       {% if !flag?(:disable_logging) %}logger.debug("Handling entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
@@ -37,7 +37,7 @@ module Entitas
     end
 
     # This is used by the context to manage the group.
-    def handle_entity(entity : Entity, index : Int32, component : Entitas::Component)
+    def handle_entity(entity : IEntity, index : Int32, component : Entitas::Component)
       {% if !flag?(:disable_logging) %}logger.debug("Context handle entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
@@ -48,7 +48,7 @@ module Entitas
     end
 
     # This is used by the context to manage the group.
-    def update_entity(entity : Entitas::Entity, index : Int32, prev_component : Entitas::Component?, new_component : Entitas::Component?)
+    def update_entity(entity : IEntity, index : Int32, prev_component : Entitas::Component?, new_component : Entitas::Component?)
       {% if !flag?(:disable_logging) %}logger.debug("Update entity : #{entity}", self.to_s){% end %}
 
       if has_entity?(entity)
@@ -71,7 +71,7 @@ module Entitas
       self.clear_on_entity_updated_event_hooks
     end
 
-    def add_entity_silently(entity : Entity) : Entity | Bool
+    def add_entity_silently(entity : TEntity) : TEntity | Bool
       {% if !flag?(:disable_logging) %}logger.debug("Silently adding entity : #{entity}", self.to_s){% end %}
 
       if entity.enabled? && self.entities.add?(entity)
@@ -126,7 +126,7 @@ module Entitas
       end
     end
 
-    def get_entities(buff : Array(Entitas::Entity)) : Array(Entitas::Entity)
+    def get_entities(buff : Array(IEntity)) : Array(IEntity)
       buff.clear
       buff.concat entities
       buff
@@ -135,7 +135,7 @@ module Entitas
     # Returns the only entity in this group. It will return null
     # if the group is empty. It will throw an exception if the group
     # has more than one entity.
-    def get_single_entity : Entitas::Entity?
+    def get_single_entity : TEntity?
       if single_entitie_cache.nil?
         if size == 1
           self.single_entitie_cache = entities.first?

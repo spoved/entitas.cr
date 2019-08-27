@@ -1,14 +1,14 @@
 require "../spec_helper"
 
 private def new_group_a
-  Entitas::Group.new(Entitas::Matcher.all_of(A))
+  Entitas::Group(TestEntity).new(Entitas::Matcher.all_of(A))
 end
 
 private def new_group_a_w_e
   matcher = Entitas::Matcher.all_of(A)
   matcher.component_names = ["A"]
 
-  group = Entitas::Group.new(matcher)
+  group = Entitas::Group(TestEntity).new(matcher)
 
   entity = new_entity_with_a
   group.handle_add_ea(entity)
@@ -83,7 +83,7 @@ describe Entitas::Group do
 
     it "doesn't add entities to buffer" do
       group_a = new_group_a
-      buff = Array(Entitas::Entity).new
+      buff = Array(Entitas::IEntity).new
       buff << new_entity_with_a
       ret_buff = group_a.get_entities(buff)
       ret_buff.should be_empty
@@ -108,14 +108,14 @@ describe Entitas::Group do
 
     it "fills buffer with entities" do
       group_a, e_a1 = new_group_a_w_e
-      buff = Array(Entitas::Entity).new
+      buff = Array(Entitas::IEntity).new
       group_a.get_entities(buff)
       buff.size.should eq 1
       buff.first.should eq e_a1
     end
 
     it "clears buffer before filling" do
-      buff = Array(Entitas::Entity).new
+      buff = Array(Entitas::IEntity).new
       group_a, e_a1 = new_group_a_w_e
 
       buff << new_entity
@@ -542,7 +542,7 @@ describe Entitas::Group do
       Entitas::Matcher.all_of(A),
       Entitas::Matcher.all_of(B)
     )
-    group = Entitas::Group.new(m)
+    group = Entitas::Group(TestEntity).new(m)
     group.to_s.should eq "Group(AllOf(0, 1))"
   end
 end

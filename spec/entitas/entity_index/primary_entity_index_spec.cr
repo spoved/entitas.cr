@@ -7,9 +7,13 @@ end
 private def new_index
   ctx = new_context
   group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-  index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
-    (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
-  })
+  index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
+    name: "TestIndex",
+    group: group,
+    get_key: ->(entity : TestEntity, component : Entitas::Component?) {
+      (component.nil? ? entity.as(TestEntity).get_component_name_age.name : component.as(NameAge).name).as(String)
+    }
+  )
   name_age = NameAge.new(name: name)
   entity = ctx.create_entity
   entity.add_component(name_age)
@@ -19,10 +23,10 @@ end
 private def new_mk_index
   ctx = new_context
   group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-  index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new(
+  index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
     "TestIndex",
     group,
-    ->(entity : Entitas::Entity, component : Entitas::Component?) {
+    ->(entity : TestEntity, component : Entitas::Component?) {
       (component.nil? ? (
         ["#{entity.get_component_name_age.name}1", "#{entity.get_component_name_age.name}2"]
       ) : (
@@ -58,9 +62,13 @@ describe Entitas::PrimaryEntityIndex do
 
       it "has existing entity" do
         e, _, group = new_index
-        index = Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
-          (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
-        })
+        index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
+          "TestIndex",
+          group,
+          ->(entity : TestEntity, component : Entitas::Component?) {
+            (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
+          }
+        )
         index.get_entity(name).should be e
       end
 

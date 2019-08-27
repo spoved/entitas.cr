@@ -1,9 +1,9 @@
 require "./macros"
 
 module Entitas::Events
-  create_event OnEntityAdded, {group: Group, entity: Entity, index: Int32, component: Entitas::Component?}
-  create_event OnEntityRemoved, {group: Group, entity: Entity, index: Int32, component: Entitas::Component?}
-  create_event OnEntityUpdated, {group: Group, entity: Entity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
+  create_event OnEntityAdded, {group: IGroup, entity: IEntity, index: Int32, component: Entitas::Component?}
+  create_event OnEntityRemoved, {group: IGroup, entity: IEntity, index: Int32, component: Entitas::Component?}
+  create_event OnEntityUpdated, {group: IGroup, entity: IEntity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
 
   alias GroupChanged = OnEntityAdded.class | OnEntityRemoved.class | OnEntityUpdated.class | Nil
 
@@ -13,19 +13,19 @@ module Entitas::Events
     AddedOrRemoved
   end
 
-  create_event OnEntityCreated, {context: IContext, entity: Entity}
-  create_event OnEntityWillBeDestroyed, {context: IContext, entity: Entity}
-  create_event OnEntityDestroyed, {context: IContext, entity: Entity}
-  create_event OnEntityReleased, {entity: Entity}
-  create_event OnEntityChanged, {entity: Entity, index: Int32, component: Entitas::Component?}
+  create_event OnEntityCreated, {context: IContext, entity: IEntity}
+  create_event OnEntityWillBeDestroyed, {context: IContext, entity: IEntity}
+  create_event OnEntityDestroyed, {context: IContext, entity: IEntity}
+  create_event OnEntityReleased, {entity: IEntity}
+  create_event OnEntityChanged, {entity: IEntity, index: Int32, component: Entitas::Component?}
 
-  create_event OnComponentAdded, {entity: Entity, index: Int32, component: Entitas::Component}
-  create_event OnComponentRemoved, {entity: Entity, index: Int32, component: Entitas::Component?}
-  create_event OnComponentReplaced, {entity: Entity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
+  create_event OnComponentAdded, {entity: IEntity, index: Int32, component: Entitas::Component}
+  create_event OnComponentRemoved, {entity: IEntity, index: Int32, component: Entitas::Component?}
+  create_event OnComponentReplaced, {entity: IEntity, index: Int32, prev_component: Entitas::Component?, new_component: Entitas::Component?}
 
-  create_event OnDestroyEntity, {entity: Entity}
+  create_event OnDestroyEntity, {entity: IEntity}
 
-  create_event OnGroupCreated, {context: IContext, group: Group}
+  create_event OnGroupCreated, {context: IContext, group: IGroup}
 
   struct TriggerOn
     getter matcher : Entitas::Matcher

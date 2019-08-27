@@ -5,12 +5,12 @@ require "./entity"
 module Entitas
   # A Collector can observe one or more groups from the same context
   # and collects changed entities based on the specified groupEvent.
-  class Collector
+  class Collector(TEntity)
     {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
-    include ICollector(Entitas::Entity)
+    include ICollector
 
-    protected property groups : Array(Entitas::Group) = Array(Entitas::Group).new
+    protected property groups : Array(Group(TEntity)) = Array(Group(TEntity)).new
     protected property group_events : Array(Entitas::Events::GroupEvent) = Array(Entitas::Events::GroupEvent).new
 
     protected property to_string_cache : String?
@@ -21,7 +21,7 @@ module Entitas
 
     # Creates a Collector and will collect changed entities
     # based on the specified *group_event*.
-    def initialize(group : Group, group_event : Entitas::Events::GroupEvent)
+    def initialize(group : Group(TEntity), group_event : Entitas::Events::GroupEvent)
       @groups << group
       @group_events << group_event
       @add_entity_on_added_cache = ->add_entity(Entitas::Events::OnEntityAdded)
@@ -32,15 +32,15 @@ module Entitas
 
     # Creates a Collector and will collect changed entities
     # based on the specified *group_events*.
-    def self.new(groups : Array(Group), group_events : Array(Entitas::Events::GroupEvent))
+    def self.new(groups : Array(Group(TEntity)), group_events : Array(Entitas::Events::GroupEvent))
       if groups.size != group_events.size
         raise Error.new "Unbalanced count with groups (#{groups.size})" \
                         " and group events (#{group_events.size}). " \
                         "Group and group events count must be equal."
       end
 
-      instance = Collector.allocate
-      instance.groups = groups
+      instance = Collector(TEntity).allocate
+      instance.groups = groups.as(Array(Group(TEntity)))
       instance.group_events = group_events
 
       instance.add_entity_on_added_cache = ->instance.add_entity(Entitas::Events::OnEntityAdded)
@@ -86,7 +86,7 @@ module Entitas
     # Enumerable funcs
     ############################
 
-    # Returns the total number of `Entitas::Entity` in this `Collector`
+    # Returns the total number of `TEntity` in this `Collector`
     def size
       self.entities.size
     end
@@ -111,34 +111,37 @@ module Entitas
     # Entity funcs
     ############################
 
-    def add_entity(event : Entitas::Events::OnEntityAdded) : Nil
-      {% if !flag?(:disable_logging) %}
-        logger.debug("Processing OnEntityAdded : #{event.entity}", self.to_s)
-      {% end %}
-      return if self.entities.includes?(event.entity)
+    private def _add_entity(entity : TEntity)
+      return if self.entities.includes?(entity)
+      entities << entity
+      entity.retain(self)
+    end
 
-      entities << event.entity
-      event.entity.retain(self)
+    def add_entity(event : Entitas::Events::OnEntityAdded) : Nil
+      entity = event.entity.as(TEntity)
+
+      {% if !flag?(:disable_logging) %}
+        logger.debug("Processing OnEntityAdded : #{entity}", self.to_s)
+      {% end %}
+      _add_entity(entity)
     end
 
     def add_entity(event : Entitas::Events::OnEntityRemoved) : Nil
-      {% if !flag?(:disable_logging) %}
-        logger.debug("Processing OnEntityRemoved : #{event.entity}", self.to_s)
-      {% end %}
-      return if self.entities.includes?(event.entity)
+      entity = event.entity.as(TEntity)
 
-      entities << event.entity
-      event.entity.retain(self)
+      {% if !flag?(:disable_logging) %}
+        logger.debug("Processing OnEntityRemoved : #{entity}", self.to_s)
+      {% end %}
+
+      _add_entity(entity)
     end
 
     def add_entity(event : Entitas::Events::OnEntityUpdated) : Nil
+      entity = event.entity.as(TEntity)
       {% if !flag?(:disable_logging) %}
-        logger.debug("Processing OnEntityUpdated : #{event.entity}", self.to_s)
+        logger.debug("Processing OnEntityUpdated : #{entity}", self.to_s)
       {% end %}
-      return if self.entities.includes?(event.entity)
-
-      entities << event.entity
-      event.entity.retain(self)
+      _add_entity(entity)
     end
 
     ############################

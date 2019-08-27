@@ -4,7 +4,7 @@ class Entitas::Context(TEntity)
   end
 
   def create_collector(*triggers : Entitas::Events::TriggerOn) : Entitas::Collector
-    groups = Array(Entitas::Group).new
+    groups = Array(Entitas::Group(TEntity)).new
     group_events = Array(Entitas::Events::GroupEvent).new
     triggers.each do |t|
       groups << self.get_group(t.matcher)

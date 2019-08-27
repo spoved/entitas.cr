@@ -12,22 +12,22 @@ module Entitas
 
     include Entitas::Systems::ReactiveSystem
 
-    private getter collector : Entitas::Collector
-    private property buffer : Array(Entitas::Entity) = Array(Entitas::Entity).new
+    private getter collector : ICollector
+    private property buffer : Array(Entitas::IEntity) = Array(Entitas::IEntity).new
     private property to_string_cache : String? = nil
-    protected property _filter : Proc(Entitas::Entity, Bool) = ->(entity : Entitas::Entity) { true }
+    protected property _filter : Proc(Entitas::IEntity, Bool) = ->(entity : Entitas::IEntity) { true }
 
-    def initialize(@collector : Entitas::Collector); end
+    def initialize(@collector : ICollector); end
 
     macro inherited
-      def self.new(collector : Entitas::Collector, filter : Proc(Entitas::Entity, Bool)) : {{@type.id}}
+      def self.new(collector : Entitas::Collector, filter : Proc(Entitas::IEntity, Bool)) : {{@type.id}}
         instance = {{@type.id}}.allocate
         instance.initialize collector
         instance._filter = filter
         instance
       end
 
-      def self.new(context : Entitas::Context, filter : Proc(Entitas::Entity, Bool)) : {{@type.id}}
+      def self.new(context : Entitas::Context, filter : Proc(Entitas::IEntity, Bool)) : {{@type.id}}
         instance = {{@type.id}}.allocate
         instance.initialize instance.get_trigger(context)
         instance._filter = filter
@@ -42,7 +42,7 @@ module Entitas
     end
 
     # Specify the collector that will trigger the ReactiveSystem.
-    abstract def get_trigger(context : Entitas::Context) : Entitas::Collector
+    abstract def get_trigger(context : Entitas::Context) : ICollector
 
     # This will exclude all entities which don't pass the filter.
     def filter(entity)

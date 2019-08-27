@@ -19,9 +19,9 @@ module Entitas
 
   class Systems; end
 
-  class Group; end
+  class Group(TEntity); end
 
-  class Collector; end
+  class Collector(TEntity); end
 
   class Matcher; end
 

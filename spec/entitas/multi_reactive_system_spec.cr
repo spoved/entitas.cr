@@ -2,8 +2,8 @@ require "../spec_helper"
 
 def before
   contexts = Contexts.new
-  sys = MultiReactiveSystemSpy.new(contexts)
-  sys.execute_action = ->(entities : Array(Entitas::Entity)) do
+  sys = MultiReactiveSystemSpy.new(contexts: contexts)
+  sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
     entities.each do |e|
       e.name_age.age += 10
     end
@@ -22,7 +22,7 @@ end
 
 def before2
   contexts = Contexts.new
-  sys = MultiReactiveSystemSpy.new(contexts)
+  sys = MultiReactiveSystemSpy.new(contexts: contexts)
 
   e1 = contexts.test.create_entity
   e1.add_name_age(name: "Max", age: 42)

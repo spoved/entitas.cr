@@ -2,18 +2,18 @@ require "../group"
 
 module Entitas
   abstract class Context(TEntity)
-    protected property groups : Hash(String, Entitas::Group) = Hash(String, Entitas::Group).new
-    protected property groups_for_index : Array(Set(Entitas::Group))
-    private property group_events_buffer = Set(Tuple(Group, Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
+    protected property groups : Hash(String, Group(TEntity)) = Hash(String, Group(TEntity)).new
+    protected property groups_for_index : Array(Set(Group(TEntity)))
+    private property group_events_buffer = Set(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
 
     # Returns a group for the specified matcher.
     # Calling context.GetGroup(matcher) with the same matcher will always
     # return the same instance of the group.
-    def get_group(matcher : Entitas::Matcher) : Entitas::Group
+    def get_group(matcher : Entitas::Matcher) : Group(TEntity)
       if self.groups[matcher.to_s]?
         self.groups[matcher.to_s]
       else
-        group = Group.new(matcher)
+        group = Group(TEntity).new(matcher)
 
         {% if !flag?(:disable_logging) %}logger.debug("created new group: #{group}", self){% end %}
 

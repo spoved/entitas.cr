@@ -18,7 +18,7 @@ end
 
 private def entity_index(ctx)
   group = ctx.get_group(Entitas::Matcher.all_of(A))
-  Entitas::PrimaryEntityIndex(Entitas::Entity, String).new("TestIndex", group, ->(entity : Entitas::Entity, component : Entitas::Component?) {
+  Entitas::PrimaryEntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::Component?) {
     (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
   })
 end
@@ -188,7 +188,7 @@ describe Entitas::Context do
         event_entity : Entitas::Entity? = nil
         ctx.on_entity_created do |event|
           did_dispatch += 1
-          event_entity = event.entity
+          event_entity = event.entity.as(TestEntity)
         end
 
         e = ctx.create_entity
@@ -258,12 +258,12 @@ describe Entitas::Context do
         did_dispatch = 0
         ctx, _ = context_with_entity
 
-        event_group : Entitas::Group? = nil
+        event_group : Entitas::Group(TestEntity)? = nil
 
         ctx.on_group_created do |event|
           did_dispatch += 1
           event.context.should be ctx
-          event_group = event.group
+          event_group = event.group.as(Entitas::Group(TestEntity))
         end
 
         group = ctx.get_group(Entitas::Matcher.all_of(A))

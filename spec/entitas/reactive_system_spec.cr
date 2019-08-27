@@ -98,7 +98,7 @@ describe Entitas::ReactiveSystem do
     it "collects changed entities in execute" do
       ctx, sys = new_system
       e = create_entity_ab(ctx)
-      sys.execute_action = ->(entities : Array(Entitas::Entity)) { entities.first.replace_a(A.new); nil }
+      sys.execute_action = ->(entities : Array(Entitas::IEntity)) { entities.first.replace_a(A.new); nil }
       sys.execute
       sys.execute
       assert_entities(sys, e, 2)
@@ -107,8 +107,8 @@ describe Entitas::ReactiveSystem do
     it "collects created entities in execute" do
       ctx, sys = new_system
       e1 = create_entity_ab(ctx)
-      e2 : Entitas::Entity? = nil
-      sys.execute_action = ->(entities : Array(Entitas::Entity)) do
+      e2 : Entitas::IEntity? = nil
+      sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
         e2 = create_entity_ab(ctx) if e2.nil?
         nil
       end
@@ -187,7 +187,7 @@ describe Entitas::ReactiveSystem do
       e = create_entity_ab(ctx)
       did_execute = 0
 
-      sys.execute_action = ->(entities : Array(Entitas::Entity)) do
+      sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
         did_execute += 1
         entities.first.retain_count.should eq 1
         nil
@@ -242,7 +242,8 @@ describe Entitas::ReactiveSystem do
   it "filter entities" do
     ctx = new_context
 
-    filter_proc = ->(entity : Entitas::Entity) do
+    filter_proc = ->(entity : Entitas::IEntity) do
+      entity = entity.as(TestEntity)
       comp = entity.get_component(Entitas::Component::Index::NameAge)
       if comp.nil?
         false
@@ -262,7 +263,7 @@ describe Entitas::ReactiveSystem do
     eab2.add_component(NameAge.new(age: 50))
 
     did_execute = 0
-    sys.execute_action = ->(entities : Array(Entitas::Entity)) do
+    sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
       did_execute += 1
       eab2.retain_count.should eq 3
       nil
@@ -282,7 +283,7 @@ describe Entitas::ReactiveSystem do
   describe "clear" do
     it "clears reactive system after execute" do
       ctx, sys = new_system
-      sys.execute_action = ->(entities : Array(Entitas::Entity)) do
+      sys.execute_action = ->(entities : Array(Entitas::IEntity)) do
         entities[0].replace_a(A.new)
         nil
       end

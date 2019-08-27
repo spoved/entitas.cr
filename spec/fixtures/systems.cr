@@ -46,9 +46,9 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
   property did_execute = 0
   property did_cleanup = 0
   property did_tear_down = 0
-  property entities = Array(Entitas::Entity).new
+  property entities = Array(Entitas::IEntity).new
 
-  property execute_action : Proc(Array(Entitas::Entity), Nil)? = nil
+  property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
   def get_trigger(context)
   end
@@ -62,10 +62,10 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
       logger.warn "#{self} running execute(entities)"
     {% end %}
     self.did_execute += 1
-    self.entities = entities.dup
+    self.entities = entities.map { |e| e.as(Entitas::IEntity) }
 
     if !execute_action.nil?
-      execute_action.as(Proc(Array(Entitas::Entity), Nil)).call(entities)
+      execute_action.as(Proc(Array(Entitas::IEntity), Nil)).call(entities)
     end
   end
 
@@ -80,14 +80,14 @@ end
 
 class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   property did_execute = 0
-  property entities = Array(Entitas::Entity).new
-  property execute_action : Proc(Array(Entitas::Entity), Nil)? = nil
+  property entities = Array(Entitas::IEntity).new
+  property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
   def get_trigger(contexts : ::Contexts)
     [
       contexts.test.create_collector(TestMatcher.name_age),
       contexts.test2.create_collector(Test2Matcher.name_age),
-    ]
+    ] of Entitas::ICollector
   end
 
   def execute(entities)
@@ -96,24 +96,24 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
     {% end %}
 
     self.did_execute += 1
-    self.entities = entities.dup
+    self.entities = entities.map { |e| e.as(Entitas::IEntity) }
 
     if !execute_action.nil?
-      execute_action.as(Proc(Array(Entitas::Entity), Nil)).call(entities)
+      execute_action.as(Proc(Array(Entitas::IEntity), Nil)).call(entities)
     end
   end
 end
 
 class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   property did_execute = 0
-  property entities = Array(Entitas::Entity).new
-  property execute_action : Proc(Array(Entitas::Entity), Nil)? = nil
+  property entities = Array(Entitas::IEntity).new
+  property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
   def get_trigger(contexts : ::Contexts)
     [
       contexts.test.create_collector(TestMatcher.name_age),
       contexts.test.create_collector(TestMatcher.name_age.removed),
-    ]
+    ] of Entitas::ICollector
   end
 
   def execute(entities)
@@ -121,10 +121,10 @@ class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
       logger.debug "#{self} running execute(entities)"
     {% end %}
     self.did_execute += 1
-    self.entities = entities.dup
+    self.entities = entities.map { |e| e.as(Entitas::IEntity) }
 
     if !execute_action.nil?
-      execute_action.as(Proc(Array(Entitas::Entity), Nil)).call(entities)
+      execute_action.as(Proc(Array(Entitas::IEntity), Nil)).call(entities)
     end
   end
 end

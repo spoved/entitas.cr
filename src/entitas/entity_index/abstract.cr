@@ -8,7 +8,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   abstract def add_entity(key : TKey, entity : TEntity)
   abstract def del_entity(key : TKey, entity : TEntity)
 
-  protected property group : Entitas::Group
+  protected property group : Entitas::Group(TEntity)
   protected setter get_key : Proc(TEntity, Entitas::Component?, TKey)? = nil
   protected setter get_keys : Proc(TEntity, Entitas::Component?, Array(TKey))? = nil
 
@@ -44,7 +44,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   end
 
   def initialize(
-    @name : String, @group : Entitas::Group,
+    @name : String, @group : Entitas::Group(TEntity),
     @get_key : Proc(TEntity, Entitas::Component?, TKey)?,
     @get_keys : Proc(TEntity, Entitas::Component?, Array(TKey))?,
     @is_single_key : Bool
@@ -53,7 +53,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
     @on_entity_removed = ->self.on_entity_removed(Entitas::Events::OnEntityRemoved)
   end
 
-  def self.new(name : String, group : Entitas::Group, get_key : Proc(TEntity, Entitas::Component?, TKey))
+  def self.new(name : String, group : Entitas::Group(TEntity), get_key : Proc(TEntity, Entitas::Component?, TKey))
     instance = self.allocate
     instance.initialize(
       name: name,
@@ -66,7 +66,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
     instance
   end
 
-  def self.new(name : String, group : Entitas::Group, get_keys : Proc(TEntity, Entitas::Component?, Array(TKey)))
+  def self.new(name : String, group : Entitas::Group(TEntity), get_keys : Proc(TEntity, Entitas::Component?, Array(TKey)))
     instance = self.allocate
     instance.initialize(
       name: name,
@@ -96,21 +96,23 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   end
 
   protected def on_entity_added(event : Entitas::Events::OnEntityAdded)
+    entity = event.entity.as(TEntity)
     if single_key?
-      add_entity(self.get_key.call(event.entity, event.component), event.entity)
+      add_entity(self.get_key.call(entity, event.component), entity)
     else
-      self.get_keys.call(event.entity, event.component).each do |key|
-        add_entity(key, event.entity)
+      self.get_keys.call(entity, event.component).each do |key|
+        add_entity(key, entity)
       end
     end
   end
 
   protected def on_entity_removed(event : Entitas::Events::OnEntityRemoved)
+    entity = event.entity.as(TEntity)
     if single_key?
-      del_entity(self.get_key.call(event.entity, event.component), event.entity)
+      del_entity(self.get_key.call(entity, event.component), entity)
     else
-      self.get_keys.call(event.entity, event.component).each do |key|
-        del_entity(key, event.entity)
+      self.get_keys.call(entity, event.component).each do |key|
+        del_entity(key, entity)
       end
     end
   end

@@ -43,8 +43,8 @@ module Entitas
         Entitas::ComponentPool.new
       end
 
-      @groups_for_index = Array(Set(Group)).new(total_components) do
-        Set(Group).new
+      @groups_for_index = Array(Set(Group(TEntity))).new(total_components) do
+        Set(Group(TEntity)).new
       end
 
       if self.context_info.component_names.size != self.total_components
