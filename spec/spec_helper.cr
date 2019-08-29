@@ -30,8 +30,8 @@ end
 
 def new_context_info
   Entitas::Context::Info.new("TestContext",
-    TestContext::COMPONENT_TO_INDEX_MAP.keys.map &.to_s,
-    TestContext::COMPONENT_TO_INDEX_MAP.keys,
+    TestContext::COMPONENT_NAMES,
+    TestContext::COMPONENT_KLASSES,
   )
 end
 

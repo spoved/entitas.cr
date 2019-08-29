@@ -1,5 +1,5 @@
 class Entitas::Component
-  macro is_unique
+  macro inherited
 
     # If the component has the unique annotation,
     #   set the class method to `true`

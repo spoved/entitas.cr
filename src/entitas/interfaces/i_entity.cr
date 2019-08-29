@@ -31,13 +31,11 @@ module Entitas::IEntity
 
   abstract def reactivate(creation_index : Int32)
 
-  abstract def component_index_value(klass) : Int32
+  abstract def component_index(index) : Entitas::Component::Index
+  abstract def component_index_value(index) : Int32
   abstract def component_index_class(index) : Entitas::Component.class
-  abstract def component_pools : Array(Entitas::ComponentPool)
 
-  macro finished
-    abstract def create_component(index : Entitas::Component::Index, **args)
-  end
+  abstract def component_pools : Array(Entitas::ComponentPool)
 
   def create_component(_type : Entitas::Component.class, **args)
     self.create_component(_type.index, **args)
@@ -58,6 +56,8 @@ module Entitas::IEntity
   def remove_component(index : Entitas::Component::Index) : Nil
     self.remove_component(self.component_index_value(index))
   end
+
+  abstract def create_component(index : Entitas::Component::Index, **args)
 
   abstract def replace_component(index : Int32, component : Entitas::Component?)
 

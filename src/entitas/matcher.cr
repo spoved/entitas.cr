@@ -1,5 +1,6 @@
 require "./interfaces/i_matcher"
 require "./matcher/*"
+require "./macros/matcher"
 
 module Entitas
   class Matcher

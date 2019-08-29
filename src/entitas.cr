@@ -13,6 +13,8 @@ module Entitas
 
   abstract class Component; end
 
+  class Contexts; end
+
   abstract class Context(TEntity); end
 
   abstract class Entity; end
@@ -42,4 +44,7 @@ module Entitas
   alias EntityFactory = Proc(Entitas::Entity)
 end
 
+alias Contexts = Entitas::Contexts
+
+require "./entitas/macros/context"
 require "./entitas/*"
