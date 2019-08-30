@@ -123,7 +123,7 @@ class Entitas::Context(TEntity)
               self.replace_component(component)
             end
 
-            # Alias. See `#replace_{{component_name.id.underscore}}`
+            # Append. Alias for `replace_{{component_name.id.underscore}}`
             def replace_component_{{component_name.id.underscore}}(component : ::{{component_name.id}})
               self.replace_{{component_name.id.underscore}}(component)
             end
@@ -149,6 +149,7 @@ class Entitas::Context(TEntity)
             end
 
             # Add a `{{component_name.id}}` to the entity. Returns `self` to allow chainables
+            #
             # ```
             # entity.add_{{component_name.id.underscore}}
             # ```
@@ -157,6 +158,7 @@ class Entitas::Context(TEntity)
             end
 
             # Add a `{{component_name.id}}` to the entity. Returns `self` to allow chainables
+            #
             # ```
             # entity.add_component_{{component_name.id.underscore}}
             # ```
@@ -167,6 +169,7 @@ class Entitas::Context(TEntity)
             end
 
             # Delete `{{component_name.id}}` from the entity. Returns `self` to allow chainables
+            #
             # ```
             # entity.del_{{component_name.id.underscore}}
             # entity.{{component_name.id.underscore}} # => nil
@@ -177,6 +180,7 @@ class Entitas::Context(TEntity)
             end
 
             # Delete `{{component_name.id}}` from the entity. Returns `self` to allow chainables
+            #
             # ```
             # entity.del_{{component_name.id.underscore}}
             # entity.{{component_name.id.underscore}} # => nil
@@ -186,12 +190,12 @@ class Entitas::Context(TEntity)
               self
             end
 
-            # See `#del_{{component_name.id.underscore}}`
+            # Append. Alias for `del_{{component_name.id.underscore}}`
             def remove_{{component_name.id.underscore}}
               self.del_{{component_name.id.underscore}}
             end
 
-            # See `#del_component_{{component_name.id.underscore}}`
+            # Append. Alias for `del_component_{{component_name.id.underscore}}`
             def remove_component_{{component_name.id.underscore}}
               self.del_component_{{component_name.id.underscore}}
             end
@@ -201,6 +205,8 @@ class Entitas::Context(TEntity)
 
 
         {% for context_name, components in context_map %}
+
+          # `Entitas::Entity` for the `{{context_name.id}}Context`
           class ::{{context_name.id}}Entity < Entitas::Entity
             {% for comp in components %}
             include ::{{comp.name.id}}::Helper
@@ -218,6 +224,7 @@ class Entitas::Context(TEntity)
           # Create a sub class of `Entitas::Context` with the corresponding
           # name and provided components
           #############################################
+
 
           class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
 
@@ -267,6 +274,7 @@ class Entitas::Context(TEntity)
               TOTAL_COMPONENTS
             end
 
+            # ditto
             def self.total_components : Int32
               TOTAL_COMPONENTS
             end

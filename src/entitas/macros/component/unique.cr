@@ -6,22 +6,22 @@ class Entitas::Component
     # The framework will make sure that only one instance of a unique component can be present in your context
     {% if @type.annotation(::Component::Unique) %}
       # Will return true if the class is a unique component for a context
-      def is_unique?
+      def is_unique? : Bool
         true
       end
 
-      # Will return true if the class is a unique component for a context
-      def self.is_unique?
+      # ditto
+      def self.is_unique? : Bool
         true
       end
     {% else %}
       # Will return true if the class is a unique component for a context
-      def is_unique?
+      def is_unique? : Bool
         false
       end
 
-      # Will return true if the class is a unique component for a context
-      def self.is_unique?
+      # ditto
+      def self.is_unique? : Bool
         false
       end
     {% end %}

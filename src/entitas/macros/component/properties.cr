@@ -4,6 +4,7 @@ class Entitas::Component
     {% if kwargs[:default] %}
       property {{ var.id }} : {{kype}} = {{ kwargs[:default] }}
 
+      # :nodoc:
       # This is a private methods used for code generation
       private def _entitas_set_{{ var.id }}(value : {{kype}} = {{ kwargs[:default] }})
         @{{ var.id }} = value
@@ -11,6 +12,7 @@ class Entitas::Component
     {% else %}
       property {{ var.id }} : {{kype}}? = nil
 
+      # :nodoc:
       # This is a private methods used for code generation
       private def _entitas_set_{{ var.id }}(value : {{kype}})
         @{{ var.id }} = value
