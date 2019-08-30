@@ -57,8 +57,7 @@ class InputSystem
     else
       # logger.unknown context.component_pools.inspect
       logger.unknown context.entities.size
-      context.create_entity
-        .add_debug_message(message: char.inspect)
+      context.create_entity.add_debug_message(message: char.inspect)
       logger.unknown context.entities.size
     end
   end
