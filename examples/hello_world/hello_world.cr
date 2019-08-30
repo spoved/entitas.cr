@@ -15,7 +15,7 @@ class DebugMessageSystem < Entitas::ReactiveSystem
   # getter logger = ::Logger.new(STDOUT)
   spoved_logger
 
-  def get_trigger(context : Entitas::Context) : Entitas::Collector
+  def get_trigger(context : Entitas::Context) : GameContext
     logger.level = Logger::INFO
     context.create_collector(GameMatcher.debug_message)
   end
@@ -30,9 +30,9 @@ end
 class HelloWorldSystem
   include Entitas::Systems::InitializeSystem
 
-  getter context : Entitas::Context
+  getter context : GameContext
 
-  def initialize(@context : Entitas::Context); end
+  def initialize(@context : GameContext); end
 
   def init; end
 end
@@ -42,9 +42,9 @@ class InputSystem
 
   include Entitas::Systems::ExecuteSystem
 
-  getter context : Entitas::Context
+  getter context : GameContext
 
-  def initialize(@context : Entitas::Context); end
+  def initialize(@context : GameContext); end
 
   def execute
     logger.warn "execute"
@@ -69,10 +69,10 @@ class CleanupSystem
 
   include Entitas::Systems::CleanupSystem
 
-  getter context : Entitas::Context
-  getter debug_group : Entitas::Group
+  getter context : GameContext
+  getter debug_group : Entitas::Group(GameEntity)
 
-  def initialize(@context : Entitas::Context)
+  def initialize(@context : GameContext)
     @debug_group = context.get_group(GameMatcher.debug_message)
   end
 
