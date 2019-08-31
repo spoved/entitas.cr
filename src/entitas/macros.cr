@@ -30,4 +30,6 @@ annotation ::Context; end
 # ```
 annotation ::Component::Unique; end
 
+annotation ::Component::Add; end
+
 require "./macros/*"

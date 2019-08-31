@@ -15,12 +15,12 @@ class DebugMessageSystem < Entitas::ReactiveSystem
   # getter logger = ::Logger.new(STDOUT)
   spoved_logger
 
-  def get_trigger(context : Entitas::Context) : GameContext
+  def get_trigger(context : Entitas::Context) : Entitas::Collector(GameEntity)
     logger.level = Logger::INFO
     context.create_collector(GameMatcher.debug_message)
   end
 
-  def execute(entities : Array(Entitas::Entity))
+  def execute(entities : Array(Entitas::IEntity))
     entities.each do |e|
       self.logger.error(e.debug_message, e.to_s)
     end

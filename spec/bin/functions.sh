@@ -101,6 +101,10 @@ gen_docs() {
   crystal doc ${workdir}/spec/fixtures/* >> ${LOG_FILE}
 }
 
+run_examples() {
+  crystal run ${workdir}/examples/hello_world/hello_world.cr >> ${LOG_FILE}
+}
+
 ########################
 # Spec functions
 ########################

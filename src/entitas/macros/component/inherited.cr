@@ -1,6 +1,9 @@
 class Entitas::Component
   macro inherited
+    Entitas::Component.initializers
+  end
 
+  macro initializers
     # When the class is finished search the method names for each setter
     # and populate the initialize arguments.
     macro finished

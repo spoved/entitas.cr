@@ -37,7 +37,7 @@ module Entitas
     end
 
     # This is used by the context to manage the group.
-    def handle_entity(entity : IEntity, index : Int32, component : Entitas::Component)
+    def handle_entity(entity : IEntity, index : Int32, component : Entitas::IComponent)
       {% if !flag?(:disable_logging) %}logger.debug("Context handle entity : #{entity}", self.to_s){% end %}
 
       if self.matcher.matches?(entity)
@@ -48,7 +48,7 @@ module Entitas
     end
 
     # This is used by the context to manage the group.
-    def update_entity(entity : IEntity, index : Int32, prev_component : Entitas::Component?, new_component : Entitas::Component?)
+    def update_entity(entity : IEntity, index : Int32, prev_component : Entitas::IComponent?, new_component : Entitas::IComponent?)
       {% if !flag?(:disable_logging) %}logger.debug("Update entity : #{entity}", self.to_s){% end %}
 
       if has_entity?(entity)

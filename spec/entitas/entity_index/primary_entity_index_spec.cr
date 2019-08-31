@@ -10,7 +10,7 @@ private def new_index
   index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
     name: "TestIndex",
     group: group,
-    get_key: ->(entity : TestEntity, component : Entitas::Component?) {
+    get_key: ->(entity : TestEntity, component : Entitas::IComponent?) {
       (component.nil? ? entity.as(TestEntity).get_component_name_age.name : component.as(NameAge).name).as(String)
     }
   )
@@ -26,7 +26,7 @@ private def new_mk_index
   index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
     "TestIndex",
     group,
-    ->(entity : TestEntity, component : Entitas::Component?) {
+    ->(entity : TestEntity, component : Entitas::IComponent?) {
       (component.nil? ? (
         ["#{entity.get_component_name_age.name}1", "#{entity.get_component_name_age.name}2"]
       ) : (
@@ -65,7 +65,7 @@ describe Entitas::PrimaryEntityIndex do
         index = Entitas::PrimaryEntityIndex(TestEntity, String).new(
           "TestIndex",
           group,
-          ->(entity : TestEntity, component : Entitas::Component?) {
+          ->(entity : TestEntity, component : Entitas::IComponent?) {
             (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
           }
         )

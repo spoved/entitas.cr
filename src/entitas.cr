@@ -39,12 +39,13 @@ module Entitas
 
   class PrimaryEntityIndex(TEntity, TKey) < AbstractEntityIndex(TEntity, TKey); end
 
-  alias ComponentPool = Array(Entitas::Component)
+  alias ComponentPool = Array(Entitas::IComponent)
   alias AERCFactory = Proc(Entitas::Entity, Entitas::SafeAERC)
   alias EntityFactory = Proc(Entitas::Entity)
 end
 
 alias Contexts = Entitas::Contexts
 
-require "./entitas/macros/context"
+require "./entitas/macros/*"
+require "./entitas/interfaces/*"
 require "./entitas/*"

@@ -22,7 +22,7 @@ module Entitas
   module IAnyOfMatcher
     include INoneOfMatcher
 
-    abstract def none_of(*comps : Entitas::Component.class) : INoneOfMatcher
+    abstract def none_of(*comps : Entitas::Component::ComponentTypes) : INoneOfMatcher
     abstract def none_of(*indices : Int32) : INoneOfMatcher
     abstract def none_of(*indices : Entitas::Component::Index) : INoneOfMatcher
     abstract def none_of(*matchers : IMatcher) : INoneOfMatcher
@@ -31,7 +31,7 @@ module Entitas
   module IAllOfMatcher
     include IAnyOfMatcher
 
-    abstract def any_of(*comps : Entitas::Component.class) : IAnyOfMatcher
+    abstract def any_of(*comps : Entitas::Component::ComponentTypes) : IAnyOfMatcher
     abstract def any_of(*indices : Int32) : IAnyOfMatcher
     abstract def any_of(*indices : Entitas::Component::Index) : IAnyOfMatcher
     abstract def any_of(*matchers : IMatcher) : IAnyOfMatcher

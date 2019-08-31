@@ -6,7 +6,7 @@ module Entitas
     # Component functions
     ############################
 
-    private property components_buffer = Set(Entitas::Component).new
+    private property components_buffer = Set(Entitas::IComponent).new
     private property components_indices_buffer = Set(Int32).new
     private property components_index_indices_buffer = Set(Entitas::Component::Index).new
 
@@ -23,7 +23,7 @@ module Entitas
     # Will add the `Entitas::Component` at the provided index.
     # You can only have one component at an index.
     # Each component type must have its own constant index.
-    def add_component(index : Int32, component : Entitas::Component) : Entitas::Component
+    def add_component(index : Int32, component : Entitas::IComponent) : Entitas::IComponent
       if !enabled?
         raise Error::IsNotEnabled.new "Cannot add component " \
                                       "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -64,7 +64,7 @@ module Entitas
 
     # Replaces an existing component at the specified index
     # or adds it if it doesn't exist yet.
-    def replace_component(index : Int32, component : Entitas::Component?)
+    def replace_component(index : Int32, component : Entitas::IComponent?)
       if !enabled?
         raise Entitas::Entity::Error::IsNotEnabled.new "Cannot replace component " \
                                                        "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -79,9 +79,9 @@ module Entitas
 
     # Will return the `Entitas::Component` at the provided index.
     # You can only get a component at an index if it exists.
-    def get_component(index : Int32) : Entitas::Component
+    def get_component(index : Int32) : Entitas::IComponent
       if has_component?(index)
-        self.components[index].as(Entitas::Component)
+        self.components[index].as(Entitas::IComponent)
       else
         raise Entitas::Entity::Error::DoesNotHaveComponent.new "Cannot get component " \
                                                                "'#{self.context_info.component_names[index]}' from #{self}!" \
@@ -91,7 +91,7 @@ module Entitas
     end
 
     # Returns all added components.
-    def get_components : Enumerable(Entitas::Component)
+    def get_components : Enumerable(Entitas::IComponent)
       # if the cache is empty, repopulate it
       if components_cache.nil?
         self.components.each do |c|
@@ -101,7 +101,7 @@ module Entitas
         components_buffer.clear
       end
 
-      components_cache.as(Array(Entitas::Component))
+      components_cache.as(Array(Entitas::IComponent))
     end
 
     # Returns all indices of added components.
@@ -165,7 +165,7 @@ module Entitas
       end
     end
 
-    private def _replace_component(index : Int32, replacement : Entitas::Component?) : Nil
+    private def _replace_component(index : Int32, replacement : Entitas::IComponent?) : Nil
       prev_component = self.components[index]
 
       if replacement != prev_component

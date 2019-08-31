@@ -34,21 +34,21 @@ module Entitas::IEntity
 
   abstract def component_index(index) : Entitas::Component::Index
   abstract def component_index_value(index) : Int32
-  abstract def component_index_class(index) : Entitas::Component.class
+  abstract def component_index_class(index) : Entitas::Component::ComponentTypes
 
   abstract def component_pools : Array(Entitas::ComponentPool)
 
-  def create_component(_type : Entitas::Component.class, **args)
+  def create_component(_type : Entitas::Component::ComponentTypes, **args)
     self.create_component(_type.index, **args)
   end
 
-  abstract def add_component(index : Int32, component : Entitas::Component)
+  abstract def add_component(index : Int32, component : Entitas::IComponent)
 
-  def add_component(index : Entitas::Component::Index, component : Entitas::Component) : Entitas::Component
+  def add_component(index : Entitas::Component::Index, component : Entitas::IComponent) : Entitas::IComponent
     self.add_component(self.component_index_value(index), component)
   end
 
-  def add_component(component : Entitas::Component) : Entitas::Component
+  def add_component(component : Entitas::IComponent) : Entitas::IComponent
     self.add_component(self.component_index_value(component.class), component)
   end
 
@@ -60,13 +60,13 @@ module Entitas::IEntity
 
   abstract def create_component(index : Entitas::Component::Index, **args)
 
-  abstract def replace_component(index : Int32, component : Entitas::Component?)
+  abstract def replace_component(index : Int32, component : Entitas::IComponent?)
 
-  def replace_component(index : Entitas::Component::Index, component : Entitas::Component?)
+  def replace_component(index : Entitas::Component::Index, component : Entitas::IComponent?)
     self.replace_component(self.component_index_value(index), component)
   end
 
-  def replace_component(component : Entitas::Component?)
+  def replace_component(component : Entitas::IComponent?)
     self.replace_component(self.component_index_value(component.class), component)
   end
 
@@ -74,11 +74,11 @@ module Entitas::IEntity
   # You can only get a component at an index if it exists.
   abstract def get_component(index : Int32)
 
-  def get_component(index : Entitas::Component::Index) : Entitas::Component
+  def get_component(index : Entitas::Component::Index) : Entitas::IComponent
     self.get_component(self.component_index_value(index))
   end
 
-  abstract def get_components : Enumerable(Entitas::Component)
+  abstract def get_components : Enumerable(Entitas::IComponent)
 
   # Returns all indices of added components.
   abstract def get_component_indices : Enumerable(Int32)

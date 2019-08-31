@@ -23,7 +23,7 @@ module Entitas::Helper::ComponentPools
     self.component_pools[index]
   end
 
-  def component_pool(index : Entitas::Component.class) : ComponentPool
+  def component_pool(index : Entitas::Component::ComponentTypes) : ComponentPool
     self.component_pool(component_index_value(index))
   end
 
@@ -32,7 +32,7 @@ module Entitas::Helper::ComponentPools
     component_pools[index].clear
   end
 
-  def clear_component_pool(index : Entitas::Component.class)
+  def clear_component_pool(index : Entitas::Component::ComponentTypes)
     component_pool(component_index_value(index)).clear
   end
 

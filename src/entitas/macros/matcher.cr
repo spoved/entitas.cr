@@ -7,7 +7,7 @@ class Entitas::Matcher
         # ```
         # Entitas::Matcher.{{match.id}}_of(A, B)
         # ```
-        def self.{{match.id}}_of(*comps : Entitas::Component.class) : Matcher
+        def self.{{match.id}}_of(*comps : Entitas::Component::ComponentTypes) : Matcher
           Entitas::Matcher.new.{{match.id}}_of(*comps)
         end
 

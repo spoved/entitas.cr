@@ -69,7 +69,7 @@ module Entitas
       # ```
       # Entitas::Matcher.new.{{match.id}}_of(A, B)
       # ```
-      def {{match.id}}_of(*comps : Entitas::Component.class) : {{interface.id}}
+      def {{match.id}}_of(*comps : Entitas::Component::ComponentTypes) : {{interface.id}}
         self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(comps.size)
         comps.each { |c| self.{{match.id}}_of_indices << c.index }
         self

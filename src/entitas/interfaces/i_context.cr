@@ -7,7 +7,7 @@ module Entitas::IContext
 
   abstract def component_index(index) : Entitas::Component::Index
   abstract def component_index_value(klass) : Int32
-  abstract def component_index_class(index) : Entitas::Component.class
+  abstract def component_index_class(index) : Entitas::Component::ComponentTypes
 
   abstract def entity_factory : Entitas::Entity
   abstract def component_pools : Array(Entitas::ComponentPool)

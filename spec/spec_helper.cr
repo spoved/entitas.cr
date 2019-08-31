@@ -1,5 +1,6 @@
 require "spec"
 require "../src/entitas"
+
 require "./fixtures/*"
 
 Spoved.logger.level = Logger::UNKNOWN
@@ -29,7 +30,8 @@ def new_entity_with_ab
 end
 
 def new_context_info
-  Entitas::Context::Info.new("TestContext",
+  Entitas::Context::Info.new(
+    "TestContext",
     TestContext::COMPONENT_NAMES,
     TestContext::COMPONENT_KLASSES,
   )

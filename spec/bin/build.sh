@@ -27,4 +27,7 @@ run_spec_with_coverage
 # Run benchmark
 bench_mark
 
+# Run examples
+run_examples
+
 stage "DONE"

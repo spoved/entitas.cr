@@ -9,11 +9,11 @@ module Entitas
   abstract class Entity
     include IEntity
 
-    protected property components_cache : Array(Entitas::Component)? = nil
+    protected property components_cache : Array(Entitas::IComponent)? = nil
     protected property component_indices_cache : Array(Int32)? = nil
     protected property to_string_cache : String? = nil
 
-    protected getter components : Array(Entitas::Component?)
+    protected getter components : Array(Entitas::IComponent?)
 
     def initialize(
       @creation_index : Int32,
@@ -22,7 +22,7 @@ module Entitas
       @context_info : Entitas::Context::Info? = nil,
       @aerc : SafeAERC? = nil
     )
-      @components = Array(Entitas::Component?).new(@total_components, nil)
+      @components = Array(Entitas::IComponent?).new(@total_components, nil)
       {% if !flag?(:disable_logging) %}logger.debug("Calling initialize: #{self.object_id}", self.to_s){% end %}
 
       reactivate(@creation_index)

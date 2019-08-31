@@ -23,8 +23,4 @@ exec 1>&2
 
 
 # Run formatting and spec tests
-crystal tool format
-
-./bin/ameba
-
-crystal spec --error-trace
+./spec/bin/build.sh

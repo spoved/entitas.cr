@@ -5,7 +5,7 @@ module Entitas
     class Info
       getter name : String
       getter component_names : Array(String)
-      getter component_types : Entitas::Component::KlassList
+      getter component_types : Array(Entitas::Component::ComponentTypes)
 
       def initialize(
         @name,

@@ -7,7 +7,7 @@ private macro create_instance_helpers(context)
     {{context.id}}.component_index_value(index)
   end
 
-  def component_index_class(index) : Entitas::Component.class
+  def component_index_class(index) : Entitas::Component::ComponentTypes
     {{context.id}}.component_index_class(index)
   end
 end
@@ -41,7 +41,7 @@ class Entitas::Context(TEntity)
 
         ### Gather all the contexts
         {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
-        {% for obj in Object.all_subclasses %}
+        {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
           {% if obj.annotation(::Context) %}
 
             {% contexts = obj.annotation(::Context) %}
@@ -60,6 +60,7 @@ class Entitas::Context(TEntity)
         {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
         ### Gather all the components and methods
         {% for anno, components in context_map %}
+          {% components = components.uniq %}
           {% for comp in components %}
             {% comp_methods = {} of StringLiteral => ArrayLiteral(TypeNode) %}
             {% for meth in comp.methods %}
@@ -72,9 +73,100 @@ class Entitas::Context(TEntity)
           {% end %}
         {% end %}
 
-        ### Cycle through components
+        class ::Entitas::Component
+          alias ComponentTypes = Union(Entitas::Component.class, {{*comp_map.keys.map { |c| c.name + ".class" }}})
+
+          enum Index
+            {% begin %}
+              {% i = 0 %}
+              {% for comp in comp_map.keys %}
+                {{comp.id}} = {{i}}
+                {% i = i + 1 %}
+              {% end %}
+            {% end %}
+          end
+
+          # A hash to map of enum `Index` to class of `Component`
+          INDEX_TO_COMPONENT_MAP = {
+            {% for comp in comp_map.keys %}
+              Index::{{comp.id}} => ::{{comp.id}},
+            {% end %}
+          } of Index => Entitas::Component::ComponentTypes
+
+          # A hash to map of class of `Component` to enum `Index`
+          COMPONENT_TO_INDEX_MAP = {
+            {% for comp in comp_map.keys %}
+              ::{{comp.id}} => Index::{{comp.id}},
+            {% end %}
+          } of Entitas::Component::ComponentTypes => Index
+
+          COMPONENT_NAMES = COMPONENT_TO_INDEX_MAP.keys.map &.to_s
+          COMPONENT_KLASSES = [
+            {% for comp in comp_map.keys %}
+              ::{{comp.id}},
+            {% end %}
+          ] of Entitas::Component::ComponentTypes
+
+          # The total number of componets
+          TOTAL_COMPONENTS = {{comp_map.size}}
+
+          # The total amount of components an entity can possibly have.
+          def total_components : Int32
+            TOTAL_COMPONENTS
+          end
+
+          def self.total_components : Int32
+            TOTAL_COMPONENTS
+          end
+
+          {% i = 0 %}
+          {% for comp, comp_methods in comp_map %}
+            {% component_name = comp.name %}
+
+            class ::{{component_name.id}}
+
+              INDEX = Entitas::Component::Index::{{component_name.id}}
+              INDEX_VALUE = {{i}}
+
+              def self.index_val : Int32
+                INDEX_VALUE
+              end
+
+              def index_val : Int32
+                INDEX_VALUE
+              end
+
+              def self.index : Entitas::Component::Index
+                INDEX
+              end
+
+              def index : Entitas::Component::Index
+                INDEX
+              end
+            end
+          {% end %}
+
+        end
+
+        ### Cycle through components and inject `Entitas::IComponent` and make helper modules
         {% for comp, comp_methods in comp_map %}
           {% component_name = comp.name %}
+
+          ### Check to see if the component is a subklass of ::Entitas::Component
+
+          {% if !comp.ancestors.includes?(Entitas::IComponent) %}
+            class ::{{component_name.id}}
+              include Entitas::IComponent
+
+              def is_unique? : Bool
+                {% if comp.annotation(::Component::Unique) %}
+                true
+                {% else %}
+                false
+                {% end %}
+              end
+            end
+          {% end %}
 
           ### Create a Helper module for each component
 
@@ -204,7 +296,10 @@ class Entitas::Context(TEntity)
         {% end %}
 
 
+        # Create entity, matcher, and context
+
         {% for context_name, components in context_map %}
+          {% components = components.uniq %}
 
           # `Entitas::Entity` for the `{{context_name.id}}Context`
           class ::{{context_name.id}}Entity < Entitas::Entity
@@ -245,14 +340,14 @@ class Entitas::Context(TEntity)
               {% for comp in components %}
                 Index::{{comp.id}} => ::{{comp.id}},
               {% end %}
-            } of Index => Entitas::Component.class
+            } of Index => Entitas::Component::ComponentTypes
 
             # A hash to map of class of `Component` to enum `Index`
             COMPONENT_TO_INDEX_MAP = {
               {% for comp in components %}
                 ::{{comp.id}} => Index::{{comp.id}},
               {% end %}
-            } of Entitas::Component.class => Index
+            } of Entitas::Component::ComponentTypes => Index
 
             # Unique components
             UNIQUE_COMPONENTS = [
@@ -261,13 +356,17 @@ class Entitas::Context(TEntity)
                 ::{{comp.name.id}},
               {% end %}
             {% end %}
-            ] of Entitas::Component.class
+            ] of Entitas::Component::ComponentTypes
 
             # The total number of `Entitas::Component` subclases in this context
             TOTAL_COMPONENTS = {{components.size}}
 
             COMPONENT_NAMES = COMPONENT_TO_INDEX_MAP.keys.map &.to_s
-            COMPONENT_KLASSES = COMPONENT_TO_INDEX_MAP.keys.as(Entitas::Component::KlassList)
+            COMPONENT_KLASSES = [
+              {% for comp in components %}
+                ::{{comp.id}},
+              {% end %}
+            ] of Entitas::Component::ComponentTypes
 
             # The total amount of components an entity can possibly have.
             def total_components : Int32
@@ -335,7 +434,7 @@ class Entitas::Context(TEntity)
               end
             end
 
-            def self.component_index_class(index) : Entitas::Component.class
+            def self.component_index_class(index) : Entitas::Component::ComponentTypes
               case index
               {% i = 0 %}
               {% for comp in components %}
@@ -355,7 +454,7 @@ class Entitas::Context(TEntity)
             {% for comp in components %}
               {% if comp_map[comp][:unique] %}
 
-                # def has_unique_component_already?(comp : Entitas::Component.class)
+                # def has_unique_component_already?(comp : Entitas::Component::ComponentTypes)
                 #   case comp
                 #   {% for component in components %}
                 #   when ::{{component.id}}.class

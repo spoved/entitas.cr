@@ -18,7 +18,7 @@ end
 
 private def entity_index(ctx)
   group = ctx.get_group(Entitas::Matcher.all_of(A))
-  Entitas::PrimaryEntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::Component?) {
+  Entitas::PrimaryEntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::IComponent?) {
     (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
   })
 end
@@ -92,7 +92,7 @@ describe Entitas::Context do
       end
 
       it "throws when component_names is not same length as total_components" do
-        context = Entitas::Context::Info.new("TestContext", ["A", "B"], [A, B, C])
+        context = Entitas::Context::Info.new("TestContext", ["A", "B"], [A, B, C] of Entitas::Component::ComponentTypes)
         expect_raises Entitas::Context::Error::Info do
           TestContext.new(context_info: context)
         end

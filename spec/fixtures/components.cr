@@ -28,3 +28,9 @@ class NameAge < Entitas::Component
   prop :name, String
   prop :age, Int32, default: 0
 end
+
+@[Context(Test3)]
+class Vector3 < Array(Int32)
+  property_alias :size, Int32, default: 0
+  define_property :age, Int32, default: 0
+end

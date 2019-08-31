@@ -1,3 +1,4 @@
+require "./interfaces/i_component"
 require "./macros/component"
 
 module Entitas
@@ -17,14 +18,19 @@ module Entitas
   #   prop :default, String, default: "foo"
   # end
   # ```
+  #
+  # Conmponets can also be declared using existing classes without inheritance.
+  # The special macro `property_alias` will need to be used to alias any pre-existing methods as
+  # component values
+  #
+  # ```
+  # @[Context(Test3)]
+  # class Vector3 < Array(Int32)
+  #   property_alias :size, Int32, default: 0
+  #   define_property :age, Int32, default: 0
+  # end
+  # ```
   abstract class Component
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
-
-    abstract def is_unique? : Bool
-
-    # Will return true if the class is a unique component for a context
-    def component_is_unique?
-      self.class.is_unique?
-    end
+    include Entitas::IComponent
   end
 end

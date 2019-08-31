@@ -33,7 +33,7 @@ module Entitas
       end
     end
 
-    def update_groups_component_added_or_removed(entity : TEntity, index : Int32, component : Entitas::Component?)
+    def update_groups_component_added_or_removed(entity : TEntity, index : Int32, component : Entitas::IComponent?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
       _groups = self.groups_for_index[index]?
@@ -67,8 +67,8 @@ module Entitas
     end
 
     def update_groups_component_replaced(entity : TEntity, index : Int32,
-                                         prev_component : Entitas::Component?,
-                                         new_component : Entitas::Component?)
+                                         prev_component : Entitas::IComponent?,
+                                         new_component : Entitas::IComponent?)
       {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_replaced : #{entity}", self.to_s){% end %}
       if groups_for_index[index]
         groups_for_index[index].each do |group|

@@ -7,7 +7,7 @@ end
 private def new_index
   ctx = new_context
   group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-  index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::Component?) {
+  index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::IComponent?) {
     (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
   })
   name_age = NameAge.new(name: name)
@@ -28,7 +28,7 @@ private def new_mk_index
   index = Entitas::EntityIndex(TestEntity, String).new(
     "TestIndex",
     group,
-    ->(entity : TestEntity, component : Entitas::Component?) {
+    ->(entity : TestEntity, component : Entitas::IComponent?) {
       (e1 == entity ? (
         ["1", "2"]
       ) : (
@@ -50,7 +50,7 @@ describe Entitas::EntityIndex do
       it "has no entities" do
         ctx = new_context
         group = ctx.get_group(Entitas::Matcher.all_of(NameAge))
-        index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::Component?) {
+        index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::IComponent?) {
           (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
         })
         index.get_entities("unknown_key").should be_empty
@@ -73,7 +73,7 @@ describe Entitas::EntityIndex do
 
       it "has existing entities" do
         entities, _, group = new_index
-        index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::Component?) {
+        index = Entitas::EntityIndex(TestEntity, String).new("TestIndex", group, ->(entity : TestEntity, component : Entitas::IComponent?) {
           (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
         })
         index.get_entities(name).size.should eq 2
@@ -199,14 +199,14 @@ describe Entitas::EntityIndex do
   describe "when index multiple components" do
     it "gets last component that triggered adding entity to group" do
       ctx = new_context
-      rec_comp : Entitas::Component? = nil
+      rec_comp : Entitas::IComponent? = nil
 
       group = ctx.get_group(Entitas::Matcher.all_of(NameAge, B))
 
       index = Entitas::EntityIndex(TestEntity, String).new(
         "TestIndex",
         group,
-        ->(entity : TestEntity, component : Entitas::Component?) {
+        ->(entity : TestEntity, component : Entitas::IComponent?) {
           rec_comp = component
           # (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
           component.to_s
@@ -226,14 +226,14 @@ describe Entitas::EntityIndex do
 
     it "works with none_of" do
       ctx = new_context
-      rec_comps = Array(Entitas::Component).new
+      rec_comps = Array(Entitas::IComponent).new
 
       group = ctx.get_group(Entitas::Matcher.all_of(NameAge).none_of(B))
 
       index = Entitas::EntityIndex(TestEntity, String).new(
         "TestIndex",
         group,
-        ->(entity : TestEntity, component : Entitas::Component?) {
+        ->(entity : TestEntity, component : Entitas::IComponent?) {
           rec_comps << component unless component.nil?
           # (component.nil? ? entity.get_component_name_age.name : component.as(NameAge).name).as(String)
           component.to_s
