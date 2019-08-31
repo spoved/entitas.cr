@@ -4,7 +4,7 @@ A Entity Component System Framework for Crystal. Ported from: [Entitas-CSharp](h
 
 Entitas is a super fast Entity Component System Framework (ECS). Internal caching and blazing fast component access makes it second to none. Several design decisions have been made to work optimal in a garbage collected environment and to go easy on the garbage collector. Utilizing Crystal's macro system, all code generation is done compile time. No need for a code generator!
 
-[![Build Status](https://travis-ci.com/kalinon/entitas.cr.svg?token=Shp7EsY9qyrwFK1NgezB&branch=master)](https://travis-ci.com/kalinon/entitas.cr)
+[![Build Status](https://travis-ci.com/spoved/spoved.cr.svg?branch=master)](https://travis-ci.com/spoved/spoved.cr)
 
 ## First glimpse
 
@@ -35,7 +35,7 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   entitas:
-    github: kalinon/entitas.cr
+    github: spoved/entitas.cr
 ```
 
 ## Usage
@@ -139,7 +139,7 @@ ln ./pre-commit .git/hooks/pre-commit
 
 ## Contributing
 
-1. Fork it (<https://github.com/kalinon/entitas.cr/fork>)
+1. Fork it (<https://github.com/spoved/entitas.cr/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
