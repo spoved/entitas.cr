@@ -67,16 +67,10 @@ module Entitas
     # Context::Info functions
     ############################
 
-    private def create_default_context_info : Entitas::Context::Info
-      {% if !flag?(:disable_logging) %}logger.debug("Creating default context", "Context"){% end %}
-
-      Entitas::Context::Info.new("Unnamed Context",
-        Entitas::Component::COMPONENT_NAMES,
-        Entitas::Component::COMPONENT_KLASSES)
-    end
+    abstract def create_default_context_info : Entitas::Context::Info
 
     def context_info : Entitas::Context::Info
-      @context_info ||= create_default_context_info
+      @context_info ||= self.create_default_context_info
     end
 
     # The contextInfo contains information about the context.
@@ -95,7 +89,7 @@ module Entitas
       entity = if self.reusable_entities.size > 0
                  e = self.reusable_entities.pop
                  {% if !flag?(:disable_logging) %}logger.debug("Reusing entity: #{e}", self.to_s){% end %}
-                 e.reactivate(self.creation_index)
+                 e.reactivate(self.creation_index, self.context_info)
                  self.creation_index += 1
                  e
                else

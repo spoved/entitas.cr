@@ -12,3 +12,4 @@
 .idea
 cmake-build-debug
 /test/
+/*.log

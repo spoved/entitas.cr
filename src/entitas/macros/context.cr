@@ -245,14 +245,14 @@ class Entitas::Context(TEntity)
               {% for comp in components %}
                 Index::{{comp.id}} => ::{{comp.id}},
               {% end %}
-            }
+            } of Index => Entitas::Component.class
 
             # A hash to map of class of `Component` to enum `Index`
             COMPONENT_TO_INDEX_MAP = {
               {% for comp in components %}
                 ::{{comp.id}} => Index::{{comp.id}},
               {% end %}
-            }
+            } of Entitas::Component.class => Index
 
             # Unique components
             UNIQUE_COMPONENTS = [

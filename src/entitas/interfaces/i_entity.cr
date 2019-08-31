@@ -30,6 +30,7 @@ module Entitas::IEntity
   abstract def release(owner)
 
   abstract def reactivate(creation_index : Int32)
+  abstract def reactivate(creation_index : Int32, context_info : Entitas::Context::Info)
 
   abstract def component_index(index) : Entitas::Component::Index
   abstract def component_index_value(index) : Int32

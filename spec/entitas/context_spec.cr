@@ -395,7 +395,8 @@ describe Entitas::Context do
 
         e = ctx.create_entity
 
-        e.creation_index.should eq (c_index + 1)
+        next_index = c_index + 1
+        e.creation_index.should eq next_index
         e.enabled?.should be_true
 
         e.add_a

@@ -248,7 +248,11 @@ describe Entitas::ReactiveSystem do
       if comp.nil?
         false
       else
-        comp.as(NameAge).age.nil? ? false : (comp.as(NameAge).age.as(Int32) > 42)
+        if comp.as(NameAge).age.nil?
+          false
+        else
+          comp.as(NameAge).age.as(Int32) > 42
+        end
       end
     end
 

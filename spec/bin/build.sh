@@ -1,26 +1,30 @@
 #!/usr/bin/env zsh
-# source ~/.zshrc
 
 set -e
 
+source $(dirname ${0})/functions.sh
+
+cleanup
+
+# Update shards
+shards_update
+
 # Format code
-crystal tool format
+format_code
 
 # Test code quality
-./bin/ameba
-
-# Generate coverage
-# if [ -d ./coverage ];then
-#   rm -r ./coverage
-# fi
-# ./bin/crystal-coverage spec/entitas/*.cr spec/entitas/**/*.cr
+check_quality
 
 # Run spec tests?
-crystal spec --error-trace
+run_spec
 
 # Generate docs
-if [ -d ./docs ];then
-  rm -r ./docs
-fi
+gen_docs
 
-crystal doc ./spec/fixtures/*
+# Run with coverage
+run_spec_with_coverage
+
+# Run benchmark
+bench_mark
+
+stage "DONE"
