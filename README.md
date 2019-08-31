@@ -1,3 +1,15 @@
+<p align="center">
+    <img src="https://raw.githubusercontent.com/spoved/entitas.cr/master/entitas.cr.png" alt="Entitas.cr">
+</p>
+
+<p align="center">
+    <a href="https://travis-ci.com/spoved/spoved.cr">
+        <img src="https://travis-ci.com/spoved/spoved.cr.svg?branch=master" alt="Build Status"></a>
+    <a href="https://github.com/spoved/entitas.cr/releases">
+        <img src="https://img.shields.io/github/v/release/spoved/entitas.cr" alt="Latest release"></a>
+</p>
+
+
 # entitas
 
 A Entity Component System Framework for Crystal. Ported from: [Entitas-CSharp](https://github.com/sschmid/Entitas-CSharp)

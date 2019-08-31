@@ -104,7 +104,7 @@ describe Entitas::PrimaryEntityIndex do
       end
 
       it "doesn't add entities anymore" do
-        _, index, group, ctx = new_index
+        _, index, _, ctx = new_index
         index.deactivate
 
         c = NameAge.new(name: name)
