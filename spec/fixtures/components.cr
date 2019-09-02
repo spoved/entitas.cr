@@ -34,3 +34,8 @@ class Vector3 < Array(Int32)
   property_alias :size, Int32, default: 0
   define_property :age, Int32, default: 0
 end
+
+@[Component::Unique]
+@[Context(Test3)]
+class Test::NameSpace
+end

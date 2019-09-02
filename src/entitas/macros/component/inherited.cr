@@ -47,7 +47,11 @@ class Entitas::Component
             case k
             {% for var_name, meth in comp_methods %}
             when :{{var_name}}
-              @{{var_name}} = v.as({{meth.args[0].restriction}})
+              {% if meth.args[0].default_value %}
+                @{{var_name}} = v.as({{meth.args[0].restriction}}) if v.is_a?({{meth.args[0].restriction}})
+              {% else %}
+                @{{var_name}} = v.as({{meth.args[0].restriction}}?) if v.is_a?({{meth.args[0].restriction}}?)
+              {% end %}
             {% end %}
             end
           end

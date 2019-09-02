@@ -80,7 +80,7 @@ class Entitas::Context(TEntity)
             {% begin %}
               {% i = 0 %}
               {% for comp in comp_map.keys %}
-                {{comp.id}} = {{i}}
+                {{comp.name.gsub(/.*::/, "").id}} = {{i}}
                 {% i = i + 1 %}
               {% end %}
             {% end %}
@@ -89,14 +89,14 @@ class Entitas::Context(TEntity)
           # A hash to map of enum `Index` to class of `Component`
           INDEX_TO_COMPONENT_MAP = {
             {% for comp in comp_map.keys %}
-              Index::{{comp.id}} => ::{{comp.id}},
+              Index::{{comp.name.gsub(/.*::/, "").id}} => ::{{comp.id}},
             {% end %}
           } of Index => Entitas::Component::ComponentTypes
 
           # A hash to map of class of `Component` to enum `Index`
           COMPONENT_TO_INDEX_MAP = {
             {% for comp in comp_map.keys %}
-              ::{{comp.id}} => Index::{{comp.id}},
+              ::{{comp.id}} => Index::{{comp.name.gsub(/.*::/, "").id}},
             {% end %}
           } of Entitas::Component::ComponentTypes => Index
 
@@ -121,9 +121,9 @@ class Entitas::Context(TEntity)
 
           {% i = 0 %}
           {% for comp, comp_methods in comp_map %}
-            {% component_name = comp.name %}
+            {% component_name = comp.name.gsub(/.*::/, "") %}
 
-            class ::{{component_name.id}}
+            class ::{{comp.id}}
 
               INDEX = Entitas::Component::Index::{{component_name.id}}
               INDEX_VALUE = {{i}}
@@ -150,12 +150,13 @@ class Entitas::Context(TEntity)
 
         ### Cycle through components and inject `Entitas::IComponent` and make helper modules
         {% for comp, comp_methods in comp_map %}
-          {% component_name = comp.name %}
+          {% component_name = comp.name.gsub(/.*::/, "") %}
+          {% component_meth_name = component_name.underscore %}
 
           ### Check to see if the component is a subklass of ::Entitas::Component
 
           {% if !comp.ancestors.includes?(Entitas::IComponent) %}
-            class ::{{component_name.id}}
+            class ::{{comp.id}}
               include Entitas::IComponent
 
               def is_unique? : Bool
@@ -170,7 +171,7 @@ class Entitas::Context(TEntity)
 
           ### Create a Helper module for each component
 
-          module ::{{component_name.id}}::Helper
+          module ::{{comp.id}}::Helper
             {% is_flag = false %}
 
             {% comp_methods = {} of StringLiteral => ArrayLiteral(TypeNode) %}
@@ -191,15 +192,15 @@ class Entitas::Context(TEntity)
                } %}
 
             {% if is_flag %}
-              def {{component_name.id.underscore}}?
+              def {{component_meth_name}}?
                 self.has_component?(self.component_index_value({{component_name.id}}))
               end
 
-              def is_{{component_name.id.underscore}}=(value : Bool)
+              def is_{{component_meth_name}}=(value : Bool)
                 if value
-                  self.add_component_{{component_name.id.underscore}}
+                  self.add_component_{{component_meth_name}}
                 else
-                  self.del_component_{{component_name.id.underscore}} if self.has_{{component_name.id.underscore}}?
+                  self.del_component_{{component_meth_name}} if self.has_{{component_meth_name}}?
                 end
               end
             {% end %}
@@ -207,89 +208,89 @@ class Entitas::Context(TEntity)
             # Will replace the current compoent with the provided one
             #
             # ```
-            # new_comp = {{component_name}}.new
-            # entity.replace_{{component_name.id.underscore}}(new_comp)
-            # entity.get_{{component_name.id.underscore}} # => (new_comp)
+            # new_comp = ::{{comp.id}}
+            # entity.replace_{{component_meth_name}}(new_comp)
+            # entity.get_{{component_meth_name}} # => (new_comp)
             # ```
-            def replace_{{component_name.id.underscore}}(component : ::{{component_name.id}})
+            def replace_{{component_meth_name}}(component : ::{{comp.id}})
               self.replace_component(component)
             end
 
-            # Append. Alias for `replace_{{component_name.id.underscore}}`
-            def replace_component_{{component_name.id.underscore}}(component : ::{{component_name.id}})
-              self.replace_{{component_name.id.underscore}}(component)
+            # Append. Alias for `replace_{{component_meth_name}}`
+            def replace_component_{{component_meth_name}}(component : ::{{comp.id}})
+              self.replace_{{component_meth_name}}(component)
             end
 
-            # Will return true if the entity has an component `{{component_name}}` or false if it does not
-            def has_{{component_name.id.underscore}}? : Bool
-              self.has_component_{{component_name.id.underscore}}?
+            # Will return true if the entity has an component `{{comp.id}}` or false if it does not
+            def has_{{component_meth_name}}? : Bool
+              self.has_component_{{component_meth_name}}?
             end
 
-            # Will return true if the entity has an component `{{component_name}}` or false if it does not
-            def has_component_{{component_name.id.underscore}}? : Bool
-              self.has_component?(self.component_index_value(::{{component_name.id}}))
+            # Will return true if the entity has an component `{{comp.id}}` or false if it does not
+            def has_component_{{component_meth_name}}? : Bool
+              self.has_component?(self.component_index_value(::{{comp.id}}))
             end
 
-            # Will return the component that is a `{{component_name.id}}` or raise
-            def {{component_name.id.underscore}} : {{component_name.id}}
-              self.get_component_{{component_name.id.underscore}}
+            # Will return the component that is a `{{comp.id}}` or raise
+            def {{component_meth_name}} : ::{{comp.id}}
+              self.get_component_{{component_meth_name}}
             end
 
-            # Will return the component that is a `{{component_name.id}}` or raise
-            def get_component_{{component_name.id.underscore}} : ::{{component_name.id}}
-              self.get_component(self.component_index_value(::{{component_name.id}})).as(::{{component_name.id}})
+            # Will return the component that is a `{{comp.id}}` or raise
+            def get_component_{{component_meth_name}} : ::{{comp.id}}
+              self.get_component(self.component_index_value(::{{comp.id}})).as(::{{comp.id}})
             end
 
-            # Add a `{{component_name.id}}` to the entity. Returns `self` to allow chainables
+            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
             #
             # ```
-            # entity.add_{{component_name.id.underscore}}
+            # entity.add_{{component_meth_name}}
             # ```
-            def add_{{component_name.id.underscore}}(**args) : Entitas::Entity
-              self.add_component_{{component_name.id.underscore}}(**args)
+            def add_{{component_meth_name}}(**args) : Entitas::Entity
+              self.add_component_{{component_meth_name}}(**args)
             end
 
-            # Add a `{{component_name.id}}` to the entity. Returns `self` to allow chainables
+            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
             #
             # ```
-            # entity.add_component_{{component_name.id.underscore}}
+            # entity.add_component_{{component_meth_name}}
             # ```
-            def add_component_{{component_name.id.underscore}}(**args) : Entitas::Entity
-              component = self.create_component(::{{component_name.id}}, **args)
-              self.add_component(self.component_index_value(::{{component_name.id}}), component)
+            def add_component_{{component_meth_name}}(**args) : Entitas::Entity
+              component = self.create_component(::{{comp.id}}, **args)
+              self.add_component(self.component_index_value(::{{comp.id}}), component)
               self
             end
 
-            # Delete `{{component_name.id}}` from the entity. Returns `self` to allow chainables
+            # Delete `{{comp.id}}` from the entity. Returns `self` to allow chainables
             #
             # ```
-            # entity.del_{{component_name.id.underscore}}
-            # entity.{{component_name.id.underscore}} # => nil
+            # entity.del_{{component_meth_name}}
+            # entity.{{component_meth_name}} # => nil
             # ```
-            def del_{{component_name.id.underscore}} : Entitas::Entity
-              self.del_component_{{component_name.id.underscore}}
+            def del_{{component_meth_name}} : Entitas::Entity
+              self.del_component_{{component_meth_name}}
               self
             end
 
-            # Delete `{{component_name.id}}` from the entity. Returns `self` to allow chainables
+            # Delete `{{comp.id}}` from the entity. Returns `self` to allow chainables
             #
             # ```
-            # entity.del_{{component_name.id.underscore}}
-            # entity.{{component_name.id.underscore}} # => nil
+            # entity.del_{{component_meth_name}}
+            # entity.{{component_meth_name}} # => nil
             # ```
-            def del_component_{{component_name.id.underscore}} : Entitas::Entity
-              self.remove_component(self.component_index_value(::{{component_name.id}}))
+            def del_component_{{component_meth_name}} : Entitas::Entity
+              self.remove_component(self.component_index_value(::{{comp.id}}))
               self
             end
 
-            # Append. Alias for `del_{{component_name.id.underscore}}`
-            def remove_{{component_name.id.underscore}}
-              self.del_{{component_name.id.underscore}}
+            # Append. Alias for `del_{{component_meth_name}}`
+            def remove_{{component_meth_name}}
+              self.del_{{component_meth_name}}
             end
 
-            # Append. Alias for `del_component_{{component_name.id.underscore}}`
-            def remove_component_{{component_name.id.underscore}}
-              self.del_component_{{component_name.id.underscore}}
+            # Append. Alias for `del_component_{{component_meth_name}}`
+            def remove_component_{{component_meth_name}}
+              self.del_component_{{component_meth_name}}
             end
 
           end
@@ -312,7 +313,7 @@ class Entitas::Context(TEntity)
 
           class ::{{context_name.id}}Matcher < Entitas::Matcher
             {% for comp in components %}
-            class_getter {{comp.id.underscore}} = Entitas::Matcher.all_of({{comp.id}})
+            class_getter {{comp.name.gsub(/.*::/, "").underscore.id}} = Entitas::Matcher.all_of({{comp.id}})
             {% end %}
           end
 
@@ -327,7 +328,7 @@ class Entitas::Context(TEntity)
               {% begin %}
                 {% i = 0 %}
                 {% for comp in components %}
-                  {{comp.id}} = {{i}}
+                  {{comp.name.gsub(/.*::/, "").id}} = {{i}}
                   {% i = i + 1 %}
                 {% end %}
               {% end %}
@@ -338,14 +339,14 @@ class Entitas::Context(TEntity)
             # A hash to map of enum `Index` to class of `Component`
             INDEX_TO_COMPONENT_MAP = {
               {% for comp in components %}
-                Index::{{comp.id}} => ::{{comp.id}},
+                Index::{{comp.name.gsub(/.*::/, "").id}} => ::{{comp.id}},
               {% end %}
             } of Index => Entitas::Component::ComponentTypes
 
             # A hash to map of class of `Component` to enum `Index`
             COMPONENT_TO_INDEX_MAP = {
               {% for comp in components %}
-                ::{{comp.id}} => Index::{{comp.id}},
+                ::{{comp.id}} => Index::{{comp.name.gsub(/.*::/, "").id}},
               {% end %}
             } of Entitas::Component::ComponentTypes => Index
 
@@ -413,7 +414,7 @@ class Entitas::Context(TEntity)
               {% i = 0 %}
               {% for comp in components %}
               when {{i}}, ::{{comp.id}}.class
-                Entitas::Component::Index::{{comp.id}}
+                Entitas::Component::Index::{{comp.name.gsub(/.*::/, "").id}}
               {% i = i + 1 %}
               {% end %}
               else
@@ -425,7 +426,7 @@ class Entitas::Context(TEntity)
               case index
               {% i = 0 %}
               {% for comp in components %}
-              when Entitas::Component::Index::{{comp.id}}, ::{{comp.id}}.class
+              when Entitas::Component::Index::{{comp.name.gsub(/.*::/, "").id}}, ::{{comp.id}}.class
                 {{i}}
               {% i = i + 1 %}
               {% end %}
@@ -438,7 +439,7 @@ class Entitas::Context(TEntity)
               case index
               {% i = 0 %}
               {% for comp in components %}
-              when Entitas::Component::Index::{{comp.id}}, {{i}}
+              when Entitas::Component::Index::{{comp.name.gsub(/.*::/, "").id}}, {{i}}
                 ::{{comp.id}}
               {% i = i + 1 %}
               {% end %}
@@ -453,7 +454,7 @@ class Entitas::Context(TEntity)
             # entities at the context level
             {% for comp in components %}
               {% if comp_map[comp][:unique] %}
-
+                {% comp_name = comp.name.gsub(/.*::/, "").underscore %}
                 # def has_unique_component_already?(comp : Entitas::Component::ComponentTypes)
                 #   case comp
                 #   {% for component in components %}
@@ -465,41 +466,41 @@ class Entitas::Context(TEntity)
                 #   end
                 # end
 
-                def {{comp.id.underscore.id}}_entity : Entitas::Entity?
-                  self.get_group(::{{context_name.id}}Matcher.{{comp.id.underscore.id}}).get_single_entity
+                def {{comp_name.id}}_entity : Entitas::Entity?
+                  self.get_group(::{{context_name.id}}Matcher.{{comp_name.id}}).get_single_entity
                 end
 
-                def {{comp.id.underscore.id}} : {{comp.id}}
-                  entity = {{comp.id.underscore.id}}_entity
+                def {{comp_name.id}} : {{comp.id}}
+                  entity = {{comp_name.id}}_entity
                   raise Error.new "No {{comp.id}} has been set for #{self}" if entity.nil?
-                  entity.{{comp.id.underscore.id}}
+                  entity.{{comp_name.id}}
                 end
 
-                def {{comp.id.underscore.id}}? : Bool
-                  !{{comp.id.underscore.id}}_entity.nil?
+                def {{comp_name.id}}? : Bool
+                  !{{comp_name.id}}_entity.nil?
                 end
 
-                def set_{{comp.id.underscore.id}}(value : {{comp.id}})
-                  if {{comp.id.underscore.id}}?
+                def set_{{comp_name.id}}(value : {{comp.id}})
+                  if {{comp_name.id}}?
                     raise Error.new "Could not set {{comp.id}}!\n" \
                       "#{self} already has an entity with ScoreComponent!" \
                       "You should check if the context already has a " \
-                      "{{comp.id.underscore.id}} Entity before setting " \
-                      "it or use context.replace_{{comp.id.underscore.id}}."
+                      "{{comp_name.id}} Entity before setting " \
+                      "it or use context.replace_{{comp_name.id}}."
                   end
                   entity = self.create_entity
                   entity.add_component(value)
                   entity
                 end
 
-                def {{comp.id.underscore.id}}=(value : {{comp.id}}) : Entitas::Entity
-                  set_{{comp.id.underscore.id}}(value)
+                def {{comp_name.id}}=(value : {{comp.id}}) : Entitas::Entity
+                  set_{{comp_name.id}}(value)
                 end
 
-                def replace_{{comp.id.underscore.id}}(value : {{comp.id}})
-                  entity = self.{{comp.id.underscore.id}}_entity
+                def replace_{{comp_name.id}}(value : {{comp.id}})
+                  entity = self.{{comp_name.id}}_entity
                   if entity.nil?
-                    entity = set_{{comp.id.underscore.id}}(value)
+                    entity = set_{{comp_name.id}}(value)
                   else
                     entity.replace_component(value)
                   end
