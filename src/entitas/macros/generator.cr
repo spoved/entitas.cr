@@ -43,15 +43,16 @@ class Entitas::Context(TEntity)
         {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
         {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
           {% if obj.annotation(::Context) %}
-
-            {% contexts = obj.annotation(::Context) %}
-            {% for anno in contexts.args %}
-              {% context_map[anno] = [] of ArrayLiteral(TypeNode) if context_map[anno].nil? %}
-              {% array = context_map[anno] %}
-              {% if array == nil %}
-                {% context_map[anno] = [obj] %}
-              {% else %}
-                {% context_map[anno] = array + [obj] %}
+            {% contexts = obj.annotations(::Context) %}
+            {% for context in contexts %}
+              {% for anno in context.args %}
+                {% context_map[anno] = [] of ArrayLiteral(TypeNode) if context_map[anno].nil? %}
+                {% array = context_map[anno] %}
+                {% if array == nil %}
+                  {% context_map[anno] = [obj] %}
+                {% else %}
+                  {% context_map[anno] = array + [obj] %}
+                {% end %}
               {% end %}
             {% end %}
           {% end %}
@@ -190,6 +191,7 @@ class Entitas::Context(TEntity)
                  :flag    => is_flag,
                  :unique  => is_unique,
                } %}
+
 
             {% if is_flag %}
               def {{component_meth_name}}?

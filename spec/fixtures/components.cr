@@ -23,7 +23,8 @@ class UniqueComp < Entitas::Component
   prop :default, String, default: "foo"
 end
 
-@[Context(Test, Test2)]
+@[Context(Test)]
+@[Context(Test2)]
 class NameAge < Entitas::Component
   prop :name, String
   prop :age, Int32, default: 0
