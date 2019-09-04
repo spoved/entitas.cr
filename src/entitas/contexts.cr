@@ -1,5 +1,3 @@
-require "./macros"
-
 # This class gives access to each availble context.
 class Entitas::Contexts
   private class_property _shared_instance : Entitas::Contexts? = nil

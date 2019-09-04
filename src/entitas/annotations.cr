@@ -1,5 +1,3 @@
-require "./error"
-
 # Used to define the context(s) of the component
 #
 # You can add a single context:
@@ -43,13 +41,3 @@ annotation ::Component::Unique; end
 # end
 # ```
 annotation Entitas::PostConstructor; end
-
-macro call_post_constructors
-  {% for meth in @type.methods %}
-    {% if meth.annotation(Entitas::PostConstructor) %}
-      {{meth.name.id}}
-    {% end %}
-  {% end %}
-end
-
-require "./macros/*"

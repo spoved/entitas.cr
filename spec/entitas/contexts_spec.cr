@@ -10,6 +10,7 @@ describe Contexts do
 
   it "should build entity indexs" do
     ctxs = Contexts.shared_instance
-    # puts ctxs.test.get_entity_index(Contexts::NAME_AGE_ENTITY_INDICES_NAME)
+    # index = ctxs.test.get_entity_index(Contexts::NAME_AGE_ENTITY_INDICES_NAME)
+    # # puts index
   end
 end

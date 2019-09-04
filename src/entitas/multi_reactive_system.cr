@@ -1,5 +1,4 @@
-require "../entitas"
-require "./systems/reactive"
+require "./systems"
 
 module Entitas
   # A `Entitas::ReactiveSystem` calls Execute(entities) if there were changes based on

@@ -1,4 +1,4 @@
-require "./macros"
+require "./macros/events"
 
 module Entitas::Events
   create_event OnEntityAdded, {group: IGroup, entity: IEntity, index: Int32, component: Entitas::IComponent?}

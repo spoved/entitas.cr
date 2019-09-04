@@ -23,8 +23,6 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   end
 
   getter name : String
-
-  property to_string_cache : String? = nil
   protected property is_single_key : Bool
 
   @on_entity_added : Proc(Entitas::Events::OnEntityAdded, Nil)? = nil
@@ -118,13 +116,5 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
 
   def finalize
     self.deactivate
-  end
-
-  def to_s(io)
-    if self.to_string_cache.nil?
-      self.to_string_cache = "#{self.class}(#{self.name})"
-    else
-      io << self.to_string_cache
-    end
   end
 end

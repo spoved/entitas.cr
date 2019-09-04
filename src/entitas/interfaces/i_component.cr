@@ -1,5 +1,3 @@
-require "../macros/component/properties"
-
 module Entitas::IComponent
   {% if !flag?(:disable_logging) %}spoved_logger{% end %}
 
