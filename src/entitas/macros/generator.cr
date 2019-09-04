@@ -529,6 +529,10 @@ class Entitas::Context(TEntity)
                 # Cycle through each context, to add the entity index to it
                 {% for context_name, components in context_map %}
                   {% if components.includes?(comp) %}
+                    {% types = comp.methods.find { |m| m.name == prop }.return_type %}
+                    {% if types.is_a?(Union) %}
+                      {% types = types.types.reject { |t| "#{t}" == "::Nil" }.join(" | ").id %}
+                    {% end %}
 
                     {%
                       entity_indicies.push({
@@ -537,15 +541,11 @@ class Entitas::Context(TEntity)
                         comp:          comp,
                         comp_meth:     comp_map[comp][:meth_name],
                         prop:          prop,
-                        prop_type:     comp.methods.find { |m| m.name == prop }.return_type,
+                        prop_type:     types,
                         context_name:  context_name,
                         contexts_meth: "#{context_name}".underscore.downcase,
                       })
                     %}
-
-                      # def get_entities_with_{{ prop.id }}(context : Entitas::IContext, value : String)
-                      #   context.get_entity_index(::Contexts::{{const.id}}).get_entities(value)
-                      # end
                   {% end %} # end {if components.includes?(comp)}
 
                 {% end %} # end {for context_name, components in context_map}
@@ -553,7 +553,6 @@ class Entitas::Context(TEntity)
             {% end %} # end {if const =~ /ENTITY_INDICES/}
           {% end %} # if const =~ /ENTITY_INDICES/
         {% end %} # for const in ::Entitas::Contexts.constants
-
 
         class ::Entitas::Contexts
 
@@ -564,16 +563,21 @@ class Entitas::Context(TEntity)
             {{index[:contexts_meth].id}}.add_entity_index(
               ::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}).new(
                 ::Contexts::{{index[:const].id}},
+
                 {{index[:contexts_meth].id}}.get_group(
                   {{index[:context_name].id}}Matcher.{{index[:comp_meth].id}}
                 ),
                 ->(entity : {{index[:context_name].id}}Entity, component : Entitas::IComponent?) {
-                  (component.nil? ? entity.get_component_{{index[:comp_meth].id}}.{{index[:prop].id}} : component.as({{index[:comp]}}).{{index[:prop].id}}).as({{index[:prop_type].id}})
+                  if component.nil?
+                    entity.get_component_{{index[:comp_meth].id}}.{{index[:prop].id}}.as({{index[:prop_type].id}})
+                  else
+                    component.as({{index[:comp]}}).{{index[:prop].id}}.as({{index[:prop_type].id}})
+                  end
                 }
 
               )
             )
-            {% end %}
+            {% end %} # end for index in entity_indicies
           end
 
           module Extensions
