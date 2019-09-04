@@ -24,8 +24,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
 
   getter name : String
 
-  private property to_string_cache : String? = nil
-
+  property to_string_cache : String? = nil
   protected property is_single_key : Bool
 
   @on_entity_added : Proc(Entitas::Events::OnEntityAdded, Nil)? = nil

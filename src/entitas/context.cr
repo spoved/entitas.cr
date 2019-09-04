@@ -50,6 +50,8 @@ module Entitas
       if self.context_info.component_names.size != self.total_components
         raise Error::Info.new(self, self.context_info)
       end
+
+      call_post_constructors
     end
 
     # Resets the context (destroys all entities and resets creationIndex back to 0).

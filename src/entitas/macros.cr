@@ -30,6 +30,26 @@ annotation ::Context; end
 # ```
 annotation ::Component::Unique; end
 
-annotation ::Component::Index; end
+# Used to declare if a method should be called at the end of
+# initializing a new `Entitas::Contexts`, `Entitas::Context` or
+# `Entitas::Entity`
+#
+# ```
+# def Entitas::Contexts
+#   @[Entitas::PostConstructor]
+#   def call_me_after_init
+#     # do something
+#   end
+# end
+# ```
+annotation Entitas::PostConstructor; end
+
+macro call_post_constructors
+  {% for meth in @type.methods %}
+    {% if meth.annotation(Entitas::PostConstructor) %}
+      {{meth.name.id}}
+    {% end %}
+  {% end %}
+end
 
 require "./macros/*"

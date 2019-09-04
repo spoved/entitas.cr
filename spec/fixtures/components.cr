@@ -26,14 +26,19 @@ end
 @[Context(Test)]
 @[Context(Test2)]
 class NameAge < Entitas::Component
-  prop :name, String
-  prop :age, Int32, default: 0
+  prop :name, String, index: true
+  prop :age, Int32, default: 0, index: true
 end
 
 @[Context(Test3)]
 class Vector3 < Array(Int32)
+  property size : Int32
+
+  # Add existing property
   property_alias :size, Int32, default: 0
-  define_property :age, Int32, default: 0
+
+  # New property
+  prop :angle, Int32, default: 0, index: true
 end
 
 @[Component::Unique]

@@ -1,3 +1,5 @@
+require "./macros"
+
 # This class gives access to each availble context.
 class Entitas::Contexts
   private class_property _shared_instance : Entitas::Contexts? = nil
@@ -9,7 +11,11 @@ class Entitas::Contexts
   # Entitas::Contexts.shared_instance # => Entitas::Contexts
   # ```
   def self.shared_instance : Entitas::Contexts
-    self._shared_instance ||= Entitas::Contexts.new
+    @@_shared_instance ||= Entitas::Contexts.new
+  end
+
+  def shared_instance : Entitas::Contexts
+    self.class.shared_instance
   end
 
   # Will call `Entitas::Context#reset` on each context.
@@ -37,6 +43,10 @@ class Entitas::Contexts
           self.{{context_name}},
         {% end %}
       ] of Entitas::Context
+    end
+
+    def initialize
+      call_post_constructors
     end
   end
 end

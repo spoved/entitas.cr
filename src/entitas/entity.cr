@@ -26,6 +26,8 @@ module Entitas
       {% if !flag?(:disable_logging) %}logger.debug("Calling initialize: #{self.object_id}", self.to_s){% end %}
 
       reactivate(@creation_index)
+
+      call_post_constructors
     end
 
     def init(creation_index ct_index : Int32 = 0,
@@ -41,6 +43,7 @@ module Entitas
       self.clear_caches!
 
       self.reactivate(ct_index)
+
       self
     end
 
