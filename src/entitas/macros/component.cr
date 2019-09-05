@@ -49,6 +49,8 @@ class Entitas::Component
                 @{{var_name}} = v.as({{meth.args[0].restriction}}?) if v.is_a?({{meth.args[0].restriction}}?)
               {% end %}
             {% end %}
+            else
+              raise Exception.new("Unknown property #{k} for #{self.class}")
             end
           end
 

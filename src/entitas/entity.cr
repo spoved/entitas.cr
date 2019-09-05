@@ -208,7 +208,8 @@ module Entitas
     def to_s(io)
       if @to_string_cache.nil?
         @to_string_cache = String::Builder.build do |builder|
-          builder << "Entity_#{self.creation_index}("
+          builder << self.class
+          builder << "_#{self.creation_index}("
           builder << get_components.map { |c| c.class.to_s }.join(",")
           builder << ")"
         end
