@@ -191,7 +191,7 @@ class Entitas::Context(TEntity)
                  :flag        => is_flag,
                  :unique      => is_unique,
                  :index_alias => comp.id.gsub(/::/, "").underscore.upcase,
-                 :meth_name   => component_meth_name,
+                 :meth_name   => component_meth_name.id,
                } %}
 
 
@@ -209,7 +209,7 @@ class Entitas::Context(TEntity)
               end
             {% end %}
 
-            # Will replace the current compoent with the provided one
+            # Will replace the current component with the provided one
             #
             # ```
             # new_comp = ::{{comp.id}}
@@ -225,8 +225,25 @@ class Entitas::Context(TEntity)
               self.replace_{{component_meth_name}}(component)
             end
 
+            # Will replace the current component with the new one
+            # generated from the provided arguments
+            #
+            # ```
+            # entity.replace_{{component_meth_name}}
+            # entity.get_{{component_meth_name}} # => (new_comp)
+            # ```
+            def replace_{{component_meth_name}}(**args)
+              component = self.create_component(::{{comp.id}}, **args)
+              self.replace_component(self.component_index_value(::{{comp.id}}), component)
+            end
+
             # Will return true if the entity has an component `{{comp.id}}` or false if it does not
             def has_{{component_meth_name}}? : Bool
+              self.has_component_{{component_meth_name}}?
+            end
+
+            # Alias. See `#has_{{component_meth_name}}?`
+            def {{component_meth_name}}? : Bool
               self.has_component_{{component_meth_name}}?
             end
 
@@ -457,7 +474,7 @@ class Entitas::Context(TEntity)
             # entities at the context level
             {% for comp in components %}
               {% if comp_map[comp][:unique] %}
-                {% comp_name = comp.name.gsub(/.*::/, "").underscore %}
+                {% comp_name = comp_map[comp][:meth_name] %}
                 # def has_unique_component_already?(comp : Entitas::Component::ComponentTypes)
                 #   case comp
                 #   {% for component in components %}
@@ -479,12 +496,43 @@ class Entitas::Context(TEntity)
                   entity.{{comp_name.id}}
                 end
 
+
+
+                {% if comp_map[comp][:flag] %}
+
+                  def is_{{comp_name.id}}=(value : Bool)
+                    if value == true && {{comp_name.id}}_entity.nil?
+                      self.create_entity.add_{{comp_name.id}}
+                    elsif value == true && !{{comp_name.id}}_entity.nil?
+                      # Do nothing
+                    elsif value == false && {{comp_name.id}}_entity.nil?
+                      # DO nothing
+                    elsif value == false && !{{comp_name.id}}_entity.nil?
+                      {{comp_name.id}}_entity.as({{context_name.id}}Entity).del_{{comp_name.id}}
+                    end
+                  end
+
+                  # Will check to see if there is a `{{context_name.id}}Entity` with
+                  # a `{{comp.id}}` component
+                  def is_{{comp_name.id}}? : Bool
+                    !{{comp_name.id}}_entity.nil?
+                  end
+
+                {% else %}
+
+                # Will check to see if there is a `{{context_name.id}}Entity` with
+                # a `{{comp.id}}` component
+                def has_{{comp_name.id}}? : Bool
+                  !{{comp_name.id}}_entity.nil?
+                end
+
+                # Alias. See `#has_{{comp_name.id}}?`
                 def {{comp_name.id}}? : Bool
                   !{{comp_name.id}}_entity.nil?
                 end
 
                 def set_{{comp_name.id}}(value : {{comp.id}})
-                  if {{comp_name.id}}?
+                  if has_{{comp_name.id}}?
                     raise Error.new "Could not set {{comp.id}}!\n" \
                       "#{self} already has an entity with ScoreComponent!" \
                       "You should check if the context already has a " \
@@ -500,6 +548,7 @@ class Entitas::Context(TEntity)
                   set_{{comp_name.id}}(value)
                 end
 
+
                 def replace_{{comp_name.id}}(value : {{comp.id}})
                   entity = self.{{comp_name.id}}_entity
                   if entity.nil?
@@ -509,6 +558,9 @@ class Entitas::Context(TEntity)
                   end
                   entity
                 end
+
+                {% end %}
+
               {% end %}
             {% end %}
           end
