@@ -342,6 +342,7 @@ class Entitas::Context(TEntity)
           #############################################
 
 
+          # Sub context {{context_name.id}}
           class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
 
             enum Index
@@ -402,11 +403,14 @@ class Entitas::Context(TEntity)
             private def create_default_context_info : Entitas::Context::Info
               {% if !flag?(:disable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
 
+              # @component_names_cache.clear
+              # prefix = "Index "
+              # total_components.times do |i|
+              #   @component_names_cache << prefix + i.to_s
+              # end
+
               @component_names_cache.clear
-              prefix = "Index "
-              total_components.times do |i|
-                @component_names_cache << prefix + i.to_s
-              end
+              @component_names_cache = COMPONENT_NAMES
 
               Entitas::Context::Info.new(
                 CONTEXT_NAME,
@@ -531,10 +535,17 @@ class Entitas::Context(TEntity)
                   !{{comp_name.id}}_entity.nil?
                 end
 
-                def set_{{comp_name.id}}(value : {{comp.id}})
+                # Will create a new `{{context_name.id}}Entity` and set the `{{comp.id}}` to the
+                # provided value. If an entity already exists with the unique component,
+                # a `Error` will be raised. The created `{{context_name.id}}Entity` will be returned
+                #
+                # ```
+                # context.set_{{comp_name.id}}({{comp.id}}.new) # => {{context_name.id}}Entity
+                # ```
+                def set_{{comp_name.id}}(value : {{comp.id}}) : {{context_name.id}}Entity
                   if has_{{comp_name.id}}?
                     raise Error.new "Could not set {{comp.id}}!\n" \
-                      "#{self} already has an entity with ScoreComponent!" \
+                      "#{self} already has an entity with {{comp.id}}!" \
                       "You should check if the context already has a " \
                       "{{comp_name.id}} Entity before setting " \
                       "it or use context.replace_{{comp_name.id}}."
@@ -549,7 +560,11 @@ class Entitas::Context(TEntity)
                 end
 
 
-                def replace_{{comp_name.id}}(value : {{comp.id}})
+                # Replaces the `{{comp.id}}` on an existing `{{context_name.id}}Entity`.
+                # If no existing `{{context_name.id}}Entity` with a `{{comp.id}}` exists,
+                # one will be created. Will return the `{{context_name.id}}Entity` with the
+                # replaced component.
+                def replace_{{comp_name.id}}(value : {{comp.id}}) : {{context_name.id}}Entity
                   entity = self.{{comp_name.id}}_entity
                   if entity.nil?
                     entity = set_{{comp_name.id}}(value)
@@ -608,6 +623,8 @@ class Entitas::Context(TEntity)
 
         class ::Entitas::Contexts
 
+          # Will be called after initialization to intitialze each `EntityIndex` for
+          # all of the contexts.
           @[::Entitas::PostConstructor]
           def initialize_entity_indices
             {% for index in entity_indicies %}

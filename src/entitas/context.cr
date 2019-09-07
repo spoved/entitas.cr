@@ -137,18 +137,23 @@ module Entitas
     # Event functions
     ############################
 
+    # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentAdded`
     def on_component_added(event : Entitas::Events::OnComponentAdded)
       update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
+    # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentRemoved`
     def on_component_removed(event : Entitas::Events::OnComponentRemoved)
       update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
+    # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentReplaced`
     def on_component_replaced(event : Entitas::Events::OnComponentReplaced)
       update_groups_component_replaced(event.entity.as(TEntity), event.index, event.prev_component, event.new_component)
     end
 
+    # Will clean the entity provided in the `Entitas::Events::OnEntityReleased` event. It will
+    # remove all release handlers and append it to the `reusable_entities` cache
     def on_entity_released(event : Entitas::Events::OnEntityReleased)
       {% if !flag?(:disable_logging) %}logger.info("Processing OnEntityReleased: #{event}"){% end %}
       entity = event.entity.as(TEntity)
@@ -163,6 +168,9 @@ module Entitas
       self.reusable_entities << entity
     end
 
+    # Will destroy the entity provided in the `Entitas::Events::OnDestroyEntity` event. It will
+    # delete it from the `entities` set, emit `Entitas::Events::OnEntityWillBeDestroyed` before destroying it,
+    # as well as emit `Entitas::Events::OnEntityDestroyed` after distruction.
     def on_destroy_entity(event : Entitas::Events::OnDestroyEntity)
       entity = event.entity.as(TEntity)
 
@@ -202,6 +210,7 @@ module Entitas
     # Misc functions
     ############################
 
+    # :nodoc:
     def to_s(io)
       io << self.context_info.name
     end

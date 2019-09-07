@@ -58,8 +58,9 @@ describe Entitas::Context do
       ctx = TestContext.new
       ctx.info.name.should eq "TestContext"
       ctx.info.component_names.size.should eq 6
+
       ctx.total_components.times do |i|
-        ctx.info.component_names[i].should eq "Index #{i}"
+        ctx.info.component_names[i].should eq TestContext::COMPONENT_NAMES[i]
       end
     end
 
