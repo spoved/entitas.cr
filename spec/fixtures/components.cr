@@ -39,6 +39,13 @@ class Vector3 < Array(Int32)
 
   # New property
   prop :angle, Int32, default: 0, index: true
+
+  # A property with a constructor method
+  prop :custom, String, not_nil: true, method: custom_constructor
+
+  private def custom_constructor
+    "Hello im a constructor"
+  end
 end
 
 @[Component::Unique]

@@ -8,6 +8,20 @@ macro prop(var, kype, **kwargs)
     private def _entitas_set_{{ var.id }}(value : {{kype}} = {{ kwargs[:default] }})
       @{{ var.id }} = value
     end
+  {% elsif kwargs[:not_nil] %}
+    property {{ var.id }} : {{kype}}
+
+    # :nodoc:
+    # This is a private methods used for code generation
+    private def _entitas_set_{{ var.id }}(value : {{kype}})
+      @{{ var.id }} = value
+    end
+
+    # :nodoc:
+    private def _entitas_{{ var.id }}_method : {{kype}}
+      {{kwargs[:method]}}
+    end
+
   {% else %}
     property {{ var.id }} : {{kype}}? = nil
 

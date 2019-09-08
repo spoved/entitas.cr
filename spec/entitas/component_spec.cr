@@ -25,4 +25,9 @@ describe Entitas::Component do
     comp.size.should eq 4
     comp.default.should eq "bar"
   end
+
+  it "should initialize with custom constructor" do
+    comp = Vector3.new
+    comp.custom.should eq "Hello im a constructor"
+  end
 end
