@@ -35,12 +35,17 @@ class Entitas::Contexts
     {% end %}
 
     # Returns an array containing each available context
-    def all_contexts : Array(Entitas::Context)
+    def all_contexts : Array(Entitas::IContext)
       @_all_contexts ||= [
         {% for context_name, context in contexts %}
           self.{{context_name}},
         {% end %}
-      ] of Entitas::Context
+      ] of Entitas::IContext
+    end
+
+    # Returns the context with the provided name, or nil
+    def get_context_by_name(name : String)
+      self.all_contexts.find {|ctx| ctx.info.name == name }
     end
 
     def initialize

@@ -44,8 +44,8 @@ class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity
   def to_s(io)
     if self.to_string_cache.nil?
       self.to_string_cache = "EntityIndex(#{self.name})"
-    else
-      io << self.to_string_cache
     end
+
+    io << self.to_string_cache
   end
 end

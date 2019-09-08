@@ -19,26 +19,18 @@ module Entitas
 
     def initialize(@collectors : Array(ICollector)); end
 
-    macro inherited
-      def self.new(collectors : Array(ICollector), filter : Proc(IEntity, Bool)) : {{@type.id}}
-        instance = {{@type.id}}.allocate
-        instance.initialize collectors
-        instance._filter = filter
-        instance
-      end
+    def initialize(collectors : Array(ICollector), filter : Proc(IEntity, Bool))
+      @collectors = collectors
+      @_filter = filter
+    end
 
-      def self.new(context : Entitas::Context, filter : Proc(IEntity, Bool)) : {{@type.id}}
-        instance = {{@type.id}}.allocate
-        instance.initialize instance.get_trigger(context)
-        instance._filter = filter
-        instance
-      end
+    def initialize(context : Entitas::Context, filter : Proc(IEntity, Bool))
+      @collectors = get_trigger(context)
+      @_filter = filter
+    end
 
-      def self.new(contexts : ::Contexts) : {{@type.id}}
-        instance = {{@type.id}}.allocate
-        instance.initialize instance.get_trigger(contexts)
-        instance
-      end
+    def initialize(contexts : ::Contexts)
+      @collectors = get_trigger(contexts)
     end
 
     # Specify the collector that will trigger the ReactiveSystem.

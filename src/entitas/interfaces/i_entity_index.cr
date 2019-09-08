@@ -8,8 +8,7 @@ module Entitas::IEntityIndex
   def to_s(io)
     if self.to_string_cache.nil?
       self.to_string_cache = "#{self.class}(#{self.name})"
-    else
-      io << self.to_string_cache
     end
+    io << self.to_string_cache
   end
 end
