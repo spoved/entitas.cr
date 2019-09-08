@@ -60,9 +60,13 @@ Run `crystal docs` to generate API Docs and examples. You may need to include an
 
 Examples can also be found in the `spec/fixtures` and `examples` folders. Ive replicated every test i could from the C# lib, so many examples and translations can be found there as well.
 
+### Logging
+To enable verbose logging please provide the compile time flag `-Dentitas_enable_logging`. This will enable the `Spoved::Logger`.
+This is disabled by default to keep the code as performant as possible.
+
 ## Benchmarks
 
-It is very important to make sure the lib is compariable to the original entitas. Here are some of the benchmarks to compare. Each benchmark was written as close as possible to the main source. As well as any aliases of the methods were tested. Most impressivly, the slowest test (EntityRemoveAddComponent) clocked in at 868.6 ms vs the crystal equivilant (#remove_component & #add_component) at 290.0 ms. Thats a 3x speed improvement. To benchmark please include the `-Ddisable_logging` flag to disable logging.
+It is very important to make sure the lib is compariable to the original entitas. Here are some of the benchmarks to compare. Each benchmark was written as close as possible to the main source. As well as any aliases of the methods were tested. Most impressivly, the slowest test (EntityRemoveAddComponent) clocked in at 868.6 ms vs the crystal equivilant (#remove_component & #add_component) at 290.0 ms. Thats a 3x speed improvement.
 
 ### Enitas C#
 ```
@@ -87,7 +91,7 @@ EntityReplaceComponent:                 164.2688 ms
 
 You can run the following command to run the benchmarks:
 
-`crystal run -Ddisable_logging --release ./spec/performance/bench.cr`
+`crystal run --release ./spec/performance/bench.cr`
 
 ```
 --## Entitas::Context(TEntity) ##--

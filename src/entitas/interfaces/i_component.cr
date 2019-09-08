@@ -1,5 +1,5 @@
 module Entitas::IComponent
-  {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
   # Will return true if the class is a unique component for a context
   abstract def is_unique? : Bool

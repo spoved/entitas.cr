@@ -1,7 +1,7 @@
 require "../events"
 
 module Entitas::IContext
-  {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
   abstract def total_components : Int32
 

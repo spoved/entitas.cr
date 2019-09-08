@@ -6,7 +6,7 @@ module Entitas
   # A Collector can observe one or more groups from the same context
   # and collects changed entities based on the specified groupEvent.
   class Collector(TEntity)
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+    {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
     include ICollector
 
@@ -54,7 +54,7 @@ module Entitas
     # Activates the Collector and will start collecting
     # changed entities. Collectors are activated by default.
     def activate
-      {% if !flag?(:disable_logging) %}logger.info("activating collector with events : #{group_events}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("activating collector with events : #{group_events}", self.to_s){% end %}
 
       groups.each_with_index do |group, i|
         case group_events[i]
@@ -72,7 +72,7 @@ module Entitas
     end
 
     def deactivate
-      {% if !flag?(:disable_logging) %}logger.info("deactivating collector", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("deactivating collector", self.to_s){% end %}
 
       self.groups.each do |group|
         group.remove_on_entity_added_hook add_entity_on_added_cache
@@ -120,7 +120,7 @@ module Entitas
     def add_entity(event : Entitas::Events::OnEntityAdded) : Nil
       entity = event.entity.as(TEntity)
 
-      {% if !flag?(:disable_logging) %}
+      {% if flag?(:entitas_enable_logging) %}
         logger.debug("Processing OnEntityAdded : #{entity}", self.to_s)
       {% end %}
       _add_entity(entity)
@@ -129,7 +129,7 @@ module Entitas
     def add_entity(event : Entitas::Events::OnEntityRemoved) : Nil
       entity = event.entity.as(TEntity)
 
-      {% if !flag?(:disable_logging) %}
+      {% if flag?(:entitas_enable_logging) %}
         logger.debug("Processing OnEntityRemoved : #{entity}", self.to_s)
       {% end %}
 
@@ -138,7 +138,7 @@ module Entitas
 
     def add_entity(event : Entitas::Events::OnEntityUpdated) : Nil
       entity = event.entity.as(TEntity)
-      {% if !flag?(:disable_logging) %}
+      {% if flag?(:entitas_enable_logging) %}
         logger.debug("Processing OnEntityUpdated : #{entity}", self.to_s)
       {% end %}
       _add_entity(entity)

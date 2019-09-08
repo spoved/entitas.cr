@@ -1,6 +1,6 @@
 module Entitas
   module IMatcher
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+    {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
     getter indices : Set(Entitas::Component::Index)
 

@@ -82,7 +82,7 @@ macro emits_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(event : Entitas::Events::{{name.id}}) : Nil
-    {% if !flag?(:disable_logging) %}logger.info("Processing {{name.id}}: #{event}"){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.info("Processing {{name.id}}: #{event}"){% end %}
     raise Entitas::Error::MethodNotImplemented.new
   end
 
@@ -91,7 +91,7 @@ macro emits_event(name)
 end
 
 macro emit_event(event, *args)
-  {% if !flag?(:disable_logging) %}logger.debug("Emitting event {{event.id}}", self.to_s){% end %}
+  {% if flag?(:entitas_enable_logging) %}logger.debug("Emitting event {{event.id}}", self.to_s){% end %}
   self.receive_{{event.id.underscore.id}}_event(Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
@@ -142,7 +142,7 @@ macro accept_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(&block : Entitas::Events::{{name.id}} -> Nil)
-    {% if !flag?(:disable_logging) %}logger.debug("Setting event {{name.id}} hook #{block}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Setting event {{name.id}} hook #{block}", self.to_s){% end %}
     self.{{name.id.underscore.id}}_event_hooks << block
   end
 
@@ -156,12 +156,12 @@ macro accept_event(name)
   end
 
   def remove_{{name.id.underscore.id}}_hook(hook : Proc(Entitas::Events::{{name.id}}, Nil))
-    {% if !flag?(:disable_logging) %}logger.debug("Removing event {{name.id}} hook #{hook}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Removing event {{name.id}} hook #{hook}", self.to_s){% end %}
     self.{{name.id.underscore.id}}_event_hooks.delete hook
   end
 
   def receive_{{name.id.underscore.id}}_event(event : Entitas::Events::{{name.id}})
-    {% if !flag?(:disable_logging) %}logger.debug("Receiving event {{name.id}}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Receiving event {{name.id}}", self.to_s){% end %}
 
     index = self.{{name.id.underscore.id}}_event_hooks.size - 1
     while index >= 0

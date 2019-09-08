@@ -15,7 +15,7 @@ module Entitas
       else
         group = Group(TEntity).new(matcher)
 
-        {% if !flag?(:disable_logging) %}logger.debug("created new group: #{group}", self){% end %}
+        {% if flag?(:entitas_enable_logging) %}logger.debug("created new group: #{group}", self){% end %}
 
         get_entities.each do |entity|
           group.handle_entity_silently(entity)
@@ -34,7 +34,7 @@ module Entitas
     end
 
     def update_groups_component_added_or_removed(entity : TEntity, index : Int32, component : Entitas::IComponent?)
-      {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.debug("update_groups_component_added_or_removed : #{entity}", self.to_s){% end %}
 
       _groups = self.groups_for_index[index]?
 
@@ -54,7 +54,7 @@ module Entitas
     end
 
     private def emit_group_event(group, event_type, entity, index, component)
-      {% if !flag?(:disable_logging) %}logger.debug("emit_group_event : #{event_type} : #{entity}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.debug("emit_group_event : #{event_type} : #{entity}", self.to_s){% end %}
 
       case event_type
       when Entitas::Events::OnEntityAdded.class
@@ -69,7 +69,7 @@ module Entitas
     def update_groups_component_replaced(entity : TEntity, index : Int32,
                                          prev_component : Entitas::IComponent?,
                                          new_component : Entitas::IComponent?)
-      {% if !flag?(:disable_logging) %}logger.debug("update_groups_component_replaced : [#{entity}][prev_comp: #{prev_component}][new_comp: #{new_component}]", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.debug("update_groups_component_replaced : [#{entity}][prev_comp: #{prev_component}][new_comp: #{new_component}]", self.to_s){% end %}
       if groups_for_index[index]
         groups_for_index[index].each do |group|
           group.update_entity(entity, index, prev_component, new_component)

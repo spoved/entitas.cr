@@ -6,7 +6,7 @@ require "spoved/logger"
 
 # TODO: Write documentation for `Entitas`
 module Entitas
-  {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
   class Error < Exception; end
 

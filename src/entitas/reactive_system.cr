@@ -7,7 +7,7 @@ module Entitas
   # of an entity to update the gameObject.transform.position
   # of the related gameObject.
   abstract class ReactiveSystem
-    {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+    {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
     include Entitas::Systems::ReactiveSystem
 
@@ -54,7 +54,7 @@ module Entitas
     # based on the specified `Collector`.
     # `ReactiveSystem` are activated by default.
     def activate
-      {% if !flag?(:disable_logging) %}logger.info("activating collector : #{self.collector}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("activating collector : #{self.collector}", self.to_s){% end %}
       self.collector.activate
     end
 
@@ -63,18 +63,18 @@ module Entitas
     # This will also clear the `ReactiveSystem`.
     # `ReactiveSystem` are activated by default.
     def deactivate
-      {% if !flag?(:disable_logging) %}logger.info("deactivating collector : #{self.collector}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("deactivating collector : #{self.collector}", self.to_s){% end %}
       self.collector.deactivate
     end
 
     # Clears all accumulated changes.
     def clear
-      {% if !flag?(:disable_logging) %}logger.info("clearing collector : #{self.collector}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("clearing collector : #{self.collector}", self.to_s){% end %}
       self.collector.clear
     end
 
     def execute : Nil
-      {% if !flag?(:disable_logging) %}logger.info("running execute on collector : #{self.collector}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("running execute on collector : #{self.collector}", self.to_s){% end %}
 
       unless self.collector.empty?
         self.collector.each do |e|

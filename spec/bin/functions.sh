@@ -16,8 +16,8 @@ set_vars(){
   args="--release"
   args="${args} --error-trace"
 
-  if [ -n "${DISABLE_LOGGING}" ]; then
-    args="${args} -Ddisable_logging"
+  if [ -n "${ENABLE_LOGGING}" ]; then
+    args="${args} -Dentitas_enable_logging"
   fi
 
   if [ -n "${USE_BENCHER}" ]; then

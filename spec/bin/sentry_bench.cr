@@ -5,7 +5,6 @@ build_args = [
   "spec/performance/bench.cr",
   "--release",
   "--error-trace",
-  "-Ddisable_logging",
   "-o", "bin/bench",
 ]
 

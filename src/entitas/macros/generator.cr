@@ -20,7 +20,7 @@ class Entitas::Context(TEntity)
       {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
       {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
       if !{{meth.name.id}}.nil?
-        {% if !flag?(:disable_logging) %}logger.debug("Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class){% end %}
+        {% if flag?(:entitas_enable_logging) %}logger.debug("Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class){% end %}
         entity.{{ent_meth_name}} &@{{meth.name.id}}.as(Proc(Entitas::Events::{{ent_meth_name.camelcase.id}}, Nil))
       end
       {% end %}{% end %}
@@ -401,7 +401,7 @@ class Entitas::Context(TEntity)
             end
 
             private def create_default_context_info : Entitas::Context::Info
-              {% if !flag?(:disable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
+              {% if flag?(:entitas_enable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
 
               # @component_names_cache.clear
               # prefix = "Index "

@@ -3,7 +3,7 @@ require "../helpers/entities"
 require "../matcher"
 
 module Entitas::IGroup
-  {% if !flag?(:disable_logging) %}spoved_logger{% end %}
+  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
 
   include Entitas::Helper::Entities(IEntity)
 
