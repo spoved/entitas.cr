@@ -1,0 +1,271 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+  <!--[if IE]>
+<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade
+  your browser</a> to improve your experience and security.</p>
+<![endif]-->
+
+  <div class="container pt-4">
+    <ul class="nav nav-tabs" id="context_nav" role="tablist"></ul>
+    <div class="tab-content" id="context_tab_content"></div>
+  </div>
+</body>
+
+<footer>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <script type="text/scss">
+    .row {
+      background: #f8f9fa;
+      margin-top: 20px;
+    }
+
+    .col {
+      border: solid 1px #6c757d;
+      padding: 10px;
+    }
+  </script>
+
+  <script type="application/javascript">
+    function set_context_nav(data) {
+      let nav = $('#context_nav');
+      let tab_content = $('#context_tab_content');
+
+      for (let i = 0; i < data.length; i++) {
+        let ctx = data[i];
+        let active = "false";
+        let active_class = "";
+        let show = "";
+        let disabled = "";
+
+        if (i == 0) {
+          active = "true";
+          active_class = "active";
+          show = "show";
+        }
+
+        if (ctx.entities.length == 0) {
+          disabled = "disabled";
+        }
+
+        nav.append(`<li class="nav-item">
+        	<a class="nav-link ${active_class} ${disabled}"
+            id="${ctx.name}-tab" data-toggle="tab"
+            href="#${ctx.name}" role="tab"
+            aria-controls="${ctx.name}"
+            aria-selected="${active}" >
+            ${ctx.name}
+          </a>
+        </li>`);
+
+        tab_content.append(`<div
+        	class="tab-pane fade ${show} ${active_class}"
+          id="${ctx.name}" role="tabpanel"
+          aria-labelledby="${ctx.name}-tab">
+          ${ctx.name}
+        </div>`);
+
+        set_context_panel(ctx);
+      }
+    }
+
+    function set_context_panel(ctx) {
+      let panel = $(`#${ctx.name}`);
+      panel.empty();
+
+      let entity_list = "";
+
+      for (let i = 0; i < ctx.entities.length; i++) {
+
+        let e = ctx.entities[i];
+
+        if (!e) {
+          continue;
+        }
+
+        let name = e.name.replace(/\(.*\)/, "");
+        let active = "";
+        let pill_class = "badge-primary";
+
+        if (i == 0) {
+          active = "active";
+          pill_class = "badge-secondary";
+        }
+
+        entity_list += `<button
+        	type="button" id="${name}"
+          class="list-group-item list-group-item-action
+          d-flex justify-content-between align-items-center
+          ${active}">
+          	${e.name}
+    				<span class="badge ${pill_class} badge-pill">${e.component_indices.length}</span>
+          </button>`;
+      }
+
+      let cont = `<div class="container pt-4">
+      	<div class="row">
+        	<div class="col-sm">
+    				<ul class="list-group">
+            ${entity_list}
+            </ul>
+          </div>
+          <div class="col-lg">
+          	<div class="container" id="${ctx.name}-entity-info">
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+      panel.append(cont);
+      set_entity_info(ctx, 0);
+      set_entity_hooks(ctx);
+
+    }
+
+    function set_entity_hooks(ctx) {
+      for (let i = 0; i < ctx.entities.length; i++) {
+        let e = ctx.entities[i];
+
+        if (!e) {
+          continue;
+        }
+
+        let name = e.name.replace(/\(.*\)/, "");
+
+        $(`#${name}`).click(event => {
+          set_entity_info(ctx, i);
+        });
+      }
+    }
+
+    function set_entity_info(ctx, index) {
+      let e = ctx.entities[index];
+
+      if (!e) {
+        return "";
+      }
+
+      let name = e.name.replace(/\(.*\)/, "");
+
+      let card = $(`#${ctx.name}-entity-info`);
+      let entity_card = create_entity_info(e);
+
+      let old_button = $(`#${ctx.name}`).find("ul").find("button.active");
+      old_button.removeClass("active");
+      old_button.find("span").removeClass("badge-secondary").addClass("badge-primary")
+
+      let new_button = $(`#${name}`)
+      new_button.addClass("active");
+      new_button.find("span").removeClass("badge-primary").addClass("badge-secondary")
+
+      card.empty();
+      card.append(entity_card);
+    }
+
+    function create_entity_info(entity) {
+      let cards = "";
+
+      if (!entity) {
+        return cards;
+      }
+
+      for (let i = 0; i < entity.components.length; i++) {
+        let comp = entity.components[i];
+
+        if (comp) {
+          let unique = "";
+          let flag = "";
+          let data = "";
+
+          if (comp.unique) {
+            unique = `<span class="badge card-subtitle badge-warning">unique</span>`;
+          }
+
+          if (Object.entries(comp.data).length === 0) {
+            flag = `<span class="badge card-subtitle badge-success">flag</span>`;
+          } else {
+
+            data += `<div class="card-body"><form><div class="row">`;
+
+            let keys = Object.keys(comp.data);
+            for (let ii in keys) {
+              let obj = comp.data[keys[ii]];
+              obj = JSON.stringify(obj);
+              // data += `<p class="card-text">${keys[ii]} : ${obj}</p>`;
+
+              data += `
+              	<div class="input-group col-auto mb-1">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">${keys[ii]}</div>
+                  </div>
+                  <input type="text" class="form-control" id="" value='${obj}' disabled >
+                </div>
+              `;
+            }
+
+            data += `</div></form></div>`;
+          }
+
+          cards += `
+            <div class="card mb-2 p-0">
+              <div class="card-header">
+                ${comp.name}
+                ${unique}
+                ${flag}
+              </div>
+              ${data}
+            </div>`;
+        }
+      }
+
+      return cards;
+    }
+  </script>
+
+  <script type="application/javascript">
+    let url = "http://127.0.0.1:8080/";
+
+    fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then((resp) => resp.json())
+      .then(function(data) {
+        set_context_nav(data);
+      })
+      .catch(function(error) {
+        console.log(error)
+      });
+  </script>
+</footer>
+
+</html>
