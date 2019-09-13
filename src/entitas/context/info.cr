@@ -13,6 +13,14 @@ module Entitas
         @component_types = Entitas::Component::COMPONENT_KLASSES
       )
       end
+
+      def to_json(json)
+        json.object do
+          json.field "name", name
+          json.field "component_names", component_names
+          json.field "component_types", component_types.map &.to_s
+        end
+      end
     end
   end
 end

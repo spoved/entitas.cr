@@ -194,5 +194,9 @@ module Entitas
       end
       io
     end
+
+    def to_json(json)
+      json.string to_s
+    end
   end
 end

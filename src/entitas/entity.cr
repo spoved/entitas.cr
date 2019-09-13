@@ -30,6 +30,17 @@ module Entitas
       call_post_constructors
     end
 
+    def to_json(json)
+      json.object do
+        json.field "name", to_s
+        json.field "creation_index", creation_index
+        json.field "component_indices", get_component_indices
+        json.field "components", components
+        json.field "context_info", context_info
+        json.field "retain_count", retain_count
+      end
+    end
+
     def init(creation_index ct_index : Int32 = 0,
              context_info ctx_info : Entitas::Context::Info? = nil,
              aerc _aerc : SafeAERC? = nil)

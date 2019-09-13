@@ -345,6 +345,29 @@ class Entitas::Context(TEntity)
           # Sub context {{context_name.id}}
           class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
 
+            def to_json(json)
+              json.object do
+                json.field "name", CONTEXT_NAME
+                json.field "size", self.size
+                json.field "entities", get_entities
+                json.field "components", COMPONENT_NAMES
+                json.field "creation_index", creation_index
+                json.field "info", context_info
+                json.field "reusable_entities", reusable_entities.size
+                json.field "retained_entities", retained_entities.size
+
+                json.field "component_pools" do
+                  json.object do
+                    component_pools.each_with_index do |pool, i|
+                      json.field i, pool.size
+                    end
+                  end
+                end
+
+                json.field "groups_for_index", groups_for_index
+              end
+            end
+
             enum Index
               {% begin %}
                 {% i = 0 %}
@@ -383,7 +406,11 @@ class Entitas::Context(TEntity)
             # The total number of `Entitas::Component` subclases in this context
             TOTAL_COMPONENTS = {{components.size}}
 
-            COMPONENT_NAMES = COMPONENT_TO_INDEX_MAP.keys.map &.to_s
+            COMPONENT_NAMES = [
+              {% for comp in components %}
+                {{comp.id.stringify}},
+              {% end %}
+            ]
             COMPONENT_KLASSES = [
               {% for comp in components %}
                 ::{{comp.id}},
@@ -402,12 +429,6 @@ class Entitas::Context(TEntity)
 
             private def create_default_context_info : Entitas::Context::Info
               {% if flag?(:entitas_enable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
-
-              # @component_names_cache.clear
-              # prefix = "Index "
-              # total_components.times do |i|
-              #   @component_names_cache << prefix + i.to_s
-              # end
 
               @component_names_cache.clear
               @component_names_cache = COMPONENT_NAMES
@@ -433,6 +454,27 @@ class Entitas::Context(TEntity)
               )
             end
 
+            # Will return true if the context contains the component,
+            # false if it does not.
+            def self.has_component?(index) : Bool
+              case index
+              {% i = 0 %}
+              {% for comp in components %}
+              when {{i}}, ::{{comp.id}}.class, Entitas::Component::Index::{{comp.name.gsub(/.*::/, "").id}}
+                true
+              {% i = i + 1 %}
+              {% end %}
+              else
+                false
+              end
+            end
+
+            # Will return the `Entitas::Matcher` class for the context
+            def self.matcher : ::{{context_name.id}}Matcher
+              ::{{context_name.id}}Matcher.new
+            end
+
+            # Will return the `Entitas::Component::Index` for the provided index
             def self.component_index(index) : Entitas::Component::Index
               case index
               {% i = 0 %}
@@ -479,16 +521,6 @@ class Entitas::Context(TEntity)
             {% for comp in components %}
               {% if comp_map[comp][:unique] %}
                 {% comp_name = comp_map[comp][:meth_name] %}
-                # def has_unique_component_already?(comp : Entitas::Component::ComponentTypes)
-                #   case comp
-                #   {% for component in components %}
-                #   when ::{{component.id}}.class
-                #       self.{{component.id.underscore.id}}?
-                #   {% end %}
-                #   else
-                #     false
-                #   end
-                # end
 
                 def {{comp_name.id}}_entity : Entitas::Entity?
                   self.get_group(::{{context_name.id}}Matcher.{{comp_name.id}}).get_single_entity
@@ -499,8 +531,6 @@ class Entitas::Context(TEntity)
                   raise Error.new "No {{comp.id}} has been set for #{self}" if entity.nil?
                   entity.{{comp_name.id}}
                 end
-
-
 
                 {% if comp_map[comp][:flag] %}
 

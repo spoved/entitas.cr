@@ -35,4 +35,6 @@ module Entitas::IContext
   abstract def get_group(matcher : Entitas::Matcher) : Entitas::Group
 
   accept_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
+
+  abstract def to_json(json)
 end

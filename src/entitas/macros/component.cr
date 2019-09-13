@@ -46,6 +46,19 @@ class Entitas::Component
           {% end %}
         end
 
+        def to_json(json)
+          json.object do
+            json.field "name", {{@type.id.stringify}}
+            json.field "unique", is_unique?
+            json.field("data") do
+              json.object do
+                {% for var_name in comp_variables.keys %}
+                json.field {{var_name.stringify}}, ({{var_name.id}}? ? {{var_name.id}} : nil)
+                {% end %}
+              end
+            end
+          end
+        end
 
         # Will reset all instance variables to nil or their default value
         def reset

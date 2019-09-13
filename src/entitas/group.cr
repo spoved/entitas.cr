@@ -158,5 +158,12 @@ module Entitas
       matcher.to_s(io)
       io << ")"
     end
+
+    def to_json(json)
+      json.object do
+        json.field "matcher", matcher
+        json.field "entities", get_entities
+      end
+    end
   end
 end
