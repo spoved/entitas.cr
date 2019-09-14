@@ -21,6 +21,12 @@ class Entitas::Contexts
     self.all_contexts.each &.reset
   end
 
+  def each
+    self.all_contexts.each do |ctx|
+      yield ctx
+    end
+  end
+
   macro finished
 
     {% contexts = {} of TypeString => TypeNode %}

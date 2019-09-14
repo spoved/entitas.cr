@@ -58,8 +58,15 @@ module Entitas
       self.collectors.each &.deactivate
     end
 
+    # Alias. See `#clear`
+    def clear_collected_entities
+      self.clear
+    end
+
     # Clears all accumulated changes.
     def clear
+      {% if flag?(:entitas_enable_logging) %}logger.info("clearing system", self.to_s){% end %}
+
       self.collectors.each &.clear
     end
 

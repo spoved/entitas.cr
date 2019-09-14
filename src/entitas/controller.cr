@@ -7,6 +7,10 @@ module Entitas
     private property contexts : Contexts? = nil
 
     def start
+      unless systems.nil?
+        raise "Called start more than once! systems already initialized!"
+      end
+
       self.contexts = Contexts.shared_instance
       self.systems = create_systems(self.contexts.as(Contexts))
       self.systems.as(Systems).init
@@ -18,6 +22,14 @@ module Entitas
       end
       systems.as(Systems).execute
       systems.as(Systems).cleanup
+    end
+
+    def reset
+      if systems.nil?
+        raise "Called reset before start! no systems initialized!"
+      end
+      systems.as(Systems).clear_reactive_systems
+      contexts.as(Contexts).reset
     end
 
     abstract def create_systems(contexts : Contexts)

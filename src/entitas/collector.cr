@@ -99,6 +99,8 @@ module Entitas
 
     # Clears all collected entities
     def clear
+      {% if flag?(:entitas_enable_logging) %}logger.info("clearing collector", self.to_s){% end %}
+
       self.entities.each &.release(self)
       self.entities.clear
     end
@@ -149,7 +151,7 @@ module Entitas
     ############################
 
     def to_s(io)
-      self.to_string_cache = "Collector(#{groups.join(", ")})" if self.to_string_cache.nil?
+      self.to_string_cache = "#{self.class}(#{groups.join(", ")})" if self.to_string_cache.nil?
       io << self.to_string_cache
     end
   end

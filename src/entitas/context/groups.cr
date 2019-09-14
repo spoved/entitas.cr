@@ -2,7 +2,7 @@ require "../group"
 
 module Entitas
   abstract class Context(TEntity)
-    protected property groups : Hash(String, Group(TEntity)) = Hash(String, Group(TEntity)).new
+    getter groups : Hash(String, Group(TEntity)) = Hash(String, Group(TEntity)).new
     protected property groups_for_index : Array(Set(Group(TEntity)))
     private property group_events_buffer = Set(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
 
