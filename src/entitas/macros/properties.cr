@@ -59,6 +59,23 @@ macro property_alias(var, kype, **kwargs)
     private def _entitas_set_{{ var.id }}(value : {{kype}} = {{ kwargs[:default] }})
       self.{{ var.id }} = value
     end
+
+  {% elsif kwargs[:not_nil] %}
+    setter {{ var.id }} : {{kype}}
+
+    # :nodoc:
+    # This is a private methods used for code generation
+    private def _entitas_set_{{ var.id }}(value : {{kype}})
+      @{{ var.id }} = value
+    end
+
+    {% if kwargs[:method] %}
+      # :nodoc:
+      private def _entitas_{{ var.id }}_method : {{kype}}
+        {{kwargs[:method]}}
+      end
+    {% end %}
+
   {% else %}
     # :nodoc:
     # This is a private methods used for code generation
