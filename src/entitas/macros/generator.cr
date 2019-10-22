@@ -200,7 +200,7 @@ class Entitas::Context(TEntity)
                 self.has_component?(self.component_index_value({{component_name.id}}))
               end
 
-              def is_{{component_meth_name}}=(value : Bool)
+              def {{component_meth_name}}=(value : Bool)
                 if value
                   self.add_component_{{component_meth_name}}
                 else
@@ -534,7 +534,7 @@ class Entitas::Context(TEntity)
 
                 {% if comp_map[comp][:flag] %}
 
-                  def is_{{comp_name.id}}=(value : Bool)
+                  def {{comp_name.id}}=(value : Bool)
                     if value == true && {{comp_name.id}}_entity.nil?
                       self.create_entity.add_{{comp_name.id}}
                     elsif value == true && !{{comp_name.id}}_entity.nil?
@@ -548,7 +548,7 @@ class Entitas::Context(TEntity)
 
                   # Will check to see if there is a `{{context_name.id}}Entity` with
                   # a `{{comp.id}}` component
-                  def is_{{comp_name.id}}? : Bool
+                  def {{comp_name.id}}? : Bool
                     !{{comp_name.id}}_entity.nil?
                   end
 
