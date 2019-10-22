@@ -1,6 +1,12 @@
 class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity, TKey)
   getter index : Hash(TKey, Array(TEntity)) = Hash(TKey, Array(TEntity)).new
 
+  include Enumerable({TKey, TEntity})
+
+  def each(&block : TKey -> TEntity)
+    self.index.each(&block)
+  end
+
   def clear
     index.values.each do |entities|
       entities.each do |entity|

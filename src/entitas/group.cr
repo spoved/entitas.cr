@@ -135,7 +135,7 @@ module Entitas
     # Returns the only entity in this group. It will return null
     # if the group is empty. It will throw an exception if the group
     # has more than one entity.
-    def get_single_entity : TEntity?
+    def get_single_entity : Entitas::IEntity?
       if single_entitie_cache.nil?
         if size == 1
           self.single_entitie_cache = entities.first?
