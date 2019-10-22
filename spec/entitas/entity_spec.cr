@@ -16,6 +16,23 @@ describe Entitas::Entity do
     end
   end
 
+  describe "with flag component" do
+    it "can be set with a bool" do
+      entity = new_entity
+      entity.a = true
+      entity.has_a?.should be_truthy
+      entity.a = false
+      entity.a?.should be_false
+    end
+
+    it "can be checked with a bool" do
+      entity = new_entity
+      entity.a?.should be_false
+      entity.a = true
+      entity.a?.should be_truthy
+    end
+  end
+
   describe "when created" do
     describe "initial state" do
       it "has default context info" do
