@@ -26,7 +26,7 @@ module Entitas
       )
     end
 
-    def matches?(entity : Entitas::Entity)
+    def matches?(entity : Entitas::Entity) : Bool
       {% if flag?(:entitas_enable_logging) %}
         logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
                      " && matches_any_of? #{matches_any_of?(entity)}" \

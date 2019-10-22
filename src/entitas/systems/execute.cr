@@ -1,5 +1,5 @@
 module Entitas::Systems::ExecuteSystem
   include Entitas::System
 
-  abstract def execute : Nil
+  abstract def execute
 end

@@ -121,7 +121,7 @@ module Entitas
     end
 
     # Returns the number of objects that retain this entity.
-    def retain_count
+    def retain_count : Int32
       aerc.retain_count
     end
 

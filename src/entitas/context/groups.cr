@@ -4,7 +4,7 @@ module Entitas
   abstract class Context(TEntity)
     getter groups : Hash(String, Group(TEntity)) = Hash(String, Group(TEntity)).new
     protected property groups_for_index : Array(Set(Group(TEntity)))
-    private property group_events_buffer = Set(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
+    private property group_events_buffer = Array(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
 
     # Returns a group for the specified matcher.
     # Calling context.GetGroup(matcher) with the same matcher will always
@@ -43,11 +43,17 @@ module Entitas
 
         _groups.each do |group|
           event_type = group.handle_entity(entity)
+
+          {% if flag?(:entitas_enable_logging) %}
+            logger.debug("update_groups_component_added_or_removed : #{entity} : Event : #{event_type}", self.to_s)
+          {% end %}
+
           next if event_type.nil?
-          group_events_buffer.add({group, event_type})
+          group_events_buffer << {group, event_type}
         end
 
-        group_events_buffer.each do |group, event_type|
+        while !group_events_buffer.empty?
+          group, event_type = group_events_buffer.pop
           emit_group_event(group, event_type, entity, index, component)
         end
       end

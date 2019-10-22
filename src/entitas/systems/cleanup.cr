@@ -1,5 +1,5 @@
 module Entitas::Systems::CleanupSystem
   include Entitas::System
 
-  abstract def cleanup : Nil
+  abstract def cleanup
 end

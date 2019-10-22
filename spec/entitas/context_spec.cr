@@ -713,11 +713,11 @@ describe Entitas::Context do
           entity.del_a
         end
 
-        group_ab.on_entity_added do |_|
+        group_ab.on_entity_added do
           did_execute += 1
         end
 
-        group_abc.on_entity_added do |_|
+        group_abc.on_entity_added do
           did_execute += 1
         end
 

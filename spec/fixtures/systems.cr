@@ -50,7 +50,8 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
 
   property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
-  def get_trigger(context)
+  def get_trigger(context) : Entitas::ICollector
+    @collector
   end
 
   def init
@@ -83,7 +84,7 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   property entities = Array(Entitas::IEntity).new
   property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
-  def get_trigger(contexts : ::Contexts)
+  def get_trigger(contexts : ::Contexts) : Array(Entitas::ICollector)
     [
       contexts.test.create_collector(TestMatcher.name_age),
       contexts.test2.create_collector(Test2Matcher.name_age),
@@ -109,7 +110,7 @@ class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
   property entities = Array(Entitas::IEntity).new
   property execute_action : Proc(Array(Entitas::IEntity), Nil)? = nil
 
-  def get_trigger(contexts : ::Contexts)
+  def get_trigger(contexts : ::Contexts) : Array(Entitas::ICollector)
     [
       contexts.test.create_collector(TestMatcher.name_age),
       contexts.test.create_collector(TestMatcher.name_age.removed),
