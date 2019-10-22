@@ -1,10 +1,12 @@
 class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity, TKey)
   getter index : Hash(TKey, Array(TEntity)) = Hash(TKey, Array(TEntity)).new
 
-  include Enumerable({TKey, TEntity})
+  def [](value : TKey)
+    index[value]
+  end
 
-  def each(&block : TKey -> TEntity)
-    self.index.each(&block)
+  def []?(value : TKey)
+    index[value]?
   end
 
   def clear
