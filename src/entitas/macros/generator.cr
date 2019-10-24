@@ -274,6 +274,21 @@ class Entitas::Context(TEntity)
             # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
             #
             # ```
+            # entity.add_{{component_meth_name}}(value: 1)
+            # ```
+            #
+            # or
+            #
+            # ```
+            # entity.add_{{component_meth_name}}(1)
+            # ```
+            def add_{{component_meth_name}}(value) : Entitas::Entity
+              self.add_component_{{component_meth_name}}(value: value)
+            end
+
+            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
+            #
+            # ```
             # entity.add_component_{{component_meth_name}}
             # ```
             def add_component_{{component_meth_name}}(**args) : Entitas::Entity

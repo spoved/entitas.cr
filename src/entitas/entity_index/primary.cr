@@ -4,6 +4,14 @@ module Entitas
   class PrimaryEntityIndex(TEntity, TKey) < AbstractEntityIndex(TEntity, TKey)
     getter index : Hash(TKey, TEntity) = Hash(TKey, TEntity).new
 
+    def [](value : TKey)
+      index[value]
+    end
+
+    def []?(value : TKey)
+      index[value]?
+    end
+
     def get_entity(key : TKey) : TEntity?
       self.index[key]?
     end
