@@ -639,6 +639,24 @@ class Entitas::Context(TEntity)
                   entity
                 end
 
+                # Replaces the `{{comp.id}}` on an existing `{{context_name.id}}Entity`.
+                # If no existing `{{context_name.id}}Entity` with a `{{comp.id}}` exists,
+                # one will be created. Will return the `{{context_name.id}}Entity` with the
+                # replaced component.
+                def replace_{{comp_name.id}}(**args) : {{context_name.id}}Entity
+                  entity = self.{{comp_name.id}}_entity
+                  if entity.nil?
+                    entity = set_{{comp_name.id}}(
+                      self.create_component(::{{comp.id}}, **args)
+                    )
+                  else
+                    entity.replace_component(
+                      self.create_component(::{{comp.id}}, **args)
+                    )
+                  end
+                  entity
+                end
+
                 {% end %}
 
               {% end %}
