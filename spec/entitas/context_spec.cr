@@ -754,6 +754,19 @@ describe Entitas::Context do
           ctx.unique_comp.should be comp2
         end
 
+        it "can replace with double splat" do
+          ctx = new_context
+          comp = UniqueComp.new
+          ctx.unique_comp = comp
+          ctx.unique_comp?.should be_true
+          ctx.unique_comp.should be comp
+
+          ctx.replace_unique_comp size: 9
+          ctx.unique_comp.should_not be comp
+
+          ctx.unique_comp.size.should eq 9
+        end
+
         it "raises an error when setting component " do
           ctx = new_context
           comp = UniqueComp.new

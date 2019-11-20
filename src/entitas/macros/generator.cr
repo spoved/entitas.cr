@@ -646,13 +646,9 @@ class Entitas::Context(TEntity)
                 def replace_{{comp_name.id}}(**args) : {{context_name.id}}Entity
                   entity = self.{{comp_name.id}}_entity
                   if entity.nil?
-                    entity = set_{{comp_name.id}}(
-                      self.create_component(::{{comp.id}}, **args)
-                    )
+                    entity = self.create_entity.add_{{comp_name.id}}(**args)
                   else
-                    entity.replace_component(
-                      self.create_component(::{{comp.id}}, **args)
-                    )
+                    entity.replace_{{comp_name.id}}(**args)
                   end
                   entity
                 end
