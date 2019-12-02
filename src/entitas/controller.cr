@@ -4,7 +4,14 @@ require "json"
 module Entitas
   abstract class Controller
     private property systems : Systems? = nil
-    private property contexts : Contexts? = nil
+    private setter contexts : Contexts? = nil
+
+    def contexts : Contexts
+      if contexts.nil?
+        raise "No contexts set for controller"
+      end
+      contexts.as(Contexts)
+    end
 
     def start
       unless systems.nil?
