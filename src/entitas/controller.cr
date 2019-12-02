@@ -7,10 +7,10 @@ module Entitas
     private setter contexts : Contexts? = nil
 
     def contexts : Contexts
-      if contexts.nil?
+      if @contexts.nil?
         raise "No contexts set for controller"
       end
-      contexts.as(Contexts)
+      @contexts.as(Contexts)
     end
 
     def start
