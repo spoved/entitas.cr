@@ -170,3 +170,24 @@ macro accept_event(name)
     end
   end
 end
+
+macro component_event(context, comp, target, _type = EventType::Added, priority = 1)
+  {% component_name = comp.id.gsub(/.*::/, "") %}
+  {% component_meth_name = component_name.underscore %}
+
+  {% listener = _type.id == "EventType::Removed" ? "RemovedListener" : "Listener" %}
+  {% listener = target.id == "EventTarget::Any" ? "Any#{listener.id}" : listener %}
+  {% listener = "#{context.id}#{listener.id}" %}
+  {% puts listener %}
+
+  module ::{{comp.id}}::I{{listener.id}}
+    abstract def on_{{component_meth_name}}(entity, **args)
+  end
+
+  class ::{{comp.id}}::{{listener.id}}
+    getter value : Set(::{{comp.id}}::I{{listener.id}}) = Set(::{{comp.id}}::I{{listener.id}}).new
+  end
+
+
+
+end

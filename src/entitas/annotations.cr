@@ -41,3 +41,31 @@ annotation ::Component::Unique; end
 # end
 # ```
 annotation Entitas::PostConstructor; end
+
+#
+# ```
+# @[Context(Game)]
+# @[Entitas::Event(EventTarget::Any, EventType.Removed)]
+# class FlagEvent < Entitas::Component
+# end
+# ```
+#
+# ```
+# @[Context(Game)]
+# @[Entitas::Event(EventTarget::Any, EventType.Added, priority: 1)]
+# @[Entitas::Event(EventTarget::Any, EventType.Removed, priority: 2)]
+# class MultipleEventsStandardEvent < Entitas::Component
+#   prop :value, String
+# end
+# ```
+annotation Entitas::Event; end
+
+enum Entitas::EventTarget
+  Any
+  Self
+end
+
+enum Entitas::EventType
+  Added
+  Removed
+end

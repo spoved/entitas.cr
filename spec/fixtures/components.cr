@@ -52,3 +52,56 @@ end
 @[Context(Test3)]
 class Test::NameSpace
 end
+
+##########
+# Events
+##########
+
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Self, EventType::Added, priority: 1)]
+class FlagEntityEvent < Entitas::Component
+end
+
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Any, EventType::Removed)]
+class FlagEvent < Entitas::Component
+end
+
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Any)]
+@[Entitas::Event(EventTarget::Self)]
+class MixedEvent < Entitas::Component
+  prop :value, String
+end
+
+@[Context(Test3, Test4)]
+@[Entitas::Event(EventTarget::Any)]
+class MultipleContextStandardEvent < Entitas::Component
+  prop :value, String
+end
+
+@[Context(Test3, Test4)]
+@[Entitas::Event(EventTarget::Any, EventType::Added, priority: 1)]
+@[Entitas::Event(EventTarget::Any, EventType::Removed, priority: 2)]
+class MultipleEventsStandardEvent < Entitas::Component
+  prop :value, String
+end
+
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Any)]
+class StandardEvent < Entitas::Component
+  prop :value, String
+end
+
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Self, EventType::Removed, priority: 1)]
+class StandardEntityEvent < Entitas::Component
+  prop :value, String
+end
+
+@[Component::Unique]
+@[Context(Test4)]
+@[Entitas::Event(EventTarget::Any)]
+class UniqueEvent < Entitas::Component
+  prop :value, String
+end

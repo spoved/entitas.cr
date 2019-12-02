@@ -37,10 +37,13 @@ class Entitas::Context(TEntity)
   macro finished
     {% verbatim do %}
       {% begin %}
-
-        ### Gather all the contexts
         {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
+        {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
+        {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
+
         {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
+
+          ### Gather all the contexts
           {% if obj.annotation(::Context) %}
             {% contexts = obj.annotations(::Context) %}
             {% for context in contexts %}
@@ -55,9 +58,14 @@ class Entitas::Context(TEntity)
               {% end %}
             {% end %}
           {% end %}
+
+          ### Gather all the events
+          {% if obj.annotation(::Entitas::Event) %}
+            {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
+            {% events_map[obj] = obj.annotations(::Entitas::Event) %}
+          {% end %}
         {% end %}
 
-        {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
         ### Gather all the components and methods
         {% for anno, components in context_map %}
           {% components = components.uniq %}
@@ -193,7 +201,6 @@ class Entitas::Context(TEntity)
                  :index_alias => comp.id.gsub(/::/, "").underscore.upcase,
                  :meth_name   => component_meth_name.id,
                } %}
-
 
             {% if is_flag %}
               def {{component_meth_name}}?
@@ -350,6 +357,18 @@ class Entitas::Context(TEntity)
             end
 
           end
+
+          ### Create event interfaces for each component with an event
+          {% if events_map[comp] %}
+            {% for event in events_map[comp] %}
+              {% event_target = event.args[0] %}
+              {% event_type = event.args[1] %}
+              {% event_priority = event.named_args[:priority] %}
+
+              component_event( {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
+            {% end %}
+          {% end %}
+
         {% end %}
 
         # Create entity, matcher, and context
@@ -623,7 +642,6 @@ class Entitas::Context(TEntity)
                 def {{comp_name.id}}=(value : {{comp.id}}) : Entitas::Entity
                   set_{{comp_name.id}}(value)
                 end
-
 
                 # Replaces the `{{comp.id}}` on an existing `{{context_name.id}}Entity`.
                 # If no existing `{{context_name.id}}Entity` with a `{{comp.id}}` exists,
