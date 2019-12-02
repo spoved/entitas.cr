@@ -37,37 +37,6 @@ class Entitas::Context(TEntity)
   macro finished
     {% verbatim do %}
       {% begin %}
-        {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
-        {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
-          ### Gather all the events
-          {% if obj.annotation(::Entitas::Event) %}
-            {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
-            {% events_map[obj] = obj.annotations(::Entitas::Event) %}
-          {% end %}
-
-          ### Create event components
-          {% for comp in events_map %}
-            {% for event in events_map[comp] %}
-              {% event_target = event.args[0] %}
-              {% event_type = event.args[1] %}
-              {% event_priority = event.named_args[:priority] %}
-
-              {% contexts = comp.annotations(::Context) %}
-              {% for context in contexts %}
-                {% for anno in context.args %}
-                  component_event({{anno.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
-                {% end %}
-              {% end %}
-            {% end %}
-          {% end %}
-        {% end %}
-      {% end %}
-    {% end %}
-  end
-
-  macro finished
-    {% verbatim do %}
-      {% begin %}
         {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
         {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
         {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
