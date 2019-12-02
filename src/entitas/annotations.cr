@@ -28,6 +28,8 @@ annotation ::Context; end
 # ```
 annotation ::Component::Unique; end
 
+annotation ::Component::Flag; end
+
 # Used to declare if a method should be called at the end of
 # initializing a new `Entitas::Contexts`, `Entitas::Context` or
 # `Entitas::Entity`

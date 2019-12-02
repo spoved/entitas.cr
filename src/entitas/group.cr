@@ -126,7 +126,7 @@ module Entitas
       end
     end
 
-    def get_entities(buff : Array(IEntity)) : Array(IEntity)
+    def get_entities(buff : Enumerable(IEntity))
       buff.clear
       buff.concat entities
       buff

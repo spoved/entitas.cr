@@ -11,7 +11,10 @@ end
 private class RemoveEventTest
   include ::StandardEvent::AnyListener
 
-  def on_any_standard_event_listener(entity, value)
+  def on_standard_event(entity, component)
+  end
+
+  def on_any_standard_event_listener(entity, component)
   end
 end
 

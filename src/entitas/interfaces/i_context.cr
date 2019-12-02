@@ -27,7 +27,7 @@ module Entitas::IContext
 
   abstract def create_entity : IEntity
   abstract def has_entity?(entity) : Bool
-  abstract def get_entities : Array(IEntity)
+  abstract def get_entities
 
   abstract def size : Int32
   abstract def each(&block : TEntity -> Nil)

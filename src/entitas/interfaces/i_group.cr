@@ -18,7 +18,8 @@ module Entitas::IGroup
 
   abstract def update_entity(entity : IEntity, index : Int32, prev_component : Entitas::IComponent?, new_component : Entitas::IComponent?)
 
-  abstract def get_entities(buff : Array(IEntity)) : Array(IEntity)
+  abstract def get_entities(buff : Enumerable(IEntity))
+
   abstract def get_single_entity : IEntity?
 
   accept_events OnEntityAdded, OnEntityRemoved, OnEntityUpdated

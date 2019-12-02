@@ -11,7 +11,7 @@ module Entitas::Helper::Entities(TEntity)
   end
 
   # Returns all entities which are currently in the context.
-  def get_entities : Array(TEntity)
+  def get_entities
     @entities_cache ||= entities.to_a
   end
 

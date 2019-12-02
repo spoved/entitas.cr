@@ -214,6 +214,9 @@ class Entitas::Context(TEntity)
                   self.del_component_{{component_meth_name}} if self.has_{{component_meth_name}}?
                 end
               end
+
+              @[::Component::Flag]
+              class ::{{comp.id}}; end
             {% end %}
 
             # Will replace the current component with the provided one
@@ -668,13 +671,15 @@ class Entitas::Context(TEntity)
 
           ### Create event interfaces for each component with an event
           {% for comp in components %}
+            {% is_flag = comp.annotation(::Component::Flag) ? true : false %}
+            {% is_unique = comp.annotation(::Component::Unique) ? true : false %}
             {% if events_map[comp] %}
               {% for event in events_map[comp] %}
                 {% event_target = event.args[0] %}
                 {% event_type = event.args[1] %}
                 {% event_priority = event.named_args[:priority] %}
 
-                component_event_system({{context_name.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
+                component_event_system({{context_name.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}}, {{is_flag.id}})
               {% end %}
             {% end %}
           {% end %}
@@ -787,7 +792,6 @@ class Entitas::Context(TEntity)
             def initialize(contexts : Contexts)
               @name = "{{context.id}}::EventSystems"
               {% for sys in event_systems_map[context].sort_by { |a| a.annotation(EventSystem).named_args[:priority] } %}
-                {% puts sys %}
                 add({{sys.id}}.new(contexts))
               {% end %}
             end

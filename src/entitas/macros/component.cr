@@ -108,10 +108,13 @@ class Entitas::Component
 
     Entitas::Component.initializers
 
+    {% is_flag = @type.annotation(::Component::Flag) ? true : false %}
+    {% is_unique = @type.annotation(::Component::Unique) ? true : false %}
+
     # If the component has the unique annotation,
     #   set the class method to `true`
     # The framework will make sure that only one instance of a unique component can be present in your context
-    {% if @type.annotation(::Component::Unique) %}
+    {% if is_unique %}
       # Will return true if the class is a unique component for a context
       def is_unique? : Bool
         true
@@ -142,7 +145,7 @@ class Entitas::Component
         {% contexts = @type.annotations(::Context) %}
         {% for context in contexts %}
           {% for anno in context.args %}
-            component_event({{anno.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
+            component_event({{anno.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}}, {{is_flag.id}})
           {% end %}
         {% end %}
       {% end %}
