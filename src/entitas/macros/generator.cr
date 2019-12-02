@@ -37,12 +37,42 @@ class Entitas::Context(TEntity)
   macro finished
     {% verbatim do %}
       {% begin %}
+        {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
+        {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
+          ### Gather all the events
+          {% if obj.annotation(::Entitas::Event) %}
+            {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
+            {% events_map[obj] = obj.annotations(::Entitas::Event) %}
+          {% end %}
+
+          ### Create event components
+          {% for comp in events_map %}
+            {% for event in events_map[comp] %}
+              {% event_target = event.args[0] %}
+              {% event_type = event.args[1] %}
+              {% event_priority = event.named_args[:priority] %}
+
+              {% contexts = comp.annotations(::Context) %}
+              {% for context in contexts %}
+                {% for anno in context.args %}
+                  component_event({{anno.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
+                {% end %}
+              {% end %}
+            {% end %}
+          {% end %}
+        {% end %}
+      {% end %}
+    {% end %}
+  end
+
+  macro finished
+    {% verbatim do %}
+      {% begin %}
         {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
         {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
         {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
 
         {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
-
           ### Gather all the contexts
           {% if obj.annotation(::Context) %}
             {% contexts = obj.annotations(::Context) %}
@@ -64,6 +94,7 @@ class Entitas::Context(TEntity)
             {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
             {% events_map[obj] = obj.annotations(::Entitas::Event) %}
           {% end %}
+
         {% end %}
 
         ### Gather all the components and methods
@@ -357,17 +388,6 @@ class Entitas::Context(TEntity)
             end
 
           end
-
-          ### Create event interfaces for each component with an event
-          {% if events_map[comp] %}
-            {% for event in events_map[comp] %}
-              {% event_target = event.args[0] %}
-              {% event_type = event.args[1] %}
-              {% event_priority = event.named_args[:priority] %}
-
-              component_event( {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
-            {% end %}
-          {% end %}
 
         {% end %}
 
@@ -676,6 +696,20 @@ class Entitas::Context(TEntity)
               {% end %}
             {% end %}
           end
+
+          ### Create event interfaces for each component with an event
+          {% for comp in components %}
+            {% if events_map[comp] %}
+              {% for event in events_map[comp] %}
+                {% event_target = event.args[0] %}
+                {% event_type = event.args[1] %}
+                {% event_priority = event.named_args[:priority] %}
+
+                component_event_system({{context_name.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
+              {% end %}
+            {% end %}
+          {% end %}
+
         {% end %}
 
         #TODO: Create any entity indexes
@@ -756,6 +790,40 @@ class Entitas::Context(TEntity)
           end
         end
 
+      {% end %}
+    {% end %}
+  end
+
+  # Process EventSystem annotations
+  macro finished
+    {% verbatim do %}
+      {% begin %}
+        {% event_systems_map = {} of TypeNode => ArrayLiteral(Annotation) %}
+        {% for obj in Object.all_subclasses.sort_by { |a| a.name } %}
+          {% if obj.annotation(EventSystem) %}
+            {% for anno in obj.annotations(EventSystem) %}
+              {% context = anno.named_args[:context] %}
+              {% array = event_systems_map[context] %}
+              {% if array == nil %}
+                {% event_systems_map[context] = [obj] %}
+              {% else %}
+                {% event_systems_map[context] = array + [obj] %}
+              {% end %}
+            {% end %}
+          {% end %}
+        {% end %}
+
+        {% for context in event_systems_map %}
+          class ::{{context.id}}::EventSystems < Feature
+            def initialize(contexts : Contexts)
+              @name = "{{context.id}}::EventSystems"
+              {% for sys in event_systems_map[context].sort_by { |a| a.annotation(EventSystem).named_args[:priority] } %}
+                {% puts sys %}
+                add({{sys.id}}.new(contexts))
+              {% end %}
+            end
+          end
+        {% end %}
       {% end %}
     {% end %}
   end

@@ -60,12 +60,4 @@ annotation Entitas::PostConstructor; end
 # ```
 annotation Entitas::Event; end
 
-enum Entitas::EventTarget
-  Any
-  Self
-end
-
-enum Entitas::EventType
-  Added
-  Removed
-end
+annotation EventSystem; end
