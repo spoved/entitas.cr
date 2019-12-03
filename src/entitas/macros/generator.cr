@@ -324,7 +324,7 @@ class Entitas::Context(TEntity)
               # entity.add_{{component_meth_name}}(1)
               # ```
               def add_{{component_meth_name}}({{n.id}} : {{comp_map[comp][:methods][n].args[0].restriction.id}}) : Entitas::Entity
-                {% if flag?(:entitas_enable_logging) %}logger.error("add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}", self){% end %}
+                {% if flag?(:entitas_enable_logging) %}logger.debug("add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}", self){% end %}
                 self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})
               end
             {% elsif comp_map[comp][:methods].size > 1 %}
