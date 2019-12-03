@@ -234,8 +234,8 @@ class Entitas::Context(TEntity)
               # entity.replace_{{component_meth_name}}(1)
               # entity.get_{{component_meth_name}} # => (new_comp)
               # ```
-              def replace_{{component_meth_name}}(%value : {{comp_map[comp][:methods][n].args[0].restriction.id}})
-                component = self.create_component(::{{comp.id}}, {{n.id}}: %value)
+              def replace_{{component_meth_name}}({{n.id}} : {{comp_map[comp][:methods][n].args[0].restriction.id}})
+                component = self.create_component(::{{comp.id}}, {{n.id}}: {{n.id}})
                 self.replace_component(self.component_index_value(::{{comp.id}}), component)
               end
             {% elsif comp_map[comp][:methods].size > 1 %}
@@ -323,9 +323,9 @@ class Entitas::Context(TEntity)
               # ```
               # entity.add_{{component_meth_name}}(1)
               # ```
-              def add_{{component_meth_name}}(%value : {{comp_map[comp][:methods][n].args[0].restriction.id}}) : Entitas::Entity
-                {% if flag?(:entitas_enable_logging) %}logger.error("add_{{component_meth_name}} - {{n.id}}: #{%value}", self){% end %}
-                self.add_component_{{component_meth_name}}({{n.id}}: %value)
+              def add_{{component_meth_name}}({{n.id}} : {{comp_map[comp][:methods][n].args[0].restriction.id}}) : Entitas::Entity
+                {% if flag?(:entitas_enable_logging) %}logger.error("add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}", self){% end %}
+                self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})
               end
             {% elsif comp_map[comp][:methods].size > 1 %}
               # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
@@ -699,9 +699,9 @@ class Entitas::Context(TEntity)
                 def replace_{{comp_name.id}}(**args) : {{context_name.id}}Entity
                   entity = self.{{comp_name.id}}_entity
                   if entity.nil?
-                    entity = self.create_entity.add_{{comp_name.id}}(**args)
+                    entity = self.create_entity.add_component_{{comp_name.id}}(**args)
                   else
-                    entity.replace_{{comp_name.id}}(**args)
+                    entity.replace_component_{{comp_name.id}}(**args)
                   end
                   entity
                 end
