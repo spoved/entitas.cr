@@ -171,7 +171,7 @@ macro accept_event(name)
   end
 end
 
-macro component_event(context, comp, target, _type = EventType::Added, priority = 1, is_flag = false)
+macro component_event(context, comp, target, _type = EventType::Added, priority = 1)
   {% priority = 1 if priority.id == "nil" %}
   {% component_name = comp.id.gsub(/.*::/, "") %}
   {% component_meth_name = component_name.underscore %}
@@ -191,7 +191,7 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
   {% listener_component_meth_name = listener_component_name.underscore %}
 
   module {{listener_module.id}}
-    {% if is_flag || _type.id == "EventType::Removed" %}
+    {% if _type.id == "EventType::Removed" %}
       abstract def on_{{component_meth_name.id}}(entity)
     {% else %}
       abstract def on_{{component_meth_name.id}}(entity, component : {{component_name.id}} )
@@ -200,12 +200,32 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
 
   @[::Context({{context.id}})]
   class ::{{listener_component_name.id}} < Entitas::Component
-    getter value : Set({{listener_module.id}}) = Set({{listener_module.id}}).new
+    prop :value, Set({{listener_module.id}})
+  end
+
+  module ::{{component_name.id}}::Helper
+    def add_{{listener_component_meth_name.id}}(value : {{listener_module.id}})
+      %listeners = self.{{listener_component_meth_name.id}}? ? self.{{listener_component_meth_name.id}}.value : Set({{listener_module.id}}).new
+      %listeners << value
+      self.replace_{{listener_component_meth_name.id}}(%listeners)
+    end
+
+    def remove_{{listener_component_meth_name.id}}(value : {{listener_module.id}}, remove_comp_when_empty = false)
+      %listeners = self.{{listener_component_meth_name.id}}.value
+      %listeners.delete(value)
+      if(remove_comp_when_empty && %listeners.empty?)
+        self.del_{{listener_component_meth_name.id}}
+      else
+        self.replace_{{listener_component_meth_name.id}}(%listeners)
+      end
+    end
   end
 end
 
-macro component_event_system(context, comp, target, _type = EventType::Added, priority = 1, is_flag = false)
+macro component_event_system(context, comp, target, _type = EventType::Added, priority = 1)
   {% priority = 1 if priority.id == "nil" %}
+  {% _type = "EventType::Added" if _type.id == "nil" %}
+
   {% component_name = comp.id.gsub(/.*::/, "") %}
   {% component_meth_name = component_name.underscore %}
   {% context_meth_name = context.stringify.underscore %}
@@ -223,10 +243,10 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
 
   {% listener_component_meth_name = listener_component_name.underscore %}
 
-
   @[EventSystem(context: {{context.id}}, priority: {{priority}})]
   class {{system_name.id}} < Entitas::ReactiveSystem
     protected property contexts : Contexts
+    protected property context : ::{{context.id}}Context
     protected property listener_buffer : Set({{listener_module.id}}) = Set({{listener_module.id}}).new
 
     {% if target.id == "EventTarget::Any" %}
@@ -236,9 +256,9 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
 
     def initialize(@contexts : Contexts)
       @context = @contexts.{{context_meth_name.id}}
-      @collector = get_trigger(context)
+      @collector = get_trigger(@context)
       {% if target.id == "EventTarget::Any" %}
-        @listeners = @context.get_group({{context.id}}Matcher.{{component_meth_name.id}})
+        @listeners = @context.get_group({{context.id}}Matcher.{{listener_component_meth_name.id}})
       {% end %}
     end
 
@@ -268,15 +288,10 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
     def execute(entities : Array(Entitas::IEntity))
       entities.each do |entity|
         entity = entity.as({{context.id}}Entity)
-        # {{component_name}} - {{target.id}} - {{_type.id}} - {{is_flag.id}}
+        # {{component_name}} - {{target.id}} - {{_type.id}}
+        # puts "#{entity} - {{component_name}} - {{target.id}} - {{_type.id}}"
 
-        {% if target.id == "EventTarget::Self" && _type.id == "EventType::Added" && is_flag %}
-          self.listener_buffer.clear
-          self.listener_buffer.concat(entity.{{listener_component_meth_name.id}}.value)
-          self.listener_buffer.each do |listener|
-            listener.on_{{component_meth_name.id}}(entity)
-          end
-        {% elsif target.id == "EventTarget::Self" && _type.id == "EventType::Added" %}
+        {% if target.id == "EventTarget::Self" && _type.id == "EventType::Added" %}
           comp = entity.{{component_meth_name.id}}
           self.listener_buffer.clear
           self.listener_buffer.concat(entity.{{listener_component_meth_name.id}}.value)
@@ -295,7 +310,7 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
             self.listener_buffer.clear
             self.listener_buffer.concat(listener_entity.{{listener_component_meth_name.id}}.value)
             self.listener_buffer.each do |listener|
-              listener.on_{{component_meth_name.id}}(entity, comp.value)
+              listener.on_{{component_meth_name.id}}(entity, comp)
             end
           end
         {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Removed" %}
@@ -306,12 +321,9 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
               listener.on_{{component_meth_name.id}}(entity)
             end
           end
+        {% else %}
+          raise "No idea"
         {% end %}
-
-
-
-
-
       end
     end
   end

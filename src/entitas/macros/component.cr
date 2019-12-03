@@ -108,7 +108,6 @@ class Entitas::Component
 
     Entitas::Component.initializers
 
-    {% is_flag = @type.annotation(::Component::Flag) ? true : false %}
     {% is_unique = @type.annotation(::Component::Unique) ? true : false %}
 
     # If the component has the unique annotation,
@@ -145,7 +144,7 @@ class Entitas::Component
         {% contexts = @type.annotations(::Context) %}
         {% for context in contexts %}
           {% for anno in context.args %}
-            component_event({{anno.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}}, {{is_flag.id}})
+            component_event({{anno.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
           {% end %}
         {% end %}
       {% end %}
