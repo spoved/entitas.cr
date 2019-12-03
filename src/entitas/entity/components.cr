@@ -11,6 +11,8 @@ module Entitas
     private property components_index_indices_buffer = Set(Entitas::Component::Index).new
 
     def create_component(index : Entitas::Component::Index, **args)
+      {% if flag?(:entitas_enable_logging) %}logger.debug("create_component - index: #{index}", self){% end %}
+
       pool = component_pool(index)
 
       if pool.empty?
@@ -24,6 +26,8 @@ module Entitas
     # You can only have one component at an index.
     # Each component type must have its own constant index.
     def add_component(index : Int32, component : Entitas::IComponent) : Entitas::IComponent
+      {% if flag?(:entitas_enable_logging) %}logger.debug("add_component - index: #{component.index}", self){% end %}
+
       if !enabled?
         raise Error::IsNotEnabled.new "Cannot add component " \
                                       "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -47,6 +51,8 @@ module Entitas
     # Removes a component at the specified index.
     # You can only remove a component at an index if it exists.
     def remove_component(index : Int32) : Nil
+      {% if flag?(:entitas_enable_logging) %}logger.debug("remove_component - index: #{index}", self){% end %}
+
       if !enabled?
         raise Entitas::Entity::Error::IsNotEnabled.new "Cannot remove component " \
                                                        "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -65,6 +71,8 @@ module Entitas
     # Replaces an existing component at the specified index
     # or adds it if it doesn't exist yet.
     def replace_component(index : Int32, component : Entitas::IComponent?)
+      {% if flag?(:entitas_enable_logging) %}logger.debug("replace_component - index: #{component.index}", self){% end %}
+
       if !enabled?
         raise Entitas::Entity::Error::IsNotEnabled.new "Cannot replace component " \
                                                        "'#{self.context_info.component_names[index]}' from #{self}!"
@@ -158,6 +166,8 @@ module Entitas
 
     # Removes all components.
     def remove_all_components! : Nil
+      {% if flag?(:entitas_enable_logging) %}logger.debug("remove_all_components!", self){% end %}
+
       self.clear_cache :strings
       self.components.each_index do |i|
         next if self.components[i].nil?

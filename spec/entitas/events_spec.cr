@@ -6,11 +6,18 @@ end
 
 private def new_standard_event_system
   contexts = new_contexts
-  sys = StandardEvent::AnyListener::EventSystem::Test4.new(contexts)
+  sys = ::Test4::EventSystem::StandardEvent::AnyListener.new(contexts)
+  {sys, contexts}
+end
+
+private def new_flag_entity_event_system
+  contexts = new_contexts
+  sys = ::Test4::EventSystem::FlagEntityEvent::Listener.new(contexts)
   {sys, contexts}
 end
 
 private class RemoveEventTest
+  spoved_logger
   include ::StandardEvent::AnyListener
   include ::FlagEntityEvent::Listener
 
@@ -21,16 +28,19 @@ private class RemoveEventTest
 
   def initialize(@contexts, @remove_comp_when_empty)
     @listener = @contexts.test4.create_entity
+    logger.warn("Listener: #{@listener}")
     @listener.add_any_standard_event_listener(self)
     @listener.add_flag_entity_event_listener(self)
   end
 
   def on_standard_event(entity, component : StandardEvent)
+    logger.warn("on_standard_event")
     @listener.remove_any_standard_event_listener(self, remove_comp_when_empty)
     @value = component.value
   end
 
   def on_flag_entity_event(entity, component : FlagEntityEvent)
+    logger.warn("on_flag_entity_event")
     listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
     @value = "true"
   end
@@ -41,9 +51,44 @@ describe "Events" do
     it "can remove listener in callback" do
       event_sys, contexts = new_standard_event_system
       event_test = RemoveEventTest.new(contexts, false)
-      contexts.test4.create_entity.add_standard_event("Test")
+      entity = contexts.test4.create_entity.add_standard_event("Test")
+      puts entity
       event_sys.execute
       event_test.value.should eq "Test"
     end
+
+    # it "can remove listener in callback in the middle" do
+    #   event_sys, contexts = new_standard_event_system
+    #   event_test_1 = RemoveEventTest.new(contexts, false)
+    #   event_test_2 = RemoveEventTest.new(contexts, false)
+    #   event_test_3 = RemoveEventTest.new(contexts, false)
+    #
+    #   contexts.test4.create_entity.add_standard_event("Test")
+    #   event_sys.execute
+    #
+    #   event_test_1.value.should eq "Test"
+    #   event_test_2.value.should eq "Test"
+    #   event_test_3.value.should eq "Test"
+    # end
+    #
+    # it "can remove listener in callback and remove component" do
+    #   event_sys, contexts = new_standard_event_system
+    #   event_test = RemoveEventTest.new(contexts, true)
+    #   entity = contexts.test4.create_entity.add_standard_event("Test")
+    #   event_sys.execute
+    #   event_test.value.should eq "Test"
+    # end
+  end
+
+  describe "entity event" do
+    # it "can remove listener in callback" do
+    #   event_sys, contexts = new_flag_entity_event_system
+    #   event_test = RemoveEventTest.new(contexts, true)
+    #   entity = event_test.listener.flag_entity_event = true
+    #   puts entity, entity.as(Test4Entity).flag_entity_event_listener.value.size
+    #   event_sys.execute
+    #   puts entity, entity.as(Test4Entity).flag_entity_event_listener.value.size
+    #   event_test.value.should eq "Test"
+    # end
   end
 end

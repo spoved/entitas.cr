@@ -540,6 +540,8 @@ class Entitas::Context(TEntity)
               {% i = i + 1 %}
               {% end %}
               else
+                {% if flag?(:entitas_enable_logging) %}logger.error("Unable to find index: #{index} value: #{index.value}", CONTEXT_NAME){% end %}
+
                 raise Entitas::Entity::Error::DoesNotHaveComponent.new
               end
             end

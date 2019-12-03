@@ -181,11 +181,11 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
     {% listener_component_name = "Any#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{comp.id}::Any#{listener.id}::EventSystem::#{context.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
     {% listener_component_name = "#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{comp.id}::#{listener.id}::EventSystem::#{context.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::#{listener.id}" %}
   {% end %}
 
   {% listener_component_meth_name = listener_component_name.underscore %}
@@ -234,11 +234,11 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
     {% listener_component_name = "Any#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{comp.id}::Any#{listener.id}::EventSystem::#{context.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
     {% listener_component_name = "#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{comp.id}::#{listener.id}::EventSystem::#{context.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::#{listener.id}" %}
   {% end %}
 
   {% listener_component_meth_name = listener_component_name.underscore %}
