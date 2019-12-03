@@ -75,7 +75,7 @@ describe "Events" do
     it "can remove listener in callback and remove component" do
       event_sys, contexts = new_standard_event_system
       event_test = RemoveEventTest.new(contexts, true)
-      entity = contexts.test4.create_entity.add_standard_event("Test")
+      contexts.test4.create_entity.add_standard_event("Test")
       event_sys.execute
       event_test.value.should eq "Test"
     end
@@ -84,8 +84,16 @@ describe "Events" do
   describe "entity event" do
     it "can remove listener in callback" do
       event_sys, contexts = new_flag_entity_event_system
+      event_test = RemoveEventTest.new(contexts, false)
+      event_test.listener.flag_entity_event = true
+      event_sys.execute
+      event_test.value.should eq "true"
+    end
+
+    it "can remove listener in callback and remove component" do
+      event_sys, contexts = new_flag_entity_event_system
       event_test = RemoveEventTest.new(contexts, true)
-      entity = event_test.listener.flag_entity_event = true
+      event_test.listener.flag_entity_event = true
       event_sys.execute
       event_test.value.should eq "true"
     end
