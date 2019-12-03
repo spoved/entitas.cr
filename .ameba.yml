@@ -11,6 +11,7 @@ Lint/UselessAssign:
   Severity: Warning
   Excluded:
   - spec/**/*.cr
+  - src/entitas/macros/events.cr
 
 # Problems found: 2
 # Run `ameba --only Lint/UnusedArgument` for details
