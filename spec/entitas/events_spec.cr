@@ -26,13 +26,11 @@ private class RemoveEventTest
   end
 
   def on_standard_event(entity, component : StandardEvent)
-    puts "on_standard_eventon_standard_eventon_standard_eventon_standard_eventon_standard_event"
     @listener.remove_any_standard_event_listener(self, remove_comp_when_empty)
     @value = component.value
   end
 
   def on_flag_entity_event(entity, component : FlagEntityEvent)
-    puts "on_flag_entity_eventon_flag_entity_eventon_flag_entity_event"
     listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
     @value = "true"
   end
