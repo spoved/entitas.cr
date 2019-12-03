@@ -279,6 +279,18 @@ class Entitas::Context(TEntity)
               self.replace_component(self.component_index_value(::{{comp.id}}), component)
             end
 
+            # Will replace the current component with the new one
+            # generated from the provided arguments
+            #
+            # ```
+            # entity.replace_{{component_meth_name}}
+            # entity.get_{{component_meth_name}} # => (new_comp)
+            # ```
+            def replace_component_{{component_meth_name}}(**args)
+              component = self.create_component(::{{comp.id}}, **args)
+              self.replace_component(self.component_index_value(::{{comp.id}}), component)
+            end
+
             # Will return true if the entity has an component `{{comp.id}}` or false if it does not
             def has_{{component_meth_name}}? : Bool
               self.has_component_{{component_meth_name}}?
