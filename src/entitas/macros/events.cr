@@ -91,7 +91,7 @@ macro emits_event(name)
 end
 
 macro emit_event(event, *args)
-  {% if flag?(:entitas_enable_logging) %}logger.debug("Emitting event {{event.id}}", self.to_s){% end %}
+  {% if flag?(:entitas_enable_logging) %}logger.debug("Emitting event {{event.id}}", self){% end %}
   self.receive_{{event.id.underscore.id}}_event(Entitas::Events::{{event.id}}.new({{*args}}))
 end
 
@@ -142,7 +142,7 @@ macro accept_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(&block : Entitas::Events::{{name.id}} -> Nil)
-    {% if flag?(:entitas_enable_logging) %}logger.debug("Setting event {{name.id}} hook #{block}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Setting event {{name.id}} hook #{block}", self){% end %}
     self.{{name.id.underscore.id}}_event_hooks << block
   end
 
@@ -156,12 +156,12 @@ macro accept_event(name)
   end
 
   def remove_{{name.id.underscore.id}}_hook(hook : Proc(Entitas::Events::{{name.id}}, Nil))
-    {% if flag?(:entitas_enable_logging) %}logger.debug("Removing event {{name.id}} hook #{hook}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Removing event {{name.id}} hook #{hook}", self){% end %}
     self.{{name.id.underscore.id}}_event_hooks.delete hook
   end
 
   def receive_{{name.id.underscore.id}}_event(event : Entitas::Events::{{name.id}})
-    {% if flag?(:entitas_enable_logging) %}logger.debug("Receiving event {{name.id}}", self.to_s){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.debug("Receiving event {{name.id}}", self){% end %}
 
     index = self.{{name.id.underscore.id}}_event_hooks.size - 1
     while index >= 0
@@ -200,17 +200,26 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
 
   @[::Context({{context.id}})]
   class ::{{listener_component_name.id}} < Entitas::Component
-    prop :value, Set({{listener_module.id}})
+    prop :value, Set({{listener_module.id}}), default: Set({{listener_module.id}}).new
+
+    def to_s(io)
+      io << "{{listener_component_name.id}}(" << value << ")"
+    end
   end
 
   module ::{{component_name.id}}::Helper
     def add_{{listener_component_meth_name.id}}(value : {{listener_module.id}})
+      {% if flag?(:entitas_enable_logging) %}logger\.debug("add_{{listener_component_meth_name.id}} - value: #{value}", self){% end %}
+
       %listeners = self.{{listener_component_meth_name.id}}? ? self.{{listener_component_meth_name.id}}.value : Set({{listener_module.id}}).new
       %listeners << value
+      {% if flag?(:entitas_enable_logging) %}logger\.debug("add_{{listener_component_meth_name.id}} - total listeners: #{%listeners.size}", self){% end %}
       self.replace_{{listener_component_meth_name.id}}(%listeners)
+      {% if flag?(:entitas_enable_logging) %}logger\.debug("add_{{listener_component_meth_name.id}} - total listeners: #{self.{{listener_component_meth_name.id}}.value.size}", self){% end %}
     end
 
     def remove_{{listener_component_meth_name.id}}(value : {{listener_module.id}}, remove_comp_when_empty = false)
+      {% if flag?(:entitas_enable_logging) %}logger\.debug("remove_{{listener_component_meth_name.id}} - remove_comp_when_empty: #{remove_comp_when_empty}, value: #{value}", self){% end %}
       %listeners = self.{{listener_component_meth_name.id}}.value
       %listeners.delete(value)
       if(remove_comp_when_empty && %listeners.empty?)
@@ -257,72 +266,96 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
     def initialize(@contexts : Contexts)
       @context = @contexts.{{context_meth_name.id}}
       @collector = get_trigger(@context)
+
       {% if target.id == "EventTarget::Any" %}
-        @listeners = @context.get_group({{context.id}}Matcher.{{listener_component_meth_name.id}})
+        # @listeners = @context.get_group({{context.id}}Matcher.{{listener_component_meth_name.id}})
+
+        @listeners = @context.get_group(
+          {{context.id}}Context.matcher.all_of(
+            Entitas::Component::Index::{{listener_component_name.id}}
+          )
+        )
+        {% if flag?(:entitas_enable_logging) %}logger\.debug("Added listeners #{@listeners}", self){% end %}
       {% end %}
+      {% if flag?(:entitas_enable_logging) %}logger\.debug("Added collector #{@collector}", self){% end %}
     end
 
     def get_trigger(context : Entitas::Context) : Entitas::ICollector
       context.create_collector(
         {% if _type.id == "EventType::Removed" %}
-          {{context.id}}Matcher.{{component_meth_name.id}}.removed
+          {{context.id}}Context.matcher.all_of(
+            Entitas::Component::Index::{{component_name.id}}
+          ).removed
         {% else %}
-          {{context.id}}Matcher.{{component_meth_name.id}}.added
+          {{context.id}}Context.matcher.all_of(
+            Entitas::Component::Index::{{component_name.id}}
+          ).added
         {% end %}
       )
     end
 
     def filter(entity : {{context.id}}Entity)
-      {% if target.id == "EventTarget::Self" %}
-        entity.{{listener_component_meth_name.id}}? &&
-      {% end %}
-
-      {% if _type.id == "EventType::Removed" %}
-        !entity.{{component_meth_name.id}}?
-      {% else %}
+      {% if target.id == "EventTarget::Self" && _type.id == "EventType::Added" %}
+        entity.{{listener_component_meth_name.id}}? && entity.{{component_meth_name.id}}?
+      {% elsif target.id == "EventTarget::Self" && _type.id == "EventType::Removed" %}
+        entity.{{listener_component_meth_name.id}}? && !entity.{{component_meth_name.id}}?
+      {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Added" %}
         entity.{{component_meth_name.id}}?
+      {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Removed" %}
+        !entity.{{component_meth_name.id}}?
       {% end %}
     end
-
 
     def execute(entities : Array(Entitas::IEntity))
       entities.each do |entity|
         entity = entity.as({{context.id}}Entity)
         # {{component_name}} - {{target.id}} - {{_type.id}}
-        # puts "#{entity} - {{component_name}} - {{target.id}} - {{_type.id}}"
+        {% if flag?(:entitas_enable_logging) %}logger.info("execute - {{component_name}} - {{target.id}} - {{_type.id}} - #{entity}", self){% end %}
 
         {% if target.id == "EventTarget::Self" && _type.id == "EventType::Added" %}
           comp = entity.{{component_meth_name.id}}
+          {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Self:Added] execute - component: #{comp.to_s}", self){% end %}
           self.listener_buffer.clear
           self.listener_buffer.concat(entity.{{listener_component_meth_name.id}}.value)
+          {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Self:Added] execute - total listeners: #{listener_buffer.size}", self){% end %}
           self.listener_buffer.each do |listener|
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Self:Added] execute - calling listener: #{listener}", self){% end %}
             listener.on_{{component_meth_name.id}}(entity, comp)
           end
         {% elsif target.id == "EventTarget::Self" && _type.id == "EventType::Removed" %}
           self.listener_buffer.clear
           self.listener_buffer.concat(entity.{{listener_component_meth_name.id}}.value)
+          {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Self:Removed] execute - total listeners: #{listener_buffer.size}", self){% end %}
           self.listener_buffer.each do |listener|
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Self:Removed] execute - calling listener: #{listener}", self){% end %}
             listener.on_{{component_meth_name.id}}(entity)
           end
         {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Added" %}
           comp = entity.{{component_meth_name.id}}
+          {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Any:Added] execute - component: #{comp.to_s}", self){% end %}
           self.listeners.get_entities(self.entity_buffer).each do |listener_entity|
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Any:Added] execute - listener_entity: #{listener_entity}", self){% end %}
             self.listener_buffer.clear
             self.listener_buffer.concat(listener_entity.{{listener_component_meth_name.id}}.value)
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Any:Added] execute - total listeners: #{listener_buffer.size}", self){% end %}
             self.listener_buffer.each do |listener|
+              {% if flag?(:entitas_enable_logging) %}logger\.debug("[Event:Any:Added] execute - calling listener: #{listener}", self){% end %}
               listener.on_{{component_meth_name.id}}(entity, comp)
             end
           end
         {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Removed" %}
           self.listeners.get_entities(self.entity_buffer).each do |listener_entity|
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Any:Removed] execute - listener_entity: #{listener_entity}", self){% end %}
             self.listener_buffer.clear
             self.listener_buffer.concat(listener_entity.{{listener_component_meth_name.id}}.value)
+            {% if flag?(:entitas_enable_logging) %}logger\.debug("[Any:Removed] execute - total listeners: #{listener_buffer.size}", self){% end %}
             self.listener_buffer.each do |listener|
+              {% if flag?(:entitas_enable_logging) %}logger\.debug("[Any:Removed] execute - calling listener: #{listener}", self){% end %}
               listener.on_{{component_meth_name.id}}(entity)
             end
           end
         {% else %}
-          raise "No idea"
+          raise "Invalid event {{component_name}} - {{target.id}} - {{_type.id}}"
         {% end %}
       end
     end

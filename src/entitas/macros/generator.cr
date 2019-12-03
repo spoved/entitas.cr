@@ -289,28 +289,46 @@ class Entitas::Context(TEntity)
               self.get_component(self.component_index_value(::{{comp.id}})).as(::{{comp.id}})
             end
 
-            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-            #
-            # ```
-            # entity.add_{{component_meth_name}}
-            # ```
-            def add_{{component_meth_name}}(**args) : Entitas::Entity
-              self.add_component_{{component_meth_name}}(**args)
-            end
+            {% if comp_map[comp][:methods].size == 1 %}
+              {% n = comp_map[comp][:methods].keys.first %}
+              # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
+              #
+              # ```
+              # entity.add_{{component_meth_name}}(1)
+              # ```
+              def add_{{component_meth_name}}(%value : {{comp_map[comp][:methods][n].args[0].restriction.id}}) : Entitas::Entity
+                {% if flag?(:entitas_enable_logging) %}logger.error("add_{{component_meth_name}} - {{n.id}}: #{%value}", self){% end %}
+                self.add_component_{{component_meth_name}}({{n.id}}: %value)
+              end
+            {% elsif comp_map[comp][:methods].size > 1 %}
+              # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
+              #
+              # ```
+              # entity.add_{{component_meth_name}}
+              # ```
+              def add_{{component_meth_name}}(**args) : Entitas::Entity
+                self.add_component_{{component_meth_name}}(**args)
+              end
+            {% else %}
+              # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
+              #
+              # ```
+              # entity.add_{{component_meth_name}}
+              # ```
+              def add_{{component_meth_name}} : Entitas::Entity
+                self.add_component_{{component_meth_name}}
+              end
+            {% end %}
 
             # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
             #
             # ```
-            # entity.add_{{component_meth_name}}(value: 1)
+            # entity.add_component_{{component_meth_name}}
             # ```
-            #
-            # or
-            #
-            # ```
-            # entity.add_{{component_meth_name}}(1)
-            # ```
-            def add_{{component_meth_name}}(value) : Entitas::Entity
-              self.add_component_{{component_meth_name}}(value: value)
+            def add_component_{{component_meth_name}} : Entitas::Entity
+              component = self.create_component(::{{comp.id}})
+              self.add_component(self.component_index_value(::{{comp.id}}), component)
+              self
             end
 
             # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
@@ -514,7 +532,7 @@ class Entitas::Context(TEntity)
 
             # Will return the `Entitas::Matcher` class for the context
             def self.matcher : ::{{context_name.id}}Matcher
-              ::{{context_name.id}}Matcher.new
+              ::{{context_name.id}}Matcher.new(Entitas::Component::COMPONENT_NAMES)
             end
 
             # Will return the `Entitas::Component::Index` for the provided index

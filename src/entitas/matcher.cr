@@ -16,6 +16,8 @@ module Entitas
 
     protected setter indices : Set(Entitas::Component::Index)? = nil
 
+    def initialize(@component_names : Array(String) = Array(String).new); end
+
     def indices : Set(Entitas::Component::Index)
       @indices ||= Set(Entitas::Component::Index).new.concat(
         self.all_of_indices
