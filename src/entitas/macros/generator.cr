@@ -216,53 +216,68 @@ class Entitas::Context(TEntity)
               end
             {% end %}
 
-            # Will replace the current component with the provided one
+
+
+            {% if comp_map[comp][:methods].size == 1 %}
+              {% n = comp_map[comp][:methods].keys.first %}
+              # Will replace the current component with the new one
+              # generated from the provided arguments
+              #
+              # ```
+              # entity.replace_{{component_meth_name}}(value: 1)
+              # entity.get_{{component_meth_name}} # => (new_comp)
+              # ```
+              #
+              # or
+              #
+              # ```
+              # entity.replace_{{component_meth_name}}(1)
+              # entity.get_{{component_meth_name}} # => (new_comp)
+              # ```
+              def replace_{{component_meth_name}}(%value : {{comp_map[comp][:methods][n].args[0].restriction.id}})
+                component = self.create_component(::{{comp.id}}, {{n.id}}: %value)
+                self.replace_component(self.component_index_value(::{{comp.id}}), component)
+              end
+            {% elsif comp_map[comp][:methods].size > 1 %}
+              # Will replace the current component with the new one
+              # generated from the provided arguments
+              #
+              # ```
+              # entity.replace_{{component_meth_name}}
+              # entity.get_{{component_meth_name}} # => (new_comp)
+              # ```
+              def replace_{{component_meth_name}}(**args)
+                component = self.create_component(::{{comp.id}}, **args)
+                self.replace_component(self.component_index_value(::{{comp.id}}), component)
+              end
+            {% else %}
+              # Will replace the current component with the new one
+              # generated from the provided arguments
+              #
+              # ```
+              # entity.replace_{{component_meth_name}}
+              # entity.get_{{component_meth_name}} # => (new_comp)
+              # ```
+              def replace_{{component_meth_name}}
+                component = self.create_component(::{{comp.id}})
+                self.replace_component(self.component_index_value(::{{comp.id}}), component)
+              end
+            {% end %}
+
+            # Will replace the current component with the new one provided
             #
             # ```
-            # new_comp = ::{{comp.id}}
-            # entity.replace_{{component_meth_name}}(new_comp)
+            # entity.replace_component_{{component_meth_name}}(new_comp)
             # entity.get_{{component_meth_name}} # => (new_comp)
             # ```
             def replace_{{component_meth_name}}(component : ::{{comp.id}})
-              self.replace_component(component)
+              self.replace_component_{{component_meth_name}}(component)
             end
 
             # Append. Alias for `replace_{{component_meth_name}}`
             def replace_component_{{component_meth_name}}(component : ::{{comp.id}})
-              self.replace_{{component_meth_name}}(component)
-            end
-
-            # Will replace the current component with the new one
-            # generated from the provided arguments
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            def replace_{{component_meth_name}}(**args)
-              component = self.create_component(::{{comp.id}}, **args)
               self.replace_component(self.component_index_value(::{{comp.id}}), component)
             end
-
-            # Will replace the current component with the new one
-            # generated from the provided arguments
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}(value: 1)
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            #
-            # or
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}(1)
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            def replace_{{component_meth_name}}(value)
-              component = self.create_component(::{{comp.id}}, value: value)
-              self.replace_component(self.component_index_value(::{{comp.id}}), component)
-            end
-
 
             # Will return true if the entity has an component `{{comp.id}}` or false if it does not
             def has_{{component_meth_name}}? : Bool
@@ -373,7 +388,6 @@ class Entitas::Context(TEntity)
             def remove_component_{{component_meth_name}}
               self.del_component_{{component_meth_name}}
             end
-
           end
 
         {% end %}
