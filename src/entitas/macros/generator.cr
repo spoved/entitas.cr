@@ -318,12 +318,15 @@ class Entitas::Context(TEntity)
 
             {% if comp_map[comp][:methods].size == 1 %}
               {% n = comp_map[comp][:methods].keys.first %}
+              {% meth_n = comp_map[comp][:methods][n].args[0] %}
               # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
               #
               # ```
               # entity.add_{{component_meth_name}}(1)
               # ```
-              def add_{{component_meth_name}}({{n.id}} : {{comp_map[comp][:methods][n].args[0].restriction.id}}) : Entitas::Entity
+              def add_{{component_meth_name}}(
+                  {{n.id}} : {{meth_n.restriction.id}} {% if meth_n.default_value %}= {{meth_n.default_value.id}}{% end %}
+                ) : Entitas::Entity
                 {% if flag?(:entitas_enable_logging) %}logger.debug("add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}", self){% end %}
                 self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})
               end
