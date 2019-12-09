@@ -197,7 +197,7 @@ module Entitas
       io
     end
 
-    def to_json(json)
+    def to_json(json : JSON::Builder)
       json.string to_s
     end
   end

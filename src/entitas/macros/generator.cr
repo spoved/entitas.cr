@@ -435,7 +435,7 @@ class Entitas::Context(TEntity)
           # Sub context {{context_name.id}}
           class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
 
-            def to_json(json)
+            def to_json(json : JSON::Builder)
               json.object do
                 json.field "name", CONTEXT_NAME
                 json.field "size", self.size

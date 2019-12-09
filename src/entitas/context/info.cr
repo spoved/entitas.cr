@@ -14,7 +14,7 @@ module Entitas
       )
       end
 
-      def to_json(json)
+      def to_json(json : JSON::Builder)
         json.object do
           json.field "name", name
           json.field "component_names", component_names

@@ -15,6 +15,28 @@ module Entitas::Helper::Entities(TEntity)
     @entities_cache ||= entities.to_a
   end
 
+  # Returns a new array with all elements sorted based on the comparator in the
+  # given block.
+  #
+  # The block must implement a comparison between two elements *a* and *b*,
+  # where `a < b` returns `-1`, `a == b` returns `0`, and `a > b` returns `1`.
+  # The comparison operator `<=>` can be used for this.
+  #
+  # ```
+  # a = [3, 1, 2]
+  # b = a.sort { |a, b| b <=> a }
+  #
+  # b # => [3, 2, 1]
+  # a # => [3, 1, 2]
+  # ```
+  def sort(&block : TEntity, TEntity -> U) : Array(TEntity) forall U
+    {% unless U <= Int32? %}
+      {% raise "expected block to return Int32 or Nil, not #{U}" %}
+    {% end %}
+
+    self.entities.to_a.sort! &block
+  end
+
   ############################
   # Enumerable funcs
   ############################

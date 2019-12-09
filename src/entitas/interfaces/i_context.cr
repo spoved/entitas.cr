@@ -36,5 +36,5 @@ module Entitas::IContext
 
   accept_events OnEntityCreated, OnEntityWillBeDestroyed, OnEntityDestroyed, OnGroupCreated
 
-  abstract def to_json(json)
+  abstract def to_json(json : JSON::Builder)
 end

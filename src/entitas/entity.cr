@@ -30,7 +30,7 @@ module Entitas
       call_post_constructors
     end
 
-    def to_json(json)
+    def to_json(json : JSON::Builder)
       json.object do
         json.field "name", to_s
         json.field "creation_index", creation_index

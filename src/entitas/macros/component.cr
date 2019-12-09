@@ -46,7 +46,7 @@ class Entitas::Component
           {% end %}
         end
 
-        def to_json(json)
+        def to_json(json : JSON::Builder)
           json.object do
             json.field "name", {{@type.id.stringify}}
             json.field "unique", is_unique?
