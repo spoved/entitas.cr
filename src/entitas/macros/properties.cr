@@ -38,6 +38,7 @@ macro prop(var, kype, **kwargs)
     !@{{ var.id }}.nil?
   end
 
+  {% if kwargs[:index] %}@[::EntityIndex(var: {{ var.id }}, type: {{kype}})]{% end %}
   def {{ var.id }} : {{kype}}
     if @{{ var.id }}.nil?
       raise Exception.new("{{ var.id }} is nil! Check before calling!")

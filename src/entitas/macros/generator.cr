@@ -62,9 +62,9 @@ class Entitas::Context(TEntity)
           {% if obj.annotation(::Entitas::Event) %}
             {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
             {% events_map[obj] = obj.annotations(::Entitas::Event) %}
-          {% end %}
+          {% end %} # end if obj.annotation(::Entitas::Event)
 
-        {% end %}
+        {% end %} # end for obj in Object.all_subclasses.sort_by { |a| a.name }
 
         ### Gather all the components and methods
         {% for anno, components in context_map %}
@@ -79,7 +79,7 @@ class Entitas::Context(TEntity)
             {% end %}
             {% comp_map[comp] = comp_methods %}
           {% end %}
-        {% end %}
+        {% end %} # end for anno, components in context_map
 
         class ::Entitas::Component
           alias ComponentTypes = Union(Entitas::Component.class, {{*comp_map.keys.map { |c| c.name + ".class" }}})
@@ -159,6 +159,7 @@ class Entitas::Context(TEntity)
 
         ### Cycle through components and inject `Entitas::IComponent` and make helper modules
         {% for comp, comp_methods in comp_map %}
+
           {% component_name = comp.name.gsub(/.*::/, "") %}
           {% component_meth_name = component_name.underscore %}
 
@@ -176,7 +177,7 @@ class Entitas::Context(TEntity)
                 {% end %}
               end
             end
-          {% end %}
+          {% end %} # end if !comp.ancestors.includes?(Entitas::IComponent)
 
           ### Create a Helper module for each component
 
@@ -405,7 +406,7 @@ class Entitas::Context(TEntity)
             end
           end
 
-        {% end %}
+        {% end %} # end for comp, comp_methods in comp_map
 
         # Create entity, matcher, and context
 
@@ -415,8 +416,19 @@ class Entitas::Context(TEntity)
           # `Entitas::Entity` for the `{{context_name.id}}Context`
           class ::{{context_name.id}}Entity < Entitas::Entity
             {% for comp in components %}
-            include ::{{comp.name.id}}::Helper
-            {% end %}
+
+              # Append contexts to comp_map
+              {% comp_map[comp][:contexts] = [] of ArrayLiteral(TypeNode) if comp_map[comp][:contexts].nil? %}
+              {% array = comp_map[comp][:contexts] %}
+              {% if array == nil %}
+                {% comp_map[comp][:contexts] = [context_name] %}
+              {% else %}
+                {% comp_map[comp][:contexts] = array + [context_name] %}
+              {% end %}
+
+
+              include ::{{comp.name.id}}::Helper
+            {% end %} # end for comp in components
 
             create_instance_helpers(::{{context_name.id}}Context)
           end
@@ -424,7 +436,7 @@ class Entitas::Context(TEntity)
           class ::{{context_name.id}}Matcher < Entitas::Matcher
             {% for comp in components %}
             class_getter {{comp.name.gsub(/.*::/, "").underscore.id}} = Entitas::Matcher.all_of({{comp.id}})
-            {% end %}
+            {% end %} # end for comp in components
           end
 
           # Create a sub class of `Entitas::Context` with the corresponding
@@ -727,49 +739,38 @@ class Entitas::Context(TEntity)
                 component_event_system({{context_name.id}}, {{comp.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
               {% end %}
             {% end %}
-          {% end %}
+          {% end %} # end for comp in components
 
-        {% end %}
+        {% end %} # end for context_name, components in context_map
 
-        #TODO: Create any entity indexes
 
+        # Create any entity indexes
+        #############################################
         {% entity_indicies = [] of HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
 
-        {% for const in ::Entitas::Contexts.constants %}
-          {% if const =~ /ENTITY_INDICES/ %}
-            {% parts = const.split("_ENTITY_INDICES_") %}
-            {% prop = parts.last.downcase %}
-            # Cycle through each component to find the matching alias
-            {% for comp in comp_map.keys %}
-              {% if comp_map[comp][:index_alias] == parts[0] %}
+        {% for comp, comp_methods in comp_map %}
+          {% component_name = comp.name.gsub(/.*::/, "") %}
 
-                # Cycle through each context, to add the entity index to it
-                {% for context_name, components in context_map %}
-                  {% if components.includes?(comp) %}
-                    {% types = comp.methods.find { |m| m.name == prop }.return_type %}
-                    {% if types.is_a?(Union) %}
-                      {% types = types.types.reject { |t| "#{t}" == "::Nil" }.join(" | ").id %}
-                    {% end %}
-
-                    {%
-                      entity_indicies.push({
-                        index_alias:   parts[0],
-                        const:         const,
-                        comp:          comp,
-                        comp_meth:     comp_map[comp][:meth_name],
-                        prop:          prop,
-                        prop_type:     types,
-                        context_name:  context_name,
-                        contexts_meth: "#{context_name}".underscore.downcase,
-                      })
-                    %}
-                  {% end %} # end {if components.includes?(comp)}
-
-                {% end %} # end {for context_name, components in context_map}
-              {% end %} # end {for comp in comp_map.keys}
-            {% end %} # end {if const =~ /ENTITY_INDICES/}
-          {% end %} # if const =~ /ENTITY_INDICES/
-        {% end %} # for const in ::Entitas::Contexts.constants
+          {% for meth in comp.methods %}
+            {% if meth.annotation(::EntityIndex) %}
+              {% anno = meth.annotation(::EntityIndex) %}
+              {% index_name = (comp.id.gsub(/::/, "") + "EntityIndices#{meth.name.camelcase.id}").underscore.upcase %}
+              {% for context in comp_methods[:contexts] %}
+                {%
+                  entity_indicies.push({
+                    const:         index_name,
+                    comp:          comp,
+                    comp_meth:     meth.name,
+                    prop:          anno[:var],
+                    prop_type:     anno[:type],
+                    context_name:  context,
+                    contexts_meth: "#{context}".underscore.downcase,
+                  })
+                %}
+              {% end %} # end for context in comp_methods[:contexts]
+            {% end %} # end if meth.annotation(::EntityIndex)
+          {% end %} # end for meth in comp.methods
+        {% end %} # end for comp, comp_methods in comp_map
 
         class ::Entitas::Contexts
 
@@ -778,39 +779,40 @@ class Entitas::Context(TEntity)
           @[::Entitas::PostConstructor]
           def initialize_entity_indices
             {% for index in entity_indicies %}
-
-            {{index[:contexts_meth].id}}.add_entity_index(
-              ::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}).new(
-                ::Contexts::{{index[:const].id}},
-
-                {{index[:contexts_meth].id}}.get_group(
-                  {{index[:context_name].id}}Matcher.{{index[:comp_meth].id}}
-                ),
-                ->(entity : {{index[:context_name].id}}Entity, component : Entitas::IComponent?) {
-                  if component.nil?
-                    entity.get_component_{{index[:comp_meth].id}}.{{index[:prop].id}}.as({{index[:prop_type].id}})
-                  else
-                    component.as({{index[:comp]}}).{{index[:prop].id}}.as({{index[:prop_type].id}})
-                  end
-                }
-
+              self.{{index[:contexts_meth].id}}.add_entity_index(
+                ::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}).new(
+                  ::Entitas::Contexts::{{index[:const].id}},
+                  {{index[:contexts_meth].id}}.get_group(
+                    {{index[:context_name].id}}Matcher.{{index[:comp_meth].id}}
+                  ),
+                  ->(entity : {{index[:context_name].id}}Entity, component : Entitas::IComponent?) {
+                    component.nil? ? entity.{{index[:comp_meth].id}}.{{index[:prop_meth].id}} : component.as({{index[:comp].id}}).{{index[:prop_meth].id}}
+                  }
+                )
               )
-            )
             {% end %} # end for index in entity_indicies
           end
 
-          module Extensions
-            {% for index in entity_indicies %}
-
+          {% for index in entity_indicies %}
+            module {{index[:context_name].id}}Extensions
               def get_entities_with_{{ index[:prop].id }}(context : Entitas::IContext, value : {{index[:prop_type].id}})
-                context.get_entity_index(::Contexts::{{index[:const].id}}).get_entities(value)
+                context.get_entity_index(::Contexts::{{index[:const].id}})
+                  .as(::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}))
+                  .get_entities(value)
               end
-            {% end %}
-          end
+            end
+          {% end %} # end for index in entity_indicies
+
         end
 
-      {% end %}
-    {% end %}
+        {% for index in entity_indicies %}
+          class ::{{index[:context_name].id}}Context < Entitas::Context(::{{index[:context_name].id}}Entity)
+            include ::Entitas::Contexts::{{index[:context_name].id}}Extensions
+          end
+        {% end %} # end for index in entity_indicies
+
+      {% end %} # begin
+    {% end %} # end verbatim do
   end
 
   # Process EventSystem annotations

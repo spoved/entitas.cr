@@ -61,3 +61,5 @@ annotation Entitas::PostConstructor; end
 annotation Entitas::Event; end
 
 annotation EventSystem; end
+
+annotation EntityIndex; end
