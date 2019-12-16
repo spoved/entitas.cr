@@ -760,8 +760,9 @@ class Entitas::Context(TEntity)
                   entity_indicies.push({
                     const:         index_name,
                     comp:          comp,
-                    comp_meth:     meth.name,
+                    comp_meth:     comp_methods[:meth_name],
                     prop:          anno[:var],
+                    prop_meth:     meth.name,
                     prop_type:     anno[:type],
                     context_name:  context,
                     contexts_meth: "#{context}".underscore.downcase,
