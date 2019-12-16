@@ -83,7 +83,7 @@ end
 @[Context(Test3, Test4)]
 @[Entitas::Event(EventTarget::Any, EventType::Added, priority: 1)]
 @[Entitas::Event(EventTarget::Any, EventType::Removed, priority: 2)]
-class MultipleEventsStandardEvent < Entitas::Component
+class Test::MultipleEventsStandardEvent < Entitas::Component
   prop :value, String
 end
 
@@ -102,6 +102,6 @@ end
 @[Component::Unique]
 @[Context(Test4)]
 @[Entitas::Event(EventTarget::Any)]
-class UniqueEvent < Entitas::Component
+class Test::UniqueEvent < Entitas::Component
   prop :value, String
 end

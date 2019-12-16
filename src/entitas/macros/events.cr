@@ -130,7 +130,6 @@ end
 # obj.on_entity_created(event) # => does something with event
 # ```
 macro accept_event(name)
-
   # Array of event hooks to trigger when an `Entitas::Events::{{name.id}}` is emitted
   getter {{name.id.underscore.id}}_event_hooks : Array(Proc(Entitas::Events::{{name.id}}, Nil)) = Array(Proc(Entitas::Events::{{name.id}}, Nil)).new
 
@@ -172,6 +171,7 @@ macro accept_event(name)
 end
 
 macro component_event(context, comp, target, _type = EventType::Added, priority = 1)
+
   {% priority = 1 if priority.id == "nil" %}
   {% component_name = comp.id.gsub(/.*::/, "") %}
   {% component_meth_name = component_name.underscore %}
@@ -180,12 +180,12 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
 
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
-    {% listener_component_name = "Any#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::Any#{listener.id}" %}
+    {% listener_component_name = "Any#{component_name.id}#{listener.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
-    {% listener_component_name = "#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::#{listener.id}" %}
+    {% listener_component_name = "#{component_name.id}#{listener.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::#{listener.id}" %}
   {% end %}
 
   {% listener_component_meth_name = listener_component_name.underscore %}
@@ -207,7 +207,7 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
     end
   end
 
-  module ::{{component_name.id}}::Helper
+  module ::{{comp.id}}::Helper
     def add_{{listener_component_meth_name.id}}(value : {{listener_module.id}})
       {% if flag?(:entitas_enable_logging) %}logger.debug("add_{{listener_component_meth_name.id}} - value: #{value}", self){% end %}
 
@@ -242,12 +242,12 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
 
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
-    {% listener_component_name = "Any#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::Any#{listener.id}" %}
+    {% listener_component_name = "Any#{component_name.id}#{listener.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
-    {% listener_component_name = "#{comp.id}#{listener.id}" %}
-    {% system_name = "::#{context.id}::EventSystem::#{comp.id}::#{listener.id}" %}
+    {% listener_component_name = "#{component_name.id}#{listener.id}" %}
+    {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::#{listener.id}" %}
   {% end %}
 
   {% listener_component_meth_name = listener_component_name.underscore %}
