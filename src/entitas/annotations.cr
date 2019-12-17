@@ -40,7 +40,7 @@ annotation ::Component::Unique; end
 #   end
 # end
 # ```
-annotation Entitas::PostConstructor; end
+annotation ::Entitas::PostConstructor; end
 
 #
 # ```
@@ -58,8 +58,10 @@ annotation Entitas::PostConstructor; end
 #   prop :value, String
 # end
 # ```
-annotation Entitas::Event; end
+annotation ::Entitas::Event; end
 
-annotation EventSystem; end
+annotation ::EventSystem; end
 
-annotation EntityIndex; end
+annotation ::EntityIndex; end
+
+annotation ::Component::Property; end

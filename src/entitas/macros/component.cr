@@ -7,12 +7,28 @@ class Entitas::Component
 
         {% comp_variables = {} of StringLiteral => HashLiteral(SymbolLiteral, ArrayLiteral(TypeNode) | TypeNode) %}
         {% for meth in @type.methods %}
+          {% if meth.annotation(::Component::Property) %}
+            {% anno = meth.annotation(::Component::Property) %}
+            {% var_name = anno.args.first %}
+            {% comp_variables[var_name.id] = {
+                 :name    => var_name,
+                 :type    => anno.named_args[:type],
+                 :default => anno.named_args[:default],
+                 :index   => anno.named_args[:index],
+                 :not_nil => anno.named_args[:not_nil],
+               } %}
+          {% end %} # end if meth.annotation(::Component::Property)
+        {% end %} # end for meth in @type.methods
+
+        {% for meth in @type.methods %}
           {% if meth.name =~ /^_entitas_set_(.*)$/ %}
             {% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
-            {% comp_variables[var_name] = {} of SymbolLiteral => ArrayLiteral(TypeNode) | TypeNode %}
+            {% unless comp_variables[var_name] %}
+              {% comp_variables[var_name] = {} of SymbolLiteral => ArrayLiteral(TypeNode) | TypeNode %}
+            {% end %}
             {% comp_variables[var_name][:set_method] = meth %}
           {% end %}
-        {% end %}
+        {% end %} # end for meth in @type.methods
 
         {% for var_name in comp_variables.keys %}
           {% for meth in @type.methods %}
@@ -20,19 +36,19 @@ class Entitas::Component
               {% comp_variables[var_name][:constructor] = meth %}
             {% end %}
           {% end %}
-        {% end %}
+        {% end %} # end for var_name in comp_variables.keys
 
         def initialize(
-        {% for var_name in comp_variables.keys %}
-          {% meth = comp_variables[var_name][:set_method] %}
-          {% if comp_variables[var_name][:constructor] %}
-            {{var_name}} : {{meth.args[0].restriction}}? = nil,
-          {% elsif meth.args[0].default_value %}
-            @{{var_name}} : {{meth.args[0].restriction}}? = {{meth.args[0].default_value}},
-          {% else %}
-            @{{var_name}} : {{meth.args[0].restriction}}? = nil,
-          {% end %}
-        {% end %}
+          {% for var_name in comp_variables.keys %}
+            {% meth = comp_variables[var_name][:set_method] %}
+            {% if comp_variables[var_name][:constructor] %}
+              {{var_name}} : {{meth.args[0].restriction}}? = nil,
+            {% elsif meth.args[0].default_value %}
+              @{{var_name}} : {{meth.args[0].restriction}}? = {{meth.args[0].default_value}},
+            {% else %}
+              @{{var_name}} : {{meth.args[0].restriction}}? = nil,
+            {% end %}
+          {% end %} # end for var_name in comp_variables.keys
           )
 
           {% for var_name in comp_variables.keys %}
@@ -42,8 +58,8 @@ class Entitas::Component
               else
                 @{{var_name}} = {{var_name}}
               end
-            {% end %}
-          {% end %}
+            {% end %} # end if comp_variables[var_name][:constructor]
+          {% end %} # end for var_name in comp_variables.keys
         end
 
         def to_json(json : JSON::Builder)
@@ -53,8 +69,8 @@ class Entitas::Component
             json.field("data") do
               json.object do
                 {% for var_name in comp_variables.keys %}
-                json.field {{var_name.stringify}}, ({{var_name.id}}? ? {{var_name.id}} : nil)
-                {% end %}
+                  json.field {{var_name.stringify}}, ({{var_name.id}}? ? {{var_name.id}} : nil)
+                {% end %} # end for var_name in comp_variables.keys
               end
             end
           end
