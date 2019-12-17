@@ -173,17 +173,22 @@ end
 macro component_event(context, comp, target, _type = EventType::Added, priority = 1)
 
   {% priority = 1 if priority.id == "nil" %}
-  {% component_name = comp.id.gsub(/.*::/, "") %}
+  {% _type = "EventType::Added" if _type.id == "nil" %}
+  {% component_name = comp.id.gsub(/^.*::/, "") %}
+  {% component_namespace = "#{comp.id.gsub(/::.*$/, "")}::" %}
   {% component_meth_name = component_name.underscore %}
   {% context_meth_name = context.stringify.underscore %}
+
   {% listener = _type.id == "EventType::Removed" ? "RemovedListener" : "Listener" %}
 
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
+    {% listener_component_module = "#{component_namespace.id}Any#{component_name.id}#{listener.id}" %}
     {% listener_component_name = "Any#{component_name.id}#{listener.id}" %}
     {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
+    {% listener_component_module = "#{component_namespace.id}#{component_name.id}#{listener.id}" %}
     {% listener_component_name = "#{component_name.id}#{listener.id}" %}
     {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::#{listener.id}" %}
   {% end %}
@@ -194,12 +199,12 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
     {% if _type.id == "EventType::Removed" %}
       abstract def on_{{component_meth_name.id}}(entity)
     {% else %}
-      abstract def on_{{component_meth_name.id}}(entity, component : {{component_name.id}} )
+      abstract def on_{{component_meth_name.id}}(entity, component : {{comp.id}} )
     {% end %}
   end
 
   @[::Context({{context.id}})]
-  class ::{{listener_component_name.id}} < Entitas::Component
+  class {{listener_component_module.id}} < Entitas::Component
     prop :value, Set({{listener_module.id}}), default: Set({{listener_module.id}}).new
 
     def to_s(io)
@@ -234,18 +239,21 @@ end
 macro component_event_system(context, comp, target, _type = EventType::Added, priority = 1)
   {% priority = 1 if priority.id == "nil" %}
   {% _type = "EventType::Added" if _type.id == "nil" %}
-
-  {% component_name = comp.id.gsub(/.*::/, "") %}
+  {% component_name = comp.id.gsub(/^.*::/, "") %}
+  {% component_namespace = "#{comp.id.gsub(/::.*$/, "")}::" %}
   {% component_meth_name = component_name.underscore %}
   {% context_meth_name = context.stringify.underscore %}
+
   {% listener = _type.id == "EventType::Removed" ? "RemovedListener" : "Listener" %}
 
   {% if target.id == "EventTarget::Any" %}
     {% listener_module = "::#{comp.id}::Any#{listener.id}" %}
+    {% listener_component_module = "#{component_namespace.id}Any#{component_name.id}#{listener.id}" %}
     {% listener_component_name = "Any#{component_name.id}#{listener.id}" %}
     {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::Any#{listener.id}" %}
   {% else %}
     {% listener_module = "::#{comp.id}::#{listener.id}" %}
+    {% listener_component_module = "#{component_namespace.id}#{component_name.id}#{listener.id}" %}
     {% listener_component_name = "#{component_name.id}#{listener.id}" %}
     {% system_name = "::#{context.id}::EventSystem::#{component_name.id}::#{listener.id}" %}
   {% end %}
