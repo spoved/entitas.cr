@@ -626,12 +626,18 @@ class Entitas::Context(TEntity)
               {% if comp_map[comp][:unique] %}
                 {% comp_name = comp_map[comp][:meth_name] %}
 
-                def {{comp_name.id}}_entity : Entitas::Entity?
+                def {{comp_name.id}}_entity? : ::{{context_name.id}}Entity?
                   self.get_group(::{{context_name.id}}Matcher.{{comp_name.id}}).get_single_entity
                 end
 
+                def {{comp_name.id}}_entity : ::{{context_name.id}}Entity
+                  entity = {{comp_name.id}}_entity?
+                  raise Entitas::Entity::Error::DoesNotHaveComponent.new if entity.nil?
+                  entity.as(::{{context_name.id}}Entity)
+                end
+
                 def {{comp_name.id}} : {{comp.id}}
-                  entity = {{comp_name.id}}_entity
+                  entity = {{comp_name.id}}_entity?
                   raise Error.new "No {{comp.id}} has been set for #{self}" if entity.nil?
                   entity.{{comp_name.id}}
                 end
@@ -639,21 +645,21 @@ class Entitas::Context(TEntity)
                 {% if comp_map[comp][:flag] %}
 
                   def {{comp_name.id}}=(value : Bool)
-                    if value == true && {{comp_name.id}}_entity.nil?
+                    if value == true && {{comp_name.id}}_entity?.nil?
                       self.create_entity.add_{{comp_name.id}}
-                    elsif value == true && !{{comp_name.id}}_entity.nil?
+                    elsif value == true && !{{comp_name.id}}_entity?.nil?
                       # Do nothing
-                    elsif value == false && {{comp_name.id}}_entity.nil?
+                    elsif value == false && {{comp_name.id}}_entity?.nil?
                       # DO nothing
-                    elsif value == false && !{{comp_name.id}}_entity.nil?
-                      {{comp_name.id}}_entity.as({{context_name.id}}Entity).del_{{comp_name.id}}
+                    elsif value == false && !{{comp_name.id}}_entity?.nil?
+                      {{comp_name.id}}_entity.del_{{comp_name.id}}
                     end
                   end
 
                   # Will check to see if there is a `{{context_name.id}}Entity` with
                   # a `{{comp.id}}` component
                   def {{comp_name.id}}? : Bool
-                    !{{comp_name.id}}_entity.nil?
+                    !{{comp_name.id}}_entity?.nil?
                   end
 
                 {% else %}
@@ -661,12 +667,12 @@ class Entitas::Context(TEntity)
                 # Will check to see if there is a `{{context_name.id}}Entity` with
                 # a `{{comp.id}}` component
                 def has_{{comp_name.id}}? : Bool
-                  !{{comp_name.id}}_entity.nil?
+                  !{{comp_name.id}}_entity?.nil?
                 end
 
                 # Alias. See `#has_{{comp_name.id}}?`
                 def {{comp_name.id}}? : Bool
-                  !{{comp_name.id}}_entity.nil?
+                  !{{comp_name.id}}_entity?.nil?
                 end
 
                 # Will create a new `{{context_name.id}}Entity` and set the `{{comp.id}}` to the
@@ -698,7 +704,7 @@ class Entitas::Context(TEntity)
                 # one will be created. Will return the `{{context_name.id}}Entity` with the
                 # replaced component.
                 def replace_{{comp_name.id}}(value : {{comp.id}}) : {{context_name.id}}Entity
-                  entity = self.{{comp_name.id}}_entity
+                  entity = self.{{comp_name.id}}_entity?
                   if entity.nil?
                     entity = set_{{comp_name.id}}(value)
                   else
@@ -712,7 +718,7 @@ class Entitas::Context(TEntity)
                 # one will be created. Will return the `{{context_name.id}}Entity` with the
                 # replaced component.
                 def replace_{{comp_name.id}}(**args) : {{context_name.id}}Entity
-                  entity = self.{{comp_name.id}}_entity
+                  entity = self.{{comp_name.id}}_entity?
                   if entity.nil?
                     entity = self.create_entity.add_component_{{comp_name.id}}(**args)
                   else
