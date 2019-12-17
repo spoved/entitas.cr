@@ -18,7 +18,7 @@ module Entitas
         raise "Called start more than once! systems already initialized!"
       end
 
-      self.contexts = Contexts.shared_instance
+      self.contexts = Contexts.shared_instance if @contexts.nil?
       self.systems = create_systems(self.contexts.as(Contexts))
       self.systems.as(Systems).init
     end

@@ -1,5 +1,7 @@
 # This class gives access to each availble context.
 class Entitas::Contexts
+  include JSON::Serializable
+
   private class_property _shared_instance : Entitas::Contexts? = nil
   private property _all_contexts : Array(Entitas::IContext)? = nil
 
