@@ -1,3 +1,5 @@
+require "json"
+
 # This class gives access to each availble context.
 class Entitas::Contexts
   include JSON::Serializable
