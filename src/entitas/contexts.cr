@@ -2,8 +2,6 @@ require "json"
 
 # This class gives access to each availble context.
 class Entitas::Contexts
-  include JSON::Serializable
-
   private class_property _shared_instance : Entitas::Contexts? = nil
   private property _all_contexts : Array(Entitas::IContext)? = nil
 
@@ -60,6 +58,12 @@ class Entitas::Contexts
 
     def initialize
       call_post_constructors
+    end
+
+    def to_json(json : JSON::Builder)
+      json.object do
+        json.field("name", self.class.to_s)
+      end
     end
   end
 end

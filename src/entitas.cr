@@ -1,3 +1,5 @@
+require "json"
+
 {% if flag?(:benchmark) %}
   require "bencher"
 {% end %}
@@ -30,7 +32,13 @@ module Entitas
   # It's not meant to be implemented.
   # Use `Systems::InitializeSystem`, `Systems::ExecuteSystem`,
   # `Systems::CleanupSystem` or `Systems::TearDownSystem`.
-  module System; end
+  module System
+    def to_json(json : JSON::Builder)
+      json.object do
+        json.field("name", self.class.to_s)
+      end
+    end
+  end
 
   abstract class AbstractEntityIndex(TEntity, TKey); end
 

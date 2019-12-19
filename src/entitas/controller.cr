@@ -1,9 +1,11 @@
-require "http/server"
 require "json"
+require "./controller/*"
 
 module Entitas
   abstract class Controller
     private property systems : Systems? = nil
+
+    @[JSON::Field(ignore: true)]
     private setter contexts : Contexts? = nil
 
     def contexts : Contexts
@@ -45,18 +47,11 @@ module Entitas
       contexts.as(Contexts).all_contexts
     end
 
-    def start_server
-      spawn do
-        server = HTTP::Server.new do |context|
-          context.response.content_type = "application/json"
-          context.response.headers["Access-Control-Allow-Origin"] = "*"
-          context.response.headers["Access-Control-Allow-Methods"] = "GET"
-          context.response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-          context.response.print (stats).to_json
-        end
+    def to_json(json : JSON::Builder)
+      json.object do
+        json.field("name", self.class.to_s)
 
-        puts "Listening on http://127.0.0.1:8080"
-        server.listen(8080)
+        json.stats.to_json(json)
       end
     end
   end
