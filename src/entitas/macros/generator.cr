@@ -802,24 +802,26 @@ class Entitas::Context(TEntity)
 
           {% for index in entity_indicies %}
             module {{index[:context_name].id}}Extensions
-              def get_entities_with_{{ index[:prop].id }}(context : Entitas::IContext, value : {{index[:prop_type].id}})
+              def get_{{index[:contexts_meth].id}}_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(context : Entitas::IContext, value : {{index[:prop_type].id}})
                 context.get_entity_index(::Contexts::{{index[:const].id}})
                   .as(::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}))
                   .get_entities(value)
               end
+
+              def get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value : {{index[:prop_type].id}}) : Array({{index[:context_name].id}}Entity)
+                get_{{index[:contexts_meth].id}}_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(self, value)
+              end
+
+              def get_entity_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value : {{index[:prop_type].id}}) : {{index[:context_name].id}}Entity?
+                get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value).first
+              end
             end
           {% end %} # end for index in entity_indicies
-
         end
 
         {% for index in entity_indicies %}
           class ::{{index[:context_name].id}}Context < Entitas::Context(::{{index[:context_name].id}}Entity)
             include ::Entitas::Contexts::{{index[:context_name].id}}Extensions
-
-            def get_entities_with_{{ index[:prop].id }}(value : {{index[:prop_type].id}})
-              get_entities_with_{{ index[:prop].id }}(self, value)
-            end
-
           end
         {% end %} # end for index in entity_indicies
 
