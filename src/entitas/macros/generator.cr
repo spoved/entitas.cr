@@ -815,6 +815,11 @@ class Entitas::Context(TEntity)
         {% for index in entity_indicies %}
           class ::{{index[:context_name].id}}Context < Entitas::Context(::{{index[:context_name].id}}Entity)
             include ::Entitas::Contexts::{{index[:context_name].id}}Extensions
+
+            def get_entities_with_{{ index[:prop].id }}(value : {{index[:prop_type].id}})
+              get_entities_with_{{ index[:prop].id }}(self, value)
+            end
+
           end
         {% end %} # end for index in entity_indicies
 

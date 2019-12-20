@@ -155,7 +155,7 @@ module Entitas
     # Will clean the entity provided in the `Entitas::Events::OnEntityReleased` event. It will
     # remove all release handlers and append it to the `reusable_entities` cache
     def on_entity_released(event : Entitas::Events::OnEntityReleased)
-      {% if flag?(:entitas_enable_logging) %}logger.info("Processing OnEntityReleased: #{event}"){% end %}
+      {% if flag?(:entitas_enable_logging) %}logger.info("Processing OnEntityReleased: #{event}", self.class.to_s){% end %}
       entity = event.entity.as(TEntity)
 
       if entity.enabled?

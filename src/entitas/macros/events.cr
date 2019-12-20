@@ -29,6 +29,16 @@ module Entitas::Events
         {% end %}
       )
       end
+
+      def to_s(io)
+        io << "#{self.class}( "
+        {% for a, t in opts %}
+          io << "{{a.id}}: "
+          @{{a.id}}.to_s(io)
+          io << " "
+        {% end %}
+        io << ")"
+      end
     end
   end
 end
@@ -82,7 +92,7 @@ macro emits_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(event : Entitas::Events::{{name.id}}) : Nil
-    {% if flag?(:entitas_enable_logging) %}logger.info("Processing {{name.id}}: #{event}"){% end %}
+    {% if flag?(:entitas_enable_logging) %}logger.info("Processing {{name.id}}: #{event}", self.class.to_s){% end %}
     raise Entitas::Error::MethodNotImplemented.new
   end
 
@@ -208,7 +218,9 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
     prop :value, Set({{listener_module.id}}), default: Set({{listener_module.id}}).new
 
     def to_s(io)
-      io << "{{listener_component_name.id}}(" << value << ")"
+      io << "{{listener_component_name.id}}("
+      value.class.to_s(io) 
+      io << ")"
     end
   end
 
