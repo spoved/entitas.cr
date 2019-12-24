@@ -207,7 +207,7 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
 
   module {{listener_module.id}}
     {% if _type.id == "EventType::Removed" %}
-      abstract def on_{{component_meth_name.id}}(entity)
+      abstract def on_{{component_meth_name.id}}_removed(entity)
     {% else %}
       abstract def on_{{component_meth_name.id}}(entity, component : {{comp.id}} )
     {% end %}
@@ -348,7 +348,7 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
           {% if flag?(:entitas_enable_logging) %}logger.debug("[Event:Self:Removed] execute - total listeners: #{listener_buffer.size}", self){% end %}
           self.listener_buffer.each do |listener|
             {% if flag?(:entitas_enable_logging) %}logger.debug("[Event:Self:Removed] execute - calling listener: #{listener}", self){% end %}
-            listener.on_{{component_meth_name.id}}(entity)
+            listener.on_{{component_meth_name.id}}_removed(entity)
           end
         {% elsif target.id == "EventTarget::Any" && _type.id == "EventType::Added" %}
           comp = entity.{{component_meth_name.id}}
@@ -371,7 +371,7 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
             {% if flag?(:entitas_enable_logging) %}logger.debug("[Any:Removed] execute - total listeners: #{listener_buffer.size}", self){% end %}
             self.listener_buffer.each do |listener|
               {% if flag?(:entitas_enable_logging) %}logger.debug("[Any:Removed] execute - calling listener: #{listener}", self){% end %}
-              listener.on_{{component_meth_name.id}}(entity)
+              listener.on_{{component_meth_name.id}}_removed(entity)
             end
           end
         {% else %}
