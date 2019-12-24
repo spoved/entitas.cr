@@ -219,7 +219,7 @@ macro component_event(context, comp, target, _type = EventType::Added, priority 
 
     def to_s(io)
       io << "{{listener_component_name.id}}("
-      value.class.to_s(io) 
+      value.class.to_s(io)
       io << ")"
     end
   end
