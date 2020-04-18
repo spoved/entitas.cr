@@ -5,7 +5,6 @@ require "json"
 {% end %}
 
 require "spoved/logger"
-spoved_logger
 
 # TODO: Write documentation for `Entitas`
 module Entitas

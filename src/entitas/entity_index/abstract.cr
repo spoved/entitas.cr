@@ -29,7 +29,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   @on_entity_removed : Proc(Entitas::Events::OnEntityRemoved, Nil)? = nil
 
   def activate : Nil
-    Log.info { "#{self.class} activating" }
+    {% if flag?(:entitas_enable_logging) %}  Log.info { "#{self.class} activating" } {% end %}
 
     group.on_entity_added_event_hooks << @on_entity_added.as(Proc(Entitas::Events::OnEntityAdded, Nil))
     group.on_entity_removed_event_hooks << @on_entity_removed.as(Proc(Entitas::Events::OnEntityRemoved, Nil))
@@ -37,6 +37,8 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   end
 
   def deactivate : Nil
+    {% if flag?(:entitas_enable_logging) %}  Log.info { "#{self.class} deactivating" } {% end %}
+
     group.on_entity_added_event_hooks.delete @on_entity_added
     group.on_entity_removed_event_hooks.delete @on_entity_removed
     self.clear
@@ -83,7 +85,7 @@ abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   end
 
   protected def index_entities(group : Entitas::Group)
-    Log.warn { "#{self.class} indexing group #{group}" }
+    {% if flag?(:entitas_enable_logging) %}Log.debug { "#{self.class} indexing group #{group}" }{% end %}
     group.entities.each do |entity|
       if single_key?
         add_entity(self.get_key.call(entity, nil), entity)

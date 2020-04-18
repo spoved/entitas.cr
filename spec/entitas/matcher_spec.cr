@@ -126,7 +126,7 @@ describe Entitas::Matcher do
     end
 
     it "can to_s" do
-      new_matcher_all_of.to_s.should eq "AllOf(0, 1)"
+      new_matcher_all_of.to_s.should eq "AllOf(A, B)"
     end
 
     it "uses component_names when set" do
@@ -212,7 +212,7 @@ describe Entitas::Matcher do
     end
 
     it "can to_s" do
-      new_matcher_any_of.to_s.should eq "AnyOf(0, 1)"
+      new_matcher_any_of.to_s.should eq "AnyOf(A, B)"
     end
   end
 
@@ -275,7 +275,7 @@ describe Entitas::Matcher do
     end
 
     it "can to_s" do
-      all_of_none_of.to_s.should eq "AllOf(0, 1).NoneOf(2, 3)"
+      all_of_none_of.to_s.should eq "AllOf(A, B).NoneOf(C, D)"
     end
 
     it "uses component_names when component_names set" do
@@ -353,7 +353,7 @@ describe Entitas::Matcher do
     end
 
     it "can to_s" do
-      any_of_none_of.to_s.should eq "AnyOf(0, 1).NoneOf(2, 3)"
+      any_of_none_of.to_s.should eq "AnyOf(A, B).NoneOf(C, D)"
     end
 
     it "uses component_names when component_names set" do
@@ -427,7 +427,7 @@ describe Entitas::Matcher do
     end
 
     it "can to_s" do
-      all_of_any_of.to_s.should eq "AllOf(0, 1).AnyOf(2, 3)"
+      all_of_any_of.to_s.should eq "AllOf(A, B).AnyOf(C, D)"
     end
 
     it "uses component_names when component_names set" do

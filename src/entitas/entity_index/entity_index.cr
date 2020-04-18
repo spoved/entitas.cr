@@ -23,7 +23,7 @@ class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity
   end
 
   def add_entity(key : TKey, entity : TEntity)
-    Log.info { {key: key, entity: entity} }
+    {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - add entity - #{{key: key, entity: entity}}" }{% end %}
 
     get_entities(key) << entity
 

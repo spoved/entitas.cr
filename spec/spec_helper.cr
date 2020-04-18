@@ -2,6 +2,7 @@ require "spec"
 require "../src/entitas"
 
 require "./fixtures/*"
+spoved_logger
 
 def component_pools
   Array(Entitas::ComponentPool).new(Entitas::Component::TOTAL_COMPONENTS) do

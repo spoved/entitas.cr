@@ -543,6 +543,6 @@ describe Entitas::Group do
       Entitas::Matcher.all_of(B)
     )
     group = Entitas::Group(TestEntity).new(m)
-    group.to_s.should eq "Group(AllOf(0, 1))"
+    group.to_s.should eq "Group(AllOf(A, B))"
   end
 end
