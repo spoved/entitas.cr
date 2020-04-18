@@ -112,9 +112,9 @@ module BenchmarkHelper
 
   def add_task(value)
     raise "NO CURRENT CONTEXT FOR TASK" if context.nil?
-    logger.debug("Adding task")
+    logger.debug { "Adding task" }
     if group.nil?
-      logger.debug("Adding to tasks")
+      logger.debug { "Adding to tasks" }
       tasks << value
     else
       logger.debug "Adding to current group: #{current_group_name}"
@@ -124,9 +124,9 @@ module BenchmarkHelper
 
   def add_ips_task(value)
     raise "NO CURRENT CONTEXT FOR TASK" if context.nil?
-    logger.debug("Adding task")
+    logger.debug { "Adding task" }
     if group.nil?
-      logger.debug("Adding to tasks")
+      logger.debug { "Adding to tasks" }
       ips_tasks << value
     else
       logger.debug "Adding to current group: #{current_group_name}"

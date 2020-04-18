@@ -2,7 +2,7 @@ require "../events"
 require "../context/info"
 
 module Entitas::IEntity
-  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
+  Log = ::Log.for(self)
 
   # The context manages the state of an entity.
   # Active entities are enabled, destroyed entities are not.

@@ -20,8 +20,7 @@ class Entitas::Context(TEntity)
       {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
       {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
       if !{{meth.name.id}}.nil?
-        {% if flag?(:entitas_enable_logging) %}logger.debug("Setting {{ent_meth_name.camelcase.id}} hook for #{entity}", self.class){% end %}
-        entity.{{ent_meth_name}} &@{{meth.name.id}}.as(Proc(Entitas::Events::{{ent_meth_name.camelcase.id}}, Nil))
+        {% if flag?(:entitas_enable_logging) %}Log.debug { "Setting {{ent_meth_name.camelcase.id}} hook for #{entity}" }{% end %}
       end
       {% end %}{% end %}
     end
@@ -328,7 +327,7 @@ class Entitas::Context(TEntity)
               def add_{{component_meth_name}}(
                   {{n.id}} : {{meth_n.restriction.id}} {% if meth_n.default_value %}= {{meth_n.default_value.id}}{% end %}
                 ) : Entitas::Entity
-                {% if flag?(:entitas_enable_logging) %}logger.debug("add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}", self){% end %}
+                {% if flag?(:entitas_enable_logging) %}Log.debug { "add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}" }{% end %}
                 self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})
               end
             {% elsif comp_map[comp][:methods].size > 1 %}
@@ -530,7 +529,9 @@ class Entitas::Context(TEntity)
             end
 
             private def create_default_context_info : Entitas::Context::Info
-              {% if flag?(:entitas_enable_logging) %}logger.debug("Creating default context", CONTEXT_NAME){% end %}
+              {% if flag?(:entitas_enable_logging) %}
+                Log.debug { "Creating default context" }
+              {% end %}
 
               @component_names_cache.clear
               @component_names_cache = COMPONENT_NAMES
@@ -599,7 +600,7 @@ class Entitas::Context(TEntity)
               {% i = i + 1 %}
               {% end %}
               else
-                {% if flag?(:entitas_enable_logging) %}logger.error("Unable to find index: #{index} value: #{index.value}", CONTEXT_NAME){% end %}
+                {% if flag?(:entitas_enable_logging) %}Log.error { "Unable to find index: #{index} value: #{index.value}" }{% end %}
 
                 raise Entitas::Entity::Error::DoesNotHaveComponent.new
               end

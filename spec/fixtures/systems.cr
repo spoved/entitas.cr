@@ -60,7 +60,7 @@ class ReactiveSystemSpy < Entitas::ReactiveSystem
 
   def execute(entities)
     {% if flag?(:entitas_enable_logging) %}
-      logger.warn "#{self} running execute(entities)"
+      Log.warn { "#{self} running execute(entities)" }
     {% end %}
     self.did_execute += 1
     self.entities = entities.map { |e| e.as(Entitas::IEntity) }
@@ -93,7 +93,7 @@ class MultiReactiveSystemSpy < Entitas::MultiReactiveSystem
 
   def execute(entities)
     {% if flag?(:entitas_enable_logging) %}
-      logger.debug "#{self} running execute(entities)"
+      Log.debug { "#{self} running execute(entities)" }
     {% end %}
 
     self.did_execute += 1
@@ -119,7 +119,7 @@ class MultiTriggeredMultiReactiveSystemSpy < Entitas::MultiReactiveSystem
 
   def execute(entities)
     {% if flag?(:entitas_enable_logging) %}
-      logger.debug "#{self} running execute(entities)"
+      Log.debug { "#{self} running execute(entities)" }
     {% end %}
     self.did_execute += 1
     self.entities = entities.map { |e| e.as(Entitas::IEntity) }

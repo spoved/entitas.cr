@@ -8,7 +8,7 @@ require "spoved/logger"
 
 # TODO: Write documentation for `Entitas`
 module Entitas
-  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
+  Log = ::Log.for(self)
 
   class Error < Exception; end
 

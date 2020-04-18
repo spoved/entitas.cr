@@ -7,7 +7,7 @@ module Entitas
   # of an entity to update the gameObject.transform.position
   # of the related gameObject.
   abstract class MultiReactiveSystem
-    {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
+    Log = ::Log.for(self)
 
     include Entitas::Systems::ReactiveSystem
 
@@ -65,7 +65,7 @@ module Entitas
 
     # Clears all accumulated changes.
     def clear
-      {% if flag?(:entitas_enable_logging) %}logger.info("clearing system", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.info { "clearing system" }{% end %}
 
       self.collectors.each &.clear
     end

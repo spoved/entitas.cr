@@ -4,7 +4,7 @@ require "./macros/matcher"
 
 module Entitas
   class Matcher
-    {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
+    Log = ::Log.for(self)
 
     include IAllOfMatcher
 
@@ -30,9 +30,9 @@ module Entitas
 
     def matches?(entity : Entitas::Entity) : Bool
       {% if flag?(:entitas_enable_logging) %}
-        logger.debug("matches_all_of? #{matches_all_of?(entity)}" \
-                     " && matches_any_of? #{matches_any_of?(entity)}" \
-                     " && matches_none_of? #{matches_none_of?(entity)}", self)
+        Log.debug { "matches_all_of? #{matches_all_of?(entity)}" \
+                    " && matches_any_of? #{matches_any_of?(entity)}" \
+                    " && matches_none_of? #{matches_none_of?(entity)}" }
       {% end %}
       matches_all_of?(entity) && matches_any_of?(entity) && matches_none_of?(entity)
     end

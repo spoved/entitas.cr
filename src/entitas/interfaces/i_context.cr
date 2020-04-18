@@ -1,7 +1,7 @@
 require "../events"
 
 module Entitas::IContext
-  {% if flag?(:entitas_enable_logging) %}spoved_logger{% end %}
+  Log = ::Log.for(self)
 
   abstract def total_components : Int32
 

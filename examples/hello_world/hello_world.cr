@@ -22,7 +22,7 @@ class DebugMessageSystem < Entitas::ReactiveSystem
 
   def execute(entities : Array(Entitas::IEntity))
     entities.each do |e|
-      self.logger.error(e.debug_message, e.to_s)
+      self.logger.error { e.debug_message }
     end
   end
 end

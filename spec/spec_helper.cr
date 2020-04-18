@@ -3,12 +3,6 @@ require "../src/entitas"
 
 require "./fixtures/*"
 
-Spoved.logger.level = Logger::UNKNOWN
-
-{% if flag?(:entitas_enable_logging) %}
-  Spoved.logger.level = Logger::DEBUG
-{% end %}
-
 def component_pools
   Array(Entitas::ComponentPool).new(Entitas::Component::TOTAL_COMPONENTS) do
     Entitas::ComponentPool.new

@@ -23,7 +23,7 @@ module Entitas
       @aerc : SafeAERC? = nil
     )
       @components = Array(Entitas::IComponent?).new(@total_components, nil)
-      {% if flag?(:entitas_enable_logging) %}logger.debug("Calling initialize: #{self.object_id}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.debug { "Calling initialize: #{self.object_id}" }{% end %}
 
       reactivate(@creation_index)
 
@@ -44,7 +44,7 @@ module Entitas
     def init(creation_index ct_index : Int32 = 0,
              context_info ctx_info : Entitas::Context::Info? = nil,
              aerc _aerc : SafeAERC? = nil)
-      {% if flag?(:entitas_enable_logging) %}logger.debug("Calling init: #{self.object_id}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.debug { "Calling init: #{self.object_id}" }{% end %}
 
       self.aerc = _aerc
       self.context_info = ctx_info
@@ -64,7 +64,7 @@ module Entitas
 
     # Re-enable the entity and set its creation index
     def reactivate(creation_index : Int32) : Entity
-      {% if flag?(:entitas_enable_logging) %}logger.debug("Reactivating Entity: #{self.object_id}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.debug { "Reactivating Entity: #{self.object_id}" }{% end %}
       # Set our passed variables
       @creation_index = creation_index
       self.is_enabled = true
@@ -86,7 +86,7 @@ module Entitas
     end
 
     def destroy! : Nil
-      {% if flag?(:entitas_enable_logging) %}logger.info("Starting to destroy entity: #{self}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.info { "Starting to destroy entity: #{self}" }{% end %}
 
       if !self.enabled?
         raise Error::IsNotEnabled.new "Cannot destroy #{self}!"
@@ -97,7 +97,7 @@ module Entitas
 
     # This method is used internally. Don't call it yourself. use `destroy`
     def internal_destroy!
-      {% if flag?(:entitas_enable_logging) %}logger.info("Destroying entity: #{self}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.info { "Destroying entity: #{self}" }{% end %}
 
       self.is_enabled = false
       self.remove_all_components!
@@ -177,7 +177,7 @@ module Entitas
     # @_components_cache.size # => 0
     # ```
     private def clear_cache(cache : Symbol)
-      {% if flag?(:entitas_enable_logging) %}logger.debug("Clearing cache: #{cache}", self.to_s){% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.debug { "Clearing cache: #{cache}" }{% end %}
 
       case cache
       when :components

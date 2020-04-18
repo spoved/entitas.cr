@@ -28,21 +28,21 @@ private class RemoveEventTest
 
   def initialize(@contexts, @remove_comp_when_empty)
     @listener = @contexts.test4.create_entity
-    # logger.warn("Listener: #{@listener}", "RemoveEventTest")
-    # logger.info("add_any_standard_event_listener", "RemoveEventTest")
+    # logger.warn { "Listener: #{@listener}" }
+    # logger.info { "add_any_standard_event_listener" }
     @listener.add_any_standard_event_listener(value: self)
-    # logger.info("add_flag_entity_event_listener", "RemoveEventTest")
+    # logger.info { "add_flag_entity_event_listener" }
     @listener.add_flag_entity_event_listener(value: self)
   end
 
   def on_standard_event(entity, component : StandardEvent)
-    # logger.warn("on_standard_event", "RemoveEventTest")
+    # logger.warn { "on_standard_event" }
     @listener.remove_any_standard_event_listener(self, remove_comp_when_empty)
     @value = component.value
   end
 
   def on_flag_entity_event(entity, component : FlagEntityEvent)
-    # logger.warn("on_flag_entity_event", "RemoveEventTest")
+    # logger.warn { "on_flag_entity_event" }
     listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
     @value = "true"
   end
