@@ -17,18 +17,10 @@ class Entitas::Context(TEntity)
     ### Generate event methods
 
     private def set_entity_event_hooks(entity)
-      {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
-      {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
-      if !{{meth.name.id}}.nil?
-        {% if flag?(:entitas_enable_logging) %}Log.debug { "Setting {{ent_meth_name.camelcase.id}} hook for #{entity}" }{% end %}
-      end
-      {% end %}{% end %}
-    end
-
-    private def set_cache_hooks
-      {% for meth in @type.methods %}{% if meth.name =~ /^(.*)_event_cache$/ %}
-      {% ent_meth_name = meth.name.gsub(/_event_cache$/, "").id %}
-      @{{meth.name.id}} = ->{{ent_meth_name.id}}(Entitas::Events::{{ent_meth_name.camelcase.id}})
+      {% for meth in @type.methods %}
+      {% if meth.annotation(EventHandler) %}
+        {% if flag?(:entitas_enable_logging) %}Log.debug {"#{self} - Adding {{meth.name.camelcase.id}} hook for #{entity} to {{meth.name.id}}"}{% end %}
+        entity.{{meth.name.id}} &->{{meth.name.id}}(Entitas::Events::{{meth.name.camelcase.id}})
       {% end %}{% end %}
     end
   end
@@ -523,7 +515,7 @@ class Entitas::Context(TEntity)
               TOTAL_COMPONENTS
             end
 
-            # ditto
+            # :ditto:
             def self.total_components : Int32
               TOTAL_COMPONENTS
             end

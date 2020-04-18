@@ -23,7 +23,9 @@ module Entitas
       @aerc : SafeAERC? = nil
     )
       @components = Array(Entitas::IComponent?).new(@total_components, nil)
-      {% if flag?(:entitas_enable_logging) %}Log.debug { "Calling initialize: #{self.object_id}" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}
+        Log.debug { "Calling initialize: #{self.object_id}" }
+      {% end %}
 
       reactivate(@creation_index)
 
@@ -50,11 +52,7 @@ module Entitas
       self.context_info = ctx_info
       @creation_index = ct_index
 
-      # Clear caches
-      self.clear_caches!
-
       self.reactivate(ct_index)
-
       self
     end
 

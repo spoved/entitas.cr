@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-set -e
+set -ex
 
 source $(dirname ${0})/functions.sh
 

@@ -159,7 +159,7 @@ module Entitas
       if self.component_names.empty?
         indices.each_with_index do |value, i|
           io << ", " if i > 0
-          io << value.value
+          io << value.to_s
         end
       else
         indices.each_with_index do |value, i|

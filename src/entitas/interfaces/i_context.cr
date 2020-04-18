@@ -29,7 +29,7 @@ module Entitas::IContext
   abstract def has_entity?(entity) : Bool
   abstract def get_entities
 
-  abstract def size : Int32
+  abstract def size
   abstract def each(&block : TEntity -> Nil)
 
   abstract def get_group(matcher : Entitas::Matcher) : Entitas::Group

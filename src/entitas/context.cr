@@ -36,8 +36,6 @@ module Entitas
       @creation_index : Int32 = 0,
       context_info : Entitas::Context::Info? = nil
     )
-      set_cache_hooks
-
       @context_info = context_info || create_default_context_info
       @component_pools = Array(Entitas::ComponentPool).new(total_components) do
         Entitas::ComponentPool.new
@@ -85,32 +83,36 @@ module Entitas
     # Entity functions
     ############################
 
-    # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
-    def create_entity : TEntity
-      {% if flag?(:entitas_enable_logging) %}Log.debug { "Creating new entity" }{% end %}
-      entity = if self.reusable_entities.size > 0
-                 e = self.reusable_entities.pop
-                 {% if flag?(:entitas_enable_logging) %}Log.debug { "Reusing entity: #{e}" }{% end %}
-                 e.reactivate(self.creation_index, self.context_info)
-                 self.creation_index += 1
-                 e
-               else
-                 e = self.entity_factory
-                 {% if flag?(:entitas_enable_logging) %}Log.debug { "Created new entity: #{e}" }{% end %}
-                 e.init(self.creation_index, self.context_info, self.aerc_factory(e))
-                 self.creation_index += 1
-                 e
-               end
+    macro inherited
 
-      self.entities << entity
+      # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
+      def create_entity : {{@type.superclass.type_vars[0]}}
+        {% if flag?(:entitas_enable_logging) %}Log.debug { "Creating new entity" }{% end %}
+        entity = if self.reusable_entities.size > 0
+                   e = self.reusable_entities.pop
+                   {% if flag?(:entitas_enable_logging) %}Log.debug { "Reusing entity: #{e}" }{% end %}
+                   e.reactivate(self.creation_index, self.context_info)
+                   self.creation_index += 1
+                   e
+                 else
+                   e = self.entity_factory
+                   {% if flag?(:entitas_enable_logging) %}Log.debug { "Created new entity: #{e}" }{% end %}
+                   e.init(self.creation_index, self.context_info, self.aerc_factory(e))
+                   self.creation_index += 1
+                   e
+                 end
 
-      entity.retain(self)
-      set_entity_event_hooks(entity)
+        self.entities << entity
 
-      self.entities_cache = nil
+        entity.retain(self)
+        set_entity_event_hooks(entity)
 
-      emit_event OnEntityCreated, self, entity
-      entity
+        self.entities_cache = nil
+
+        emit_event OnEntityCreated, self, entity
+
+        entity
+      end
     end
 
     def aerc_factory(entity : TEntity) : Entitas::SafeAERC
@@ -138,24 +140,31 @@ module Entitas
     ############################
 
     # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentAdded`
+    @[EventHandler]
     def on_component_added(event : Entitas::Events::OnComponentAdded)
+      {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Processing OnComponentAdded: #{event}" }{% end %}
       update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
     # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentRemoved`
+    @[EventHandler]
     def on_component_removed(event : Entitas::Events::OnComponentRemoved)
+      {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Processing OnComponentRemoved: #{event}" }{% end %}
       update_groups_component_added_or_removed(event.entity.as(TEntity), event.index, event.component)
     end
 
     # Triggers `update_groups_component_added_or_removed` for the provided `Entitas::Events::OnComponentReplaced`
+    @[EventHandler]
     def on_component_replaced(event : Entitas::Events::OnComponentReplaced)
+      {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Processing OnComponentReplaced: #{event}" }{% end %}
       update_groups_component_replaced(event.entity.as(TEntity), event.index, event.prev_component, event.new_component)
     end
 
     # Will clean the entity provided in the `Entitas::Events::OnEntityReleased` event. It will
     # remove all release handlers and append it to the `reusable_entities` cache
+    @[EventHandler]
     def on_entity_released(event : Entitas::Events::OnEntityReleased)
-      {% if flag?(:entitas_enable_logging) %}Log.info { "Processing OnEntityReleased: #{event}" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Processing OnEntityReleased: #{event}" }{% end %}
       entity = event.entity.as(TEntity)
 
       if entity.enabled?
@@ -171,7 +180,9 @@ module Entitas
     # Will destroy the entity provided in the `Entitas::Events::OnDestroyEntity` event. It will
     # delete it from the `entities` set, emit `Entitas::Events::OnEntityWillBeDestroyed` before destroying it,
     # as well as emit `Entitas::Events::OnEntityDestroyed` after distruction.
+    @[EventHandler]
     def on_destroy_entity(event : Entitas::Events::OnDestroyEntity)
+      {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Processing OnDestroyEntity: #{event}" }{% end %}
       entity = event.entity.as(TEntity)
 
       self.entities.delete(entity)
@@ -185,7 +196,7 @@ module Entitas
         # Can be released immediately without
         # adding to retained_entities
 
-        entity.on_entity_released_event_hooks.delete(on_entity_released_event_cache)
+        entity.on_entity_released_event_hooks.delete(->on_entity_released(Entitas::Events::OnEntityReleased))
 
         self.reusable_entities << entity
         entity.release(self)
@@ -200,6 +211,7 @@ module Entitas
     # OnEntityCreated, OnEntityWillBeDestroyed,
     # OnEntityDestroyed and OnGroupCreated
     def remove_all_event_handlers
+      {% if flag?(:entitas_enable_logging) %}Log.warn { "#{self} - remove_all_event_handlers" }{% end %}
       self.clear_on_entity_created_event_hooks
       self.clear_on_entity_will_be_destroyed_event_hooks
       self.clear_on_entity_destroyed_event_hooks

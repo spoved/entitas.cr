@@ -91,12 +91,17 @@ macro emits_event(name)
   #   # do something with event
   # end
   # ```
+  @[EventHandler]
   def {{name.id.underscore.id}}(event : Entitas::Events::{{name.id}}) : Nil
     {% if flag?(:entitas_enable_logging) %}Log.info { "Processing {{name.id}}: #{event}" }{% end %}
     raise Entitas::Error::MethodNotImplemented.new
   end
 
-  property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
+  # property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
+  #
+  # def get_{{name.id.underscore.id}}_cache : Proc(Entitas::Events::{{name.id}}, Nil)
+  #   @{{name.id.underscore.id}}_event_cache || raise Error.new
+  # end
 
 end
 
@@ -151,8 +156,10 @@ macro accept_event(name)
   # end
   # ```
   def {{name.id.underscore.id}}(&block : Entitas::Events::{{name.id}} -> Nil)
-    {% if flag?(:entitas_enable_logging) %}Log.debug { "Setting event {{name.id}} hook #{block}" }{% end %}
+    {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Setting event {{name.id}} hook #{block}" }{% end %}
     self.{{name.id.underscore.id}}_event_hooks << block
+    {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - Have #{self.{{name.id.underscore.id}}_event_hooks.size} {{name.id}} event hooks" }{% end %}
+
   end
 
   # Will clear all the event hooks on this instance
@@ -161,18 +168,22 @@ macro accept_event(name)
   # obj.clear_{{name.id.underscore.id}}_event_hooks
   # ```
   private def clear_{{name.id.underscore.id}}_event_hooks : Nil
+    {% if flag?(:entitas_enable_logging) %}Log.info { "#{self} - clearing {{name.id}} event hooks" }{% end %}
     self.{{name.id.underscore.id}}_event_hooks.clear
   end
 
   def remove_{{name.id.underscore.id}}_hook(hook : Proc(Entitas::Events::{{name.id}}, Nil))
-    {% if flag?(:entitas_enable_logging) %}Log.debug { "Removing event {{name.id}} hook #{hook}" }{% end %}
+    {% if flag?(:entitas_enable_logging) %}Log.debug { "#{self} - Removing event {{name.id}} hook #{hook}" }{% end %}
     self.{{name.id.underscore.id}}_event_hooks.delete hook
   end
 
   def receive_{{name.id.underscore.id}}_event(event : Entitas::Events::{{name.id}})
-    {% if flag?(:entitas_enable_logging) %}Log.debug { "Receiving event {{name.id}}" }{% end %}
 
-    index = self.{{name.id.underscore.id}}_event_hooks.size - 1
+    hooks_size = self.{{name.id.underscore.id}}_event_hooks.size
+    {% if flag?(:entitas_enable_logging) %}Log.debug { "#{self} - Receiving event {{name.id}} - have #{hooks_size} hooks" }{% end %}
+
+    # We want to process these in reverse order, but do not want to initialize a new array with #reverse
+    index = hooks_size - 1
     while index >= 0
       self.{{name.id.underscore.id}}_event_hooks[index].call(event)
       index -= 1

@@ -135,7 +135,7 @@ class Entitas::Component
         true
       end
 
-      # ditto
+      # :ditto:
       def self.is_unique? : Bool
         true
       end
@@ -145,7 +145,7 @@ class Entitas::Component
         false
       end
 
-      # ditto
+      # :ditto:
       def self.is_unique? : Bool
         false
       end

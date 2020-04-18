@@ -23,6 +23,8 @@ class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity
   end
 
   def add_entity(key : TKey, entity : TEntity)
+    Log.info { {key: key, entity: entity} }
+
     get_entities(key) << entity
 
     if entity.aerc.is_a?(Entitas::SafeAERC)
