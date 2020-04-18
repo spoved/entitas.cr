@@ -317,7 +317,7 @@ class Entitas::Context(TEntity)
               # entity.add_{{component_meth_name}}(1)
               # ```
               def add_{{component_meth_name}}(
-                  {{n.id}} : {{meth_n.restriction.id}} {% if meth_n.default_value %}= {{meth_n.default_value.id}}{% end %}
+                  {{n.id}} : {{meth_n.restriction.id}} {% if meth_n.default_value %}= {{meth_n.default_value}}{% end %}
                 ) : Entitas::Entity
                 {% if flag?(:entitas_enable_logging) %}Log.debug { "add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}" }{% end %}
                 self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})

@@ -11,8 +11,6 @@ require "colorize"
 require "json"
 require "./tasks"
 
-Spoved.logger.level = Logger::UNKNOWN
-
 {% if !flag?(:benchmark) %}
   BenchmarkHelper.run
 {% end %}

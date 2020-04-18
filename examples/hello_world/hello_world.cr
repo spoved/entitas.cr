@@ -1,7 +1,7 @@
 require "../../src/entitas.cr"
 
 CHANNEL = Channel(Char).new(1)
-
+spoved_logger
 @[Context(Game)]
 class DebugMessage < Entitas::Component
   prop :message, String, default: ""
@@ -12,11 +12,9 @@ class DebugMessage < Entitas::Component
 end
 
 class DebugMessageSystem < Entitas::ReactiveSystem
-  # getter logger = ::Logger.new(STDOUT)
   spoved_logger
 
   def get_trigger(context : Entitas::Context) : Entitas::Collector(GameEntity)
-    logger.level = Logger::INFO
     context.create_collector(GameMatcher.debug_message)
   end
 
@@ -47,18 +45,18 @@ class InputSystem
   def initialize(@context : GameContext); end
 
   def execute
-    logger.warn "execute"
+    logger.warn { "execute" }
 
     char = CHANNEL.receive
     case char
     when '\u{4}', '\u{3}', '\e'
-      logger.warn "Exiting app : #{char.inspect}"
+      logger.warn { "Exiting app : #{char.inspect}" }
       exit
     else
       # logger.unknown context.component_pools.inspect
-      logger.unknown context.entities.size
+      logger.verbose { context.entities.size }
       context.create_entity.add_debug_message(message: char.inspect)
-      logger.unknown context.entities.size
+      logger.verbose { context.entities.size }
     end
   end
 end
@@ -76,7 +74,7 @@ class CleanupSystem
   end
 
   def cleanup
-    logger.warn "cleanup"
+    logger.warn { "cleanup" }
     debug_group.get_entities.each do |e|
       e.destroy!
     end

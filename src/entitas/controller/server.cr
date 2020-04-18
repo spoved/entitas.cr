@@ -10,7 +10,7 @@ module Entitas
           context.response.headers["Access-Control-Allow-Origin"] = "*"
           context.response.headers["Access-Control-Allow-Methods"] = "GET"
           context.response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-          context.response.print (stats).to_json
+          context.response.print stats.to_json
         end
 
         puts "Listening on http://127.0.0.1:8080"

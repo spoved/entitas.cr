@@ -4,7 +4,7 @@ require "colorize"
 IPS_HEADER = "label | human_mean (itr/sec) | human_iteration_time | relative_stddev | bytes_per_op | human_compare".colorize(:yellow)
 IPS_WARMUP =  4
 IPS_CALC   = 10
-LOGGER     = Logger.new(STDOUT)
+LOGGER     = Log.builder.for("BenchmarkHelper")
 
 def logger
   LOGGER
@@ -117,7 +117,7 @@ module BenchmarkHelper
       logger.debug { "Adding to tasks" }
       tasks << value
     else
-      logger.debug "Adding to current group: #{current_group_name}"
+      logger.debug { "Adding to current group: #{current_group_name}" }
       current_group << value
     end
   end
@@ -129,7 +129,7 @@ module BenchmarkHelper
       logger.debug { "Adding to tasks" }
       ips_tasks << value
     else
-      logger.debug "Adding to current group: #{current_group_name}"
+      logger.debug { "Adding to current group: #{current_group_name}" }
       current_ips_group << value
     end
   end
