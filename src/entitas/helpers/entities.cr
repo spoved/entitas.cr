@@ -1,8 +1,17 @@
 module Entitas::Helper::Entities(TEntity)
   macro included
-    include Enumerable(TEntity)
-    protected getter entities = Set(TEntity).new
-    protected property entities_cache : Array(TEntity)? = Array(TEntity).new
+    {% if @type.class? && @type.abstract? %}
+      {% verbatim do %}
+        include Enumerable(TEntity)
+        protected getter entities = Set(TEntity).new
+        protected property entities_cache : Array(TEntity)? = Array(TEntity).new
+      {% end %}
+    {% elsif @type.class? && !@type.abstract? %}
+      include Enumerable(TEntity)
+      protected getter entities = Set(TEntity).new
+      protected property entities_cache : Array(TEntity)? = Array(TEntity).new
+    {% end %}
+
   end
 
   # Determines whether the context has the specified entity.
