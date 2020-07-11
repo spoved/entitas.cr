@@ -2,6 +2,7 @@ require "../../src/entitas.cr"
 
 CHANNEL = Channel(Char).new(1)
 spoved_logger
+
 @[Context(Game)]
 class DebugMessage < Entitas::Component
   prop :message, String, default: ""
@@ -11,8 +12,18 @@ class DebugMessage < Entitas::Component
   end
 end
 
+# @[Context(Game, Window)]
+# class Position < Entitas::Component
+#   prop :x, Int32, default: 0
+#   prop :y, Int32, default: 0
+# end
+
 class DebugMessageSystem < Entitas::ReactiveSystem
   spoved_logger
+
+  def initialize(@context, @window)
+    super(@context)
+  end
 
   def get_trigger(context : Entitas::Context) : Entitas::Collector(GameEntity)
     context.create_collector(GameMatcher.debug_message)
@@ -54,9 +65,9 @@ class InputSystem
       exit
     else
       # logger.unknown context.component_pools.inspect
-      logger.verbose { context.entities.size }
+      logger.trace { context.entities.size }
       context.create_entity.add_debug_message(message: char.inspect)
-      logger.verbose { context.entities.size }
+      logger.trace { context.entities.size }
     end
   end
 end
