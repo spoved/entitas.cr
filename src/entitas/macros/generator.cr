@@ -546,6 +546,7 @@ class Entitas::Context(TEntity)
                 creation_index,
                 total_components,
                 component_pools,
+                context_info,
               )
             end
 

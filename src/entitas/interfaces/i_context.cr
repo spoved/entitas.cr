@@ -26,7 +26,7 @@ module Entitas::IContext
   abstract def reset
 
   abstract def create_entity : IEntity
-  abstract def has_entity?(entity) : Bool
+  abstract def has_entity?(entity : TEntity) : Bool
   abstract def get_entities
 
   abstract def size

@@ -100,6 +100,7 @@ describe Entitas::Collector do
         entities.size.should eq 1
         entities.includes?(e).should be_true
       end
+
       it "clears collected entities" do
         collector, _, _, _ = new_collector_wea
         collector.clear
@@ -267,7 +268,7 @@ describe Entitas::Collector do
       end
     end
 
-    describe "when observing with mixed GroupEvents" do
+    it "when observing with mixed GroupEvents" do
       ctx = new_context
       group_a = ctx.get_group(Entitas::Matcher.all_of(A))
       group_b = ctx.get_group(Entitas::Matcher.all_of(B))

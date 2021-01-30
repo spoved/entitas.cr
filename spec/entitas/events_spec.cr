@@ -17,7 +17,7 @@ private def new_flag_entity_event_system
 end
 
 private class RemoveEventTest
-  spoved_logger
+  include JSON::Serializable
   include ::StandardEvent::AnyListener
   include ::FlagEntityEvent::Listener
 
@@ -46,6 +46,7 @@ private class RemoveEventTest
     listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
     @value = "true"
   end
+
 end
 
 describe "Events" do

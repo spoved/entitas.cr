@@ -11,7 +11,6 @@ module Entitas::Helper::Entities(TEntity)
       protected getter entities = Set(TEntity).new
       protected property entities_cache : Array(TEntity)? = Array(TEntity).new
     {% end %}
-
   end
 
   # Determines whether the context has the specified entity.

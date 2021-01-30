@@ -129,6 +129,10 @@ module Entitas
     # If you use retain manually you also have to
     # release it manually at some point.
     def retain(owner)
+      {% if flag?(:entitas_enable_logging) %}
+      Log.trace &.emit("Retaining entity", entity: self.to_s, entity_id: self.object_id.to_s,
+        owner: owner.to_s, owner_id: owner.object_id.to_s)
+      {% end %}
       aerc.retain(owner)
     end
 
@@ -144,6 +148,11 @@ module Entitas
     # If you use retain manually you also have to
     # release it manually at some point.
     def release(owner)
+      {% if flag?(:entitas_enable_logging) %}
+      Log.trace &.emit("Releasing entity", entity: self.to_s, entity_id: self.object_id.to_s,
+        owner: owner.to_s, owner_id: owner.object_id.to_s)
+      {% end %}
+
       aerc.release(owner)
 
       if self.retain_count.zero?

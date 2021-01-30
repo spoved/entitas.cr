@@ -87,21 +87,27 @@ module Entitas
 
       # Creates a new entity or gets a reusable entity from the internal ObjectPool for entities.
       def create_entity : {{@type.superclass.type_vars[0]}}
-        {% if flag?(:entitas_enable_logging) %}Log.debug { "Creating new entity" }{% end %}
-        entity = if self.reusable_entities.size > 0
-                   e = self.reusable_entities.pop
-                   {% if flag?(:entitas_enable_logging) %}Log.debug { "Reusing entity: #{e}" }{% end %}
-                   e.reactivate(self.creation_index, self.context_info)
-                   self.creation_index += 1
-                   e
-                 else
-                   e = self.entity_factory
-                   {% if flag?(:entitas_enable_logging) %}Log.debug { "Created new entity: #{e}" }{% end %}
-                   e.init(self.creation_index, self.context_info, self.aerc_factory(e))
-                   self.creation_index += 1
-                   e
-                 end
+        {% if flag?(:entitas_enable_logging) %}Log.debug &.emit("Creating new entity", reusable_entities: self.reusable_entities.size){% end %}
 
+        e = self.reusable_entities.pop?
+        if e.nil?
+          e = self.entity_factory
+
+          {% if flag?(:entitas_enable_logging) %}
+          Log.debug  &.emit("Created new entity", entity: e.to_s, entity_id: e.object_id.to_s)
+          {% end %}
+
+          self.creation_index += 1
+        else
+          {% if flag?(:entitas_enable_logging) %}
+          Log.debug &.emit("Reusing entity", entity: e.to_s, entity_id: e.object_id.to_s, reusable_entities: self.reusable_entities.size)
+          {% end %}
+
+          e.reactivate(self.creation_index, self.context_info)
+          self.creation_index += 1
+        end
+
+        entity = e.not_nil!
         self.entities << entity
 
         entity.retain(self)
@@ -198,7 +204,6 @@ module Entitas
 
         entity.on_entity_released_event_hooks.delete(->on_entity_released(Entitas::Events::OnEntityReleased))
 
-        self.reusable_entities << entity
         entity.release(self)
         entity.remove_all_on_entity_released_handlers
       else
