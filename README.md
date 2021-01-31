@@ -3,20 +3,17 @@
 </p>
 
 <p align="center">
-    <a href="https://travis-ci.com/spoved/spoved.cr">
-        <img src="https://travis-ci.com/spoved/spoved.cr.svg?branch=master" alt="Build Status"></a>
+    <a href="https://travis-ci.com/spoved/entitas.cr">
+        <img src="https://travis-ci.com/spoved/entitas.cr.svg?branch=master" alt="Build Status"></a>
     <a href="https://github.com/spoved/entitas.cr/releases">
         <img src="https://img.shields.io/github/v/release/spoved/entitas.cr" alt="Latest release"></a>
 </p>
 
-
-# entitas
+# Entitas
 
 A Entity Component System Framework for Crystal. Ported from: [Entitas-CSharp](https://github.com/sschmid/Entitas-CSharp)
 
 Entitas is a super fast Entity Component System Framework (ECS). Internal caching and blazing fast component access makes it second to none. Several design decisions have been made to work optimal in a garbage collected environment and to go easy on the garbage collector. Utilizing Crystal's macro system, all code generation is done compile time. No need for a code generator!
-
-[![Build Status](https://travis-ci.com/spoved/spoved.cr.svg?branch=master)](https://travis-ci.com/spoved/spoved.cr)
 
 ## First glimpse
 
