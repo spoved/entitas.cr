@@ -1,5 +1,4 @@
 require "json"
-require "./controller/*"
 
 module Entitas
   abstract class Controller
