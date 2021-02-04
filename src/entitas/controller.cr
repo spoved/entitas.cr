@@ -49,8 +49,7 @@ module Entitas
     def to_json(json : JSON::Builder)
       json.object do
         json.field("name", self.class.to_s)
-
-        json.stats.to_json(json)
+        json.field("systems", self.systems)
       end
     end
   end

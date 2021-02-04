@@ -1,4 +1,5 @@
 private macro create_instance_helpers(context)
+  # Will return the `Entitas::Component::Index` for the provided index
   def component_index(index) : Entitas::Component::Index
     {{context.id}}.component_index(index)
   end
@@ -437,6 +438,13 @@ class Entitas::Context(TEntity)
 
           # Sub context {{context_name.id}}
           class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
+           protected def component_names
+              COMPONENT_NAMES
+            end
+
+            protected def name
+              CONTEXT_NAME
+            end
 
             def to_json(json : JSON::Builder)
               json.object do

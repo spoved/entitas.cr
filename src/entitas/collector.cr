@@ -154,5 +154,13 @@ module Entitas
       self.to_string_cache = "#{self.class}(#{groups.join(", ")})" if self.to_string_cache.nil?
       io << self.to_string_cache
     end
+
+    def to_json(json : JSON::Builder)
+      json.object do
+        json.field("name", self.to_s)
+        json.field("groups", self.groups)
+        json.field("group_events", self.group_events)
+      end
+    end
   end
 end
