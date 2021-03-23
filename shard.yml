@@ -4,7 +4,7 @@ version: 1.3.1
 authors:
   - Holden Omans <holden.omans@gmail.com>
 
-crystal: 0.36.0
+crystal: 1.0.0
 
 license: MIT
 
@@ -15,7 +15,7 @@ targets:
 dependencies:
   spoved:
     github: spoved/spoved.cr
-    version: ~> 0.4.1
+    version: ~> 0.5.0
 
 development_dependencies:
   sentry:
