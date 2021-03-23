@@ -15,7 +15,7 @@ targets:
 dependencies:
   spoved:
     github: spoved/spoved.cr
-    version: ~> 0.5.0
+    version: ">= 0.5.1"
 
 development_dependencies:
   sentry:
