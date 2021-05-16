@@ -15,14 +15,14 @@ targets:
 dependencies:
   spoved:
     github: spoved/spoved.cr
-    version: ">= 0.5.1"
+    version: "~> 0.6.0"
 
 development_dependencies:
-  sentry:
-    github: samueleaton/sentry
-    branch: master
-  coverage:
-    github: anykeyh/crystal-coverage
+  # sentry:
+  #   github: samueleaton/sentry
+  #   branch: master
+  # coverage:
+  #   github: anykeyh/crystal-coverage
   ameba:
     github: veelenga/ameba
-    version: ~> 0.13.0
+    # version: ~> 0.13.0

@@ -480,6 +480,7 @@ class Entitas::Context(TEntity)
             end
 
             CONTEXT_NAME = "{{context_name.id}}Context"
+            ENTITY_KLASS = ::{{context_name.id}}Entity
 
             # A hash to map of enum `Index` to class of `Component`
             INDEX_TO_COMPONENT_MAP = {
@@ -804,7 +805,7 @@ class Entitas::Context(TEntity)
 
           {% for index in entity_indicies %}
             module {{index[:context_name].id}}Extensions
-              def get_{{index[:contexts_meth].id}}_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(context : Entitas::IContext, value : {{index[:prop_type].id}})
+              def get_{{index[:contexts_meth].id}}_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(context : {{index[:context_name].id}}Context, value : {{index[:prop_type].id}})
                 context.get_entity_index(::Contexts::{{index[:const].id}})
                   .as(::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}))
                   .get_entities(value)
@@ -829,6 +830,14 @@ class Entitas::Context(TEntity)
 
       {% end %} # begin
     {% end %} # end verbatim do
+  end
+
+  macro finished
+    {% verbatim do %}
+      {% begin %}
+
+      {% end %}
+    {% end %}
   end
 
   # Process EventSystem annotations
