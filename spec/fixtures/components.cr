@@ -64,7 +64,7 @@ end
 
 @[Context(Test4)]
 @[Entitas::Event(EventTarget::Any, EventType::Removed)]
-class FlagEvent < Entitas::Component
+class FlagEvent
 end
 
 @[Context(Test4)]

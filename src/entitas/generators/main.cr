@@ -1,29 +1,26 @@
-private macro create_instance_helpers(context)
-  # Will return the `Entitas::Component::Index` for the provided index
-  def component_index(index) : Entitas::Component::Index
-    {{context.id}}.component_index(index)
-  end
-
-  def component_index_value(index) : Int32
-    {{context.id}}.component_index_value(index)
-  end
-
-  def component_index_class(index) : Entitas::Component::ComponentTypes
-    {{context.id}}.component_index_class(index)
-  end
-end
+require "./contexts"
+require "./context"
+require "./component"
 
 macro finished
+  Entitas::Component.check_components
+  Entitas::Component.create_index
+
   {% verbatim do %}
     {% begin %}
+
+
       {% context_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
       {% events_map = {} of TypeNode => ArrayLiteral(TypeNode) %}
       {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
 
+      ### Gather all the contexts
       {% for obj in Object.all_subclasses.sort_by(&.name) %}
-        ### Gather all the contexts
         {% if obj.annotation(::Context) %}
           {% contexts = obj.annotations(::Context) %}
+          {% puts obj.id %}
+          {% puts "   #{contexts}" %}
+
           {% for context in contexts %}
             {% for anno in context.args %}
               {% context_map[anno] = [] of ArrayLiteral(TypeNode) if context_map[anno].nil? %}
@@ -55,345 +52,22 @@ macro finished
               {% comp_methods[var_name] = meth %}
             {% end %}
           {% end %}
-          {% comp_map[comp] = comp_methods %}
+
+          {% component_name = comp.name.gsub(/.*::/, "") %}
+          {% component_meth_name = component_name.underscore %}
+          {% comp_map[comp] = {
+               :name        => component_name,
+               :methods     => comp_methods,
+               :index_alias => comp.id.gsub(/::/, "").underscore.upcase,
+               :meth_name   => component_meth_name.id,
+               :contexts    => [] of ArrayLiteral(TypeNode),
+               :flag        => comp_methods.empty? ? true : false,
+               :unique      => comp.annotation(::Component::Unique) ? true : false,
+             } %}
         {% end %}
       {% end %} # end for anno, components in context_map
 
-      class ::Entitas::Component
-        alias ComponentTypes = Union(Entitas::Component.class, {{*comp_map.keys.map(&.name.+(".class"))}})
-
-        {% if comp_map.empty? %}
-          enum Index
-            None
-          end
-        {% else %}
-          enum Index
-            {% begin %}
-              {% i = 0 %}
-              {% for comp in comp_map.keys %}
-                {{comp.name.gsub(/.*::/, "").id}} = {{i}}
-                {% i = i + 1 %}
-              {% end %}
-            {% end %}
-          end
-        {% end %}
-
-        # A hash to map of enum `Index` to class of `Component`
-        INDEX_TO_COMPONENT_MAP = {
-          {% for comp in comp_map.keys %}
-            Index::{{comp.name.gsub(/.*::/, "").id}} => ::{{comp.id}},
-          {% end %}
-        } of Index => Entitas::Component::ComponentTypes
-
-        # A hash to map of class of `Component` to enum `Index`
-        COMPONENT_TO_INDEX_MAP = {
-          {% for comp in comp_map.keys %}
-            ::{{comp.id}} => Index::{{comp.name.gsub(/.*::/, "").id}},
-          {% end %}
-        } of Entitas::Component::ComponentTypes => Index
-
-        COMPONENT_NAMES = COMPONENT_TO_INDEX_MAP.keys.map &.to_s
-        COMPONENT_KLASSES = [
-          {% for comp in comp_map.keys %}
-            ::{{comp.id}},
-          {% end %}
-        ] of Entitas::Component::ComponentTypes
-
-        # The total number of componets
-        TOTAL_COMPONENTS = {{comp_map.size}}
-
-        # The total amount of components an entity can possibly have.
-        def total_components : Int32
-          TOTAL_COMPONENTS
-        end
-
-        def self.total_components : Int32
-          TOTAL_COMPONENTS
-        end
-
-        {% i = 0 %}
-        {% for comp, comp_methods in comp_map %}
-          {% component_name = comp.name.gsub(/.*::/, "") %}
-
-          class ::{{comp.id}}
-
-            INDEX = Entitas::Component::Index::{{component_name.id}}
-            INDEX_VALUE = {{i}}
-
-            def self.index_val : Int32
-              INDEX_VALUE
-            end
-
-            def index_val : Int32
-              INDEX_VALUE
-            end
-
-            def self.index : Entitas::Component::Index
-              INDEX
-            end
-
-            def index : Entitas::Component::Index
-              INDEX
-            end
-
-          end
-        {% end %}
-
-      end
-
-      ### Cycle through components and inject `Entitas::IComponent` and make helper modules
-      {% for comp, comp_methods in comp_map %}
-
-        {% component_name = comp.name.gsub(/.*::/, "") %}
-        {% component_meth_name = component_name.underscore %}
-
-        ### Check to see if the component is a subklass of ::Entitas::Component
-
-        {% if !comp.ancestors.includes?(Entitas::IComponent) %}
-          class ::{{comp.id}}
-            include Entitas::IComponent
-
-            def is_unique? : Bool
-              {% if comp.annotation(::Component::Unique) %}
-              true
-              {% else %}
-              false
-              {% end %}
-            end
-          end
-        {% end %} # end if !comp.ancestors.includes?(Entitas::IComponent)
-
-        ### Create a Helper module for each component
-
-        module ::{{comp.id}}::Helper
-          {% is_flag = false %}
-
-          {% comp_methods = {} of StringLiteral => ArrayLiteral(TypeNode) %}
-          {% for meth in comp.methods %}
-            {% if meth.name =~ /^_entitas_set_(.*)$/ %}
-              {% var_name = meth.name.gsub(/^_entitas_set_/, "").id %}
-              {% comp_methods[var_name] = meth %}
-            {% end %}
-          {% end %}
-
-          {% is_flag = comp_methods.empty? ? true : false %}
-          {% is_unique = comp.annotation(::Component::Unique) ? true : false %}
-
-          {% comp_map[comp] = {
-               :methods     => comp_methods,
-               :flag        => is_flag,
-               :unique      => is_unique,
-               :index_alias => comp.id.gsub(/::/, "").underscore.upcase,
-               :meth_name   => component_meth_name.id,
-             } %}
-
-          {% if is_flag %}
-            def {{component_meth_name}}?
-              self.has_component?(self.component_index_value({{component_name.id}}))
-            end
-
-            def {{component_meth_name}}=(value : Bool)
-              if value
-                self.add_component_{{component_meth_name}}
-              else
-                self.del_component_{{component_meth_name}} if self.has_{{component_meth_name}}?
-              end
-            end
-          {% end %}
-
-
-
-          {% if comp_map[comp][:methods].size == 1 %}
-            {% n = comp_map[comp][:methods].keys.first %}
-            # Will replace the current component with the new one
-            # generated from the provided arguments
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}(value: 1)
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            #
-            # or
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}(1)
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            def replace_{{component_meth_name}}({{n.id}} : {{comp_map[comp][:methods][n].args[0].restriction.id}})
-              component = self.create_component(::{{comp.id}}, {{n.id}}: {{n.id}})
-              self.replace_component(self.component_index_value(::{{comp.id}}), component)
-            end
-          {% elsif comp_map[comp][:methods].size > 1 %}
-            # Will replace the current component with the new one
-            # generated from the provided arguments
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            def replace_{{component_meth_name}}(**args)
-              component = self.create_component(::{{comp.id}}, **args)
-              self.replace_component(self.component_index_value(::{{comp.id}}), component)
-            end
-          {% else %}
-            # Will replace the current component with the new one
-            # generated from the provided arguments
-            #
-            # ```
-            # entity.replace_{{component_meth_name}}
-            # entity.get_{{component_meth_name}} # => (new_comp)
-            # ```
-            def replace_{{component_meth_name}}
-              component = self.create_component(::{{comp.id}})
-              self.replace_component(self.component_index_value(::{{comp.id}}), component)
-            end
-          {% end %}
-
-          # Will replace the current component with the new one provided
-          #
-          # ```
-          # entity.replace_component_{{component_meth_name}}(new_comp)
-          # entity.get_{{component_meth_name}} # => (new_comp)
-          # ```
-          def replace_{{component_meth_name}}(component : ::{{comp.id}})
-            self.replace_component_{{component_meth_name}}(component)
-          end
-
-          # Append. Alias for `replace_{{component_meth_name}}`
-          def replace_component_{{component_meth_name}}(component : ::{{comp.id}})
-            self.replace_component(self.component_index_value(::{{comp.id}}), component)
-          end
-
-          # Will replace the current component with the new one
-          # generated from the provided arguments
-          #
-          # ```
-          # entity.replace_{{component_meth_name}}
-          # entity.get_{{component_meth_name}} # => (new_comp)
-          # ```
-          def replace_component_{{component_meth_name}}(**args)
-            component = self.create_component(::{{comp.id}}, **args)
-            self.replace_component(self.component_index_value(::{{comp.id}}), component)
-          end
-
-          # Will return true if the entity has an component `{{comp.id}}` or false if it does not
-          def has_{{component_meth_name}}? : Bool
-            self.has_component_{{component_meth_name}}?
-          end
-
-          # Alias. See `#has_{{component_meth_name}}?`
-          def {{component_meth_name}}? : Bool
-            self.has_component_{{component_meth_name}}?
-          end
-
-          # Will return true if the entity has an component `{{comp.id}}` or false if it does not
-          def has_component_{{component_meth_name}}? : Bool
-            self.has_component?(self.component_index_value(::{{comp.id}}))
-          end
-
-          # Will return the component that is a `{{comp.id}}` or raise
-          def {{component_meth_name}} : ::{{comp.id}}
-            self.get_component_{{component_meth_name}}
-          end
-
-          # Will return the component that is a `{{comp.id}}` or raise
-          def get_component_{{component_meth_name}} : ::{{comp.id}}
-            self.get_component(self.component_index_value(::{{comp.id}})).as(::{{comp.id}})
-          end
-
-          {% if comp_map[comp][:methods].size == 1 %}
-            {% n = comp_map[comp][:methods].keys.first %}
-            {% meth_n = comp_map[comp][:methods][n].args[0] %}
-            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-            #
-            # ```
-            # entity.add_{{component_meth_name}}(1)
-            # ```
-            def add_{{component_meth_name}}(
-                {{n.id}} : {{meth_n.restriction.id}} {% if meth_n.default_value %}= {{meth_n.default_value}}{% end %}
-              ) : Entitas::Entity
-              {% if flag?(:entitas_enable_logging) %}Log.debug { "add_{{component_meth_name}} - {{n.id}}: #{{{n.id}}}" }{% end %}
-              self.add_component_{{component_meth_name}}({{n.id}}: {{n.id}})
-            end
-          {% elsif comp_map[comp][:methods].size > 1 %}
-            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-            #
-            # ```
-            # entity.add_{{component_meth_name}}
-            # ```
-            def add_{{component_meth_name}}(**args) : Entitas::Entity
-              self.add_component_{{component_meth_name}}(**args)
-            end
-          {% else %}
-            # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-            #
-            # ```
-            # entity.add_{{component_meth_name}}
-            # ```
-            def add_{{component_meth_name}} : Entitas::Entity
-              self.add_component_{{component_meth_name}}
-            end
-          {% end %}
-
-          # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-          #
-          # ```
-          # entity.add_component_{{component_meth_name}}
-          # ```
-          def add_component_{{component_meth_name}} : Entitas::Entity
-            component = self.create_component(::{{comp.id}})
-            self.add_component(self.component_index_value(::{{comp.id}}), component)
-            self
-          end
-
-          # Add a `{{comp.id}}` to the entity. Returns `self` to allow chainables
-          #
-          # ```
-          # entity.add_component_{{component_meth_name}}
-          # ```
-          def add_component_{{component_meth_name}}(**args) : Entitas::Entity
-            component = self.create_component(::{{comp.id}}, **args)
-            self.add_component(self.component_index_value(::{{comp.id}}), component)
-            self
-          end
-
-          # Delete `{{comp.id}}` from the entity. Returns `self` to allow chainables
-          #
-          # ```
-          # entity.del_{{component_meth_name}}
-          # entity.{{component_meth_name}} # => nil
-          # ```
-          def del_{{component_meth_name}} : Entitas::Entity
-            self.del_component_{{component_meth_name}}
-            self
-          end
-
-          # Delete `{{comp.id}}` from the entity. Returns `self` to allow chainables
-          #
-          # ```
-          # entity.del_{{component_meth_name}}
-          # entity.{{component_meth_name}} # => nil
-          # ```
-          def del_component_{{component_meth_name}} : Entitas::Entity
-            self.remove_component(self.component_index_value(::{{comp.id}}))
-            self
-          end
-
-          # Append. Alias for `del_{{component_meth_name}}`
-          def remove_{{component_meth_name}}
-            self.del_{{component_meth_name}}
-          end
-
-          # Append. Alias for `del_component_{{component_meth_name}}`
-          def remove_component_{{component_meth_name}}
-            self.del_component_{{component_meth_name}}
-          end
-        end
-
-      {% end %} # end for comp, comp_methods in comp_map
-
       # Create entity, matcher, and context
-
       {% for context_name, components in context_map %}
         {% components = components.uniq %}
 
@@ -427,10 +101,9 @@ macro finished
         # name and provided components
         #############################################
 
-
         # Sub context {{context_name.id}}
         class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
-         protected def component_names
+          protected def component_names
             COMPONENT_NAMES
           end
 
@@ -490,11 +163,11 @@ macro finished
 
           # Unique components
           UNIQUE_COMPONENTS = [
-          {% for comp in components %}
-            {% if comp_map[comp][:unique] %}
-              ::{{comp.name.id}},
+            {% for comp in components %}
+              {% if comp_map[comp][:unique] %}
+                ::{{comp.name.id}},
+              {% end %}
             {% end %}
-          {% end %}
           ] of Entitas::Component::ComponentTypes
 
           # The total number of `Entitas::Component` subclases in this context
@@ -723,19 +396,21 @@ macro finished
               end
 
               {% end %}
-
             {% end %}
           {% end %}
+
+          generate_context_entity_event_hooks
         end
       {% end %} # end for context_name, components in context_map
+
+      # Define `Entitas::Contexts` methods for accessing sub contexts
+      Entitas::Contexts.generate_sub_context_methods
 
       # Create any entity indexes
       #############################################
       {% entity_indicies = [] of HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
 
       {% for comp, comp_methods in comp_map %}
-        {% component_name = comp.name.gsub(/.*::/, "") %}
-
         {% for meth in comp.methods %}
           {% if meth.annotation(::EntityIndex) %}
             {% anno = meth.annotation(::EntityIndex) %}
@@ -758,8 +433,11 @@ macro finished
         {% end %} # end for meth in comp.methods
       {% end %} # end for comp, comp_methods in comp_map
 
-      class ::Entitas::Contexts
+      class ::Entitas::Matcher
+        gen_functions
+      end
 
+      class ::Entitas::Contexts
         # Will be called after initialization to intitialze each `EntityIndex` for
         # all of the contexts.
         @[::Entitas::PostConstructor]
@@ -807,3 +485,5 @@ macro finished
     {% end %} # begin
   {% end %} # end verbatim do
 end
+
+require "./*"

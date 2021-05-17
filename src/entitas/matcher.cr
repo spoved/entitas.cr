@@ -1,6 +1,5 @@
 require "./interfaces/i_matcher"
 require "./matcher/*"
-require "./macros/matcher"
 
 module Entitas
   class Matcher
@@ -55,65 +54,6 @@ module Entitas
       (self.all_of_indices == other.all_of_indices &&
         self.any_of_indices == other.any_of_indices &&
         self.none_of_indices == other.none_of_indices)
-    end
-
-    ####################
-    # Chainables
-    ####################
-
-    macro finished
-      {% begin %}{% for match, interface in {"all"  => "IAllOfMatcher",
-                                             "any"  => "IAnyOfMatcher",
-                                             "none" => "INoneOfMatcher"} %}
-
-      # Create a matcher to match entities with {{match.upcase}} of the provided `Entitas::Component` classes
-      #
-      # ```
-      # Entitas::Matcher.new.{{match.id}}_of(A, B)
-      # ```
-      def {{match.id}}_of(*comps : Entitas::Component::ComponentTypes) : {{interface.id}}
-        self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(comps.size)
-        comps.each { |c| self.{{match.id}}_of_indices << c.index }
-        self
-      end
-
-      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
-      # in the provided `Int32` indices to merge
-      #
-      # ```
-      # Entitas::Matcher.new.{{match.id}}_of(0)
-      # ```
-      def {{match.id}}_of(*indices : Int32) : {{interface.id}}
-        self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices.size)
-        indices.each { |i| self.{{match.id}}_of_indices << Entitas::Component::Index.new(i) }
-        self
-      end
-
-      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
-      # in the provided `Entitas::Component::Index` indices to merge
-      #
-      # ```
-      # Entitas::Matcher.new.{{match.id}}_of(Entitas::Component::Index::A)
-      # ```
-      def {{match.id}}_of(*indices : Entitas::Component::Index) : {{interface.id}}
-        self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices)
-        self
-      end
-
-      # Create a matcher to match entities that have {{match.upcase}} of the `Entitas::Component` classes
-      # in the provided `Entitas::Matcher` instances to merge
-      #
-      # ```
-      # m1 = Entitas::Matcher.new.{{match.id}}_of(A)
-      # m2 = Entitas::Matcher.new.{{match.id}}_of(B)
-      # matcher = Entitas::Matcher.new.{{match.id}}_of(m1, m2)
-      # ```
-      def {{match.id}}_of(*matchers : IMatcher) : {{interface.id}}
-        self.{{match.id}}_of_indices.concat(self.class.merge_indicies(*matchers))
-        self.class.set_component_names(self, *matchers)
-        self
-      end
-      {% end %}{% end %}
     end
 
     ####################

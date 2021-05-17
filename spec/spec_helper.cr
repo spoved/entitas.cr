@@ -47,3 +47,5 @@ def context_with_entity
 
   {ctx, e}
 end
+
+Entitas::Component.check_components

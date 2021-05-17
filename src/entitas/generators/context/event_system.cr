@@ -1,5 +1,4 @@
-class Entitas::Context(TEntity)
-end
+class Entitas::Context(TEntity); end
 
 # Process EventSystem annotations
 macro finished

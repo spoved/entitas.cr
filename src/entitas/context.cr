@@ -2,7 +2,6 @@ require "spoved/logger"
 
 require "./error"
 require "./interfaces/i_context"
-require "./macros/generator"
 require "./context/*"
 require "./events"
 require "./helpers/entities"

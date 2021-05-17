@@ -1,5 +1,4 @@
 require "./interfaces/i_component"
-require "./macros/component"
 
 module Entitas
   # Inherit this class if you want to create a component which
@@ -32,9 +31,5 @@ module Entitas
   # ```
   abstract class Component
     include Entitas::IComponent
-
-    macro inherited
-      include Entitas::IComponent
-    end
   end
 end

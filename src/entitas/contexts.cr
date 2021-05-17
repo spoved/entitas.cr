@@ -29,41 +29,18 @@ class Entitas::Contexts
     end
   end
 
-  macro finished
+  # Returns the context with the provided name, or nil
+  def get_context_by_name(name : String)
+    self.all_contexts.find(&.info.name.==(name))
+  end
 
-    {% contexts = {} of TypeString => TypeNode %}
+  def initialize
+    call_post_constructors
+  end
 
-    {% for context in Entitas::Context.all_subclasses %}
-      {% context_name = context.name.gsub(/Context/, "").underscore %}
-      {% contexts[context_name] = context %}
-    {% end %}
-
-    {% for context_name, context in contexts %}
-    property {{context_name}} : ::{{context.id}} = ::{{context.id}}.new
-    {% end %}
-
-    # Returns an array containing each available context
-    def all_contexts : Array(Entitas::IContext)
-      @_all_contexts ||= [
-        {% for context_name, context in contexts %}
-          self.{{context_name}},
-        {% end %}
-      ] of Entitas::IContext
-    end
-
-    # Returns the context with the provided name, or nil
-    def get_context_by_name(name : String)
-      self.all_contexts.find {|ctx| ctx.info.name == name }
-    end
-
-    def initialize
-      call_post_constructors
-    end
-
-    def to_json(json : JSON::Builder)
-      json.object do
-        json.field("name", self.class.to_s)
-      end
+  def to_json(json : JSON::Builder)
+    json.object do
+      json.field("name", self.class.to_s)
     end
   end
 end
