@@ -76,11 +76,14 @@ Examples can also be found in the `spec/fixtures` and `examples` folders. Ive re
 To enable verbose logging please provide the compile time flag `-Dentitas_enable_logging`. This will enable the `Spoved::Logger`.
 This is disabled by default to keep the code as performant as possible.
 
+To enable some debug output for the code generator, include the flag `-Dentitas_debug_generator`.
+
 ## Benchmarks
 
 It is very important to make sure the lib is compariable to the original entitas. Here are some of the benchmarks to compare. Each benchmark was written as close as possible to the main source. As well as any aliases of the methods were tested. Most impressivly, the slowest test (EntityRemoveAddComponent) clocked in at 868.6 ms vs the crystal equivilant (#remove_component & #add_component) at 290.0 ms. Thats a 3x speed improvement.
 
 ### Enitas C#
+
 ```
 Running performance tests...
 ContextCreateEntity:                    98.5355 ms

@@ -191,7 +191,7 @@ macro accept_event(name)
 end
 
 macro component_event(contexts, comp, target, _type = EventType::Added, priority = 1)
-  {% puts "    - component_event for #{@type.id}" %}
+  {% if flag?(:entitas_debug_generator) %}{% puts "    - component_event for #{@type.id}" %}{% end %}
 
   {% priority = 1 if priority.id == "nil" %}
   {% _type = "EventType::Added" if _type.id == "nil" %}
@@ -212,7 +212,7 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
   {% end %}
 
   {% if Entitas::Component.all_subclasses.find(&.name.==(listener_component_module.gsub(/^::/, ""))) %}
-    {% puts "        WARN: #{listener_component_module.id} already exists" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "        WARN: #{listener_component_module.id} already exists" %}{% end %}
     @[::Context({{*contexts}})]
     class {{listener_component_module.id}} < Entitas::Component; end
   {% else %}
@@ -267,7 +267,7 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
 end
 
 macro component_event_system(context, comp, target, _type = EventType::Added, priority = 1)
-  {% puts "    - component_event_system for #{@type.id}" %}
+  {% if flag?(:entitas_debug_generator) %}{% puts "    - component_event_system for #{@type.id}" %}{% end %}
 
   {% priority = 1 if priority.id == "nil" %}
   {% _type = "EventType::Added" if _type.id == "nil" %}
@@ -293,7 +293,7 @@ macro component_event_system(context, comp, target, _type = EventType::Added, pr
   {% listener_component_meth_name = listener_component_name.underscore %}
 
   {% if Entitas::ReactiveSystem.all_subclasses.find(&.name.==(system_name.gsub(/^::/, ""))) %}
-    {% puts "      WARN: #{system_name.id} already exists" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "      WARN: #{system_name.id} already exists" %}{% end %}
   {% else %}
 
     @[EventSystem(context: {{context.id}}, priority: {{priority}})]

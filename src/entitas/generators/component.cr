@@ -45,14 +45,14 @@ class Entitas::Component
           {% raise "#{comp.id} has already been generated!" %}
         {% else %}
 
-          {% puts "## Generating component #{comp.id}" %}
+          {% if flag?(:entitas_debug_generator) %}{% puts "## Generating component #{comp.id}" %}{% end %}
           {% component_name = comp.name.gsub(/.*::/, "") %}
           {% component_meth_name = component_name.underscore %}
 
           ### Check to see if the component is a sub-class of ::Entitas::Component
           class ::{{comp.id}}
             {% if !comp.ancestors.includes?(Entitas::IComponent) %}
-            {% puts "* #{comp.id} was NOT inherited" %}
+            {% if flag?(:entitas_debug_generator) %}{% puts "* #{comp.id} was NOT inherited" %}{% end %}
             include Entitas::IComponent
             {% end %} # end if !comp.ancestors.includes?(Entitas::IComponent)
 

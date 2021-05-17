@@ -17,9 +17,8 @@ macro finished
       ### Gather all the contexts
       {% for obj in Object.all_subclasses.sort_by(&.name) %}
         {% if obj.annotation(::Context) %}
-          {% contexts = obj.annotations(::Context) %}
-          {% puts obj.id %}
-          {% puts "   #{contexts}" %}
+          {% contexts = obj.annotations(::Context).uniq %}
+          {% if flag?(:entitas_debug_generator) %}{% puts "Found component #{obj.id} with contexts: #{contexts}" %}{% end %}
 
           {% for context in contexts %}
             {% for anno in context.args %}
@@ -103,6 +102,7 @@ macro finished
 
         # Sub context {{context_name.id}}
         class ::{{context_name.id}}Context < Entitas::Context(::{{context_name.id}}Entity)
+
           protected def component_names
             COMPONENT_NAMES
           end
@@ -398,8 +398,6 @@ macro finished
               {% end %}
             {% end %}
           {% end %}
-
-          generate_context_entity_event_hooks
         end
       {% end %} # end for context_name, components in context_map
 
@@ -484,6 +482,8 @@ macro finished
 
     {% end %} # begin
   {% end %} # end verbatim do
+
+  generate_event_systems
 end
 
 require "./*"

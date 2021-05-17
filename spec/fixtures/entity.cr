@@ -2,7 +2,7 @@ require "../../src/entitas"
 
 module MyEntity
   include Entitas::IEntity
-  # include NameAge::Helper
+  include NameAge::Helper
 end
 
 class TestEntity < Entitas::Entity

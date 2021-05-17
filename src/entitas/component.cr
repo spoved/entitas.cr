@@ -31,5 +31,9 @@ module Entitas
   # ```
   abstract class Component
     include Entitas::IComponent
+
+    macro inherited
+      Entitas::Component.check_components
+    end
   end
 end

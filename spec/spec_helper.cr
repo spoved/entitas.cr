@@ -4,7 +4,9 @@ require "log/spec"
 require "../src/entitas"
 require "./fixtures/*"
 
-# spoved_logger
+Spec.before_suite {
+# spoved_logger :trace, bind: true
+}
 
 def component_pools
   Array(Entitas::ComponentPool).new(Entitas::Component::TOTAL_COMPONENTS) do
@@ -47,5 +49,3 @@ def context_with_entity
 
   {ctx, e}
 end
-
-Entitas::Component.check_components

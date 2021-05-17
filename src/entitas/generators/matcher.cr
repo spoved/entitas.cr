@@ -1,7 +1,7 @@
 class ::Entitas::Matcher
   macro gen_functions
     # class ::Entitas::Matcher
-      {% puts "### Generating matcher functions #{@type.id}" %}
+      {% if flag?(:entitas_debug_generator) %}{% puts "## Generating matcher functions for #{@type.id}" %}{% end %}
       {% begin %}
         {% for match in ["all", "any", "none"] %}
           # Create a matcher to match entities with {{match.upcase}} of the provided `Entitas::Component` classes

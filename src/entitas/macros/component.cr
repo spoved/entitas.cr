@@ -1,7 +1,7 @@
 module Entitas::IComponent
   # :nodoc:
   macro finalize_comp(name, index)
-    {% puts "- finalize_comp for #{@type.id}" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "- finalize_comp for #{@type.id}" %}{% end %}
 
     class ::{{@type.id}}
       INDEX = Entitas::Component::Index::{{name.id}}
@@ -35,7 +35,7 @@ module Entitas::IComponent
       {% raise "#{@type} already has been initialized" %}
     {% end %}
 
-    {% puts "  - create_initializers for #{@type.id}" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "  - create_initializers for #{@type.id}" %}{% end %}
 
     {% comp_variables = {} of StringLiteral => HashLiteral(SymbolLiteral, ArrayLiteral(TypeNode) | TypeNode) %}
     {% for meth in @type.methods %}
@@ -150,7 +150,7 @@ module Entitas::IComponent
 
   # :nodoc:
   macro setup_events
-    {% puts "  - setup_events for #{@type.id}" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "  - setup_events for #{@type.id}" %}{% end %}
 
     {% if @type.annotation(::Entitas::Event) %}
       {% for event in @type.annotations(::Entitas::Event) %}
@@ -169,9 +169,10 @@ module Entitas::IComponent
 
   # :nodoc:
   macro setup_unique
-    {% puts "  - setup_unique for #{@type.id}" %}
 
     {% is_unique = @type.annotation(::Component::Unique) ? true : false %}
+
+    {% if flag?(:entitas_debug_generator) %}{% puts "  - setup_unique for #{@type.id} : #{is_unique}" %}{% end %}
 
     # If the component has the unique annotation,
     #   set the class method to `true`
@@ -201,7 +202,7 @@ module Entitas::IComponent
 
   # :nodoc:
   macro setup_base_comp
-    {% puts "- setup_base_comp for #{@type.id}" %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "- setup_base_comp for #{@type.id}" %}{% end %}
     {% if !@type.ancestors.includes?(Entitas::IComponent) %}
       {% raise "#{@type.id} is not a Entitas::IComponent" %}
     {% end %}
@@ -216,7 +217,7 @@ end
 class Entitas::Component
   macro create_index
     class ::Entitas::Component
-      {% puts "### Creating component index" %}
+      {% if flag?(:entitas_debug_generator) %}{% puts "### Creating component index" %}{% end %}
 
       {% components = [] of TypeNode %}
       {% comp_map = {} of TypeNode => HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
