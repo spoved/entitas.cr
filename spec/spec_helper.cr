@@ -2,7 +2,6 @@ require "spec"
 require "log/spec"
 
 require "../src/entitas"
-
 require "./fixtures/*"
 
 # spoved_logger

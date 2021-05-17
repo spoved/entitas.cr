@@ -4,7 +4,6 @@ class Entitas::Component
     # and populate the initialize arguments.
     macro finished
       {% verbatim do %}
-
         {% comp_variables = {} of StringLiteral => HashLiteral(SymbolLiteral, ArrayLiteral(TypeNode) | TypeNode) %}
         {% for meth in @type.methods %}
           {% if meth.annotation(::Component::Property) %}
@@ -149,21 +148,6 @@ class Entitas::Component
       def self.is_unique? : Bool
         false
       end
-    {% end %}
-
-    {% if @type.annotation(::Entitas::Event) %}
-      {% for event in @type.annotations(::Entitas::Event) %}
-        {% event_target = event.args[0] %}
-        {% event_type = event.args[1] %}
-        {% event_priority = event.named_args[:priority] %}
-
-        {% contexts = @type.annotations(::Context) %}
-        {% for context in contexts %}
-          {% for anno in context.args %}
-            component_event({{anno.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
-          {% end %}
-        {% end %}
-      {% end %}
     {% end %}
   end
 end

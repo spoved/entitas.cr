@@ -46,7 +46,6 @@ private class RemoveEventTest
     listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
     @value = "true"
   end
-
 end
 
 describe "Events" do

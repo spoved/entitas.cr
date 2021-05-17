@@ -53,6 +53,7 @@ end
 
 alias Contexts = Entitas::Contexts
 
+require "./entitas/annotations"
 require "./entitas/macros/*"
 require "./entitas/interfaces/*"
 require "./entitas/*"
