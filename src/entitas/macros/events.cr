@@ -97,12 +97,11 @@ macro emits_event(name)
     raise Entitas::Error::MethodNotImplemented.new
   end
 
-  # property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
-  #
-  # def get_{{name.id.underscore.id}}_cache : Proc(Entitas::Events::{{name.id}}, Nil)
-  #   @{{name.id.underscore.id}}_event_cache || raise Error.new
-  # end
+  property {{name.id.underscore.id}}_event_cache : Proc(Entitas::Events::{{name.id}}, Nil)? = nil
 
+  def get_{{name.id.underscore.id}}_cache : Proc(Entitas::Events::{{name.id}}, Nil)
+    @{{name.id.underscore.id}}_event_cache || raise Error.new
+  end
 end
 
 macro emit_event(event, *args)

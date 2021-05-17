@@ -64,4 +64,5 @@ annotation ::EventSystem; end
 annotation ::EventHandler; end
 annotation ::EntityIndex; end
 
+# :nodoc:
 annotation ::Component::Property; end
