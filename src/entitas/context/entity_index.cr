@@ -11,6 +11,10 @@ class Entitas::Context(TEntity)
     entity_indices[name]
   end
 
+  def get_entity_index?(name : String) : Entitas::IEntityIndex?
+    entity_indices[name]?
+  end
+
   def entity_indices : Hash(String, Entitas::IEntityIndex)
     @entity_indices
   end

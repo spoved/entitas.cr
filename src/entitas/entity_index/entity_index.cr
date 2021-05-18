@@ -1,5 +1,6 @@
 class Entitas::EntityIndex(TEntity, TKey) < Entitas::AbstractEntityIndex(TEntity, TKey)
   getter index : Hash(TKey, Array(TEntity)) = Hash(TKey, Array(TEntity)).new
+  delegate :each, to: index
 
   def [](value : TKey)
     index[value]

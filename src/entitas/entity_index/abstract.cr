@@ -3,6 +3,7 @@ require "../group"
 
 abstract class Entitas::AbstractEntityIndex(TEntity, TKey)
   include Entitas::IEntityIndex
+  include Enumerable({TKey, TEntity})
 
   abstract def clear
   abstract def add_entity(key : TKey, entity : TEntity)

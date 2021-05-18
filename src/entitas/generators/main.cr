@@ -456,7 +456,18 @@ macro finished
         end
 
         {% for index in entity_indicies %}
-          module {{index[:context_name].id}}Extensions
+          {% if index[:comp].constants.find(&.stringify.==("#{index[:prop].id.titleize}Index")) %}
+            {% raise "#{index[:comp].id}::#{index[:prop].id.titleize}Index has already been generated!" %}
+          {% else %}
+            module ::{{index[:comp].id}}::{{index[:prop].id.titleize}}Index(T)
+              abstract def get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value : {{index[:prop_type].id}}) : Array(T)
+              abstract def get_entity_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value : {{index[:prop_type].id}}) : T?
+            end
+          {% end %}
+
+          module Extensions::{{index[:context_name].id}}Indexes
+            include ::{{index[:comp].id}}::{{index[:prop].id.titleize}}Index({{index[:context_name].id}}Entity)
+
             def get_{{index[:contexts_meth].id}}_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(context : {{index[:context_name].id}}Context, value : {{index[:prop_type].id}})
               context.get_entity_index(::Contexts::{{index[:const].id}})
                 .as(::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}))
@@ -468,7 +479,7 @@ macro finished
             end
 
             def get_entity_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value : {{index[:prop_type].id}}) : {{index[:context_name].id}}Entity?
-              get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value).first
+              get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value).first?
             end
           end
         {% end %} # end for index in entity_indicies
@@ -476,7 +487,7 @@ macro finished
 
       {% for index in entity_indicies %}
         class ::{{index[:context_name].id}}Context < Entitas::Context(::{{index[:context_name].id}}Entity)
-          include ::Entitas::Contexts::{{index[:context_name].id}}Extensions
+          include ::Entitas::Contexts::Extensions::{{index[:context_name].id}}Indexes
         end
       {% end %} # end for index in entity_indicies
 

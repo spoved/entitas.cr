@@ -3,6 +3,7 @@ require "./abstract"
 module Entitas
   class PrimaryEntityIndex(TEntity, TKey) < AbstractEntityIndex(TEntity, TKey)
     getter index : Hash(TKey, TEntity) = Hash(TKey, TEntity).new
+    delegate :each, to: index
 
     def [](value : TKey)
       index[value]

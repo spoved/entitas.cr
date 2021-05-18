@@ -16,6 +16,7 @@ module Entitas::IContext
 
   abstract def add_entity_index(entity_index : Entitas::IEntityIndex)
   abstract def get_entity_index(name : String) : Entitas::IEntityIndex
+  abstract def get_entity_index?(name : String) : Entitas::IEntityIndex?
 
   abstract def reset_creation_index
 
