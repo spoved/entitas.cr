@@ -91,7 +91,7 @@ module Entitas
         begin
           self.execute(self.buffer)
         ensure
-          self.buffer.each { |e| e.release(self) }
+          self.buffer.each(&.release(self))
 
           self.collected_buffer.clear
           self.buffer.clear

@@ -130,8 +130,8 @@ module Entitas
     # release it manually at some point.
     def retain(owner)
       {% if flag?(:entitas_enable_logging) %}
-      Log.trace &.emit("Retaining entity", entity: self.to_s, entity_id: self.object_id.to_s,
-        owner: owner.to_s, owner_id: owner.object_id.to_s)
+        Log.trace &.emit("Retaining entity", entity: self.to_s, entity_id: self.object_id.to_s,
+          owner: owner.to_s, owner_id: owner.object_id.to_s)
       {% end %}
       aerc.retain(owner)
     end
@@ -149,8 +149,8 @@ module Entitas
     # release it manually at some point.
     def release(owner)
       {% if flag?(:entitas_enable_logging) %}
-      Log.trace &.emit("Releasing entity", entity: self.to_s, entity_id: self.object_id.to_s,
-        owner: owner.to_s, owner_id: owner.object_id.to_s)
+        Log.trace &.emit("Releasing entity", entity: self.to_s, entity_id: self.object_id.to_s,
+          owner: owner.to_s, owner_id: owner.object_id.to_s)
       {% end %}
 
       aerc.release(owner)
@@ -228,7 +228,7 @@ module Entitas
         @to_string_cache = String::Builder.build do |builder|
           builder << self.class
           builder << "_#{self.creation_index}("
-          builder << get_components.map { |c| c.class.to_s }.join(",")
+          builder << get_components.join(",", &.class.to_s)
           builder << ")"
         end
       end
