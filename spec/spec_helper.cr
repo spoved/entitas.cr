@@ -5,7 +5,9 @@ require "../src/entitas"
 require "./fixtures/*"
 
 Spec.before_suite {
-# spoved_logger :trace, bind: true
+  {% if flag?(:entitas_enable_logging) %}
+    spoved_logger :trace, bind: true
+  {% end %}
 }
 
 def component_pools

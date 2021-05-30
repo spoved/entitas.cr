@@ -157,8 +157,9 @@ module Entitas::IComponent
         {% event_target = event.args[0] %}
         {% event_type = event.args[1] %}
         {% event_priority = event.named_args[:priority] %}
-
-        {% contexts = @type.annotations(::Context).first.args %}
+        {% contexts = [] of Path %}
+        {% for anno in @type.annotations(::Context) %}{% anno.args.each { |a| contexts.push(a) } %}{% end %}
+        {% if flag?(:entitas_debug_generator) %}{% puts "    - contexts: #{contexts}" %}{% end %}
         component_event({{contexts}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})
         {% for context in contexts %}
         component_event_system({{context.id}}, {{@type.id}}, {{event_target.id}}, {{event_type.id}}, {{event_priority.id}})

@@ -4,8 +4,20 @@ module Entitas
   abstract class Controller
     private property systems : Systems? = nil
 
+    private getter mutex : Mutex = Mutex.new
+
     @[JSON::Field(ignore: true)]
     private setter contexts : Contexts? = nil
+
+    delegate synchronize, to: @mutex
+
+    # Will allow you to interact with the returned `Contexts` with a `Mutex` lock
+    # preventing `#update` from being called in another thread
+    def with_contexts
+      self.synchronize do
+        yield self.contexts
+      end
+    end
 
     def contexts : Contexts
       if @contexts.nil?
@@ -20,24 +32,32 @@ module Entitas
       end
 
       self.contexts = Contexts.shared_instance if @contexts.nil?
-      self.systems = create_systems(self.contexts.as(Contexts))
-      self.systems.as(Systems).init
+      with_contexts do |ctxs|
+        self.systems = create_systems(ctxs)
+        self.systems.as(Systems).init
+      end
     end
 
     def update
       if systems.nil?
         raise "Called update before start! no systems initialized!"
       end
-      systems.as(Systems).execute
-      systems.as(Systems).cleanup
+
+      self.synchronize do
+        systems.as(Systems).execute
+        systems.as(Systems).cleanup
+      end
     end
 
     def reset
       if systems.nil?
         raise "Called reset before start! no systems initialized!"
       end
-      systems.as(Systems).clear_reactive_systems
-      contexts.as(Contexts).reset
+
+      with_contexts do |ctxs|
+        systems.as(Systems).clear_reactive_systems
+        ctxs.reset
+      end
     end
 
     abstract def create_systems(contexts : Contexts)
