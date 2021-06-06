@@ -379,13 +379,13 @@ describe Entitas::Context do
       end
 
       it "returns a new entity" do
-          ctx, e1 = context_with_entity
-          e1.destroy
-          ctx.create_entity.should be e1
+        ctx, e1 = context_with_entity
+        e1.destroy
+        ctx.create_entity.should be e1
 
-          e2 = ctx.create_entity
-          e2.has_a?.should be_false
-          e2.should_not be e1
+        e2 = ctx.create_entity
+        e2.has_a?.should be_false
+        e2.should_not be e1
       end
 
       it "sets up entity from pool" do
