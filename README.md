@@ -3,10 +3,10 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/spoved/entitas.cr/actions/workflows/master.yml">
-        <img src="https://github.com/spoved/entitas.cr/actions/workflows/master.yml/badge.svg?branch=master" alt="Build Status"></a>
+    <a href="https://github.com/spoved/entitas.cr/actions/workflows/build.yml">
+        <img src="https://github.com/spoved/entitas.cr/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
     <a href="https://github.com/spoved/entitas.cr/actions/workflows/release.yml">
-        <img src="https://github.com/spoved/entitas.cr/actions/workflows/release.yml/badge.svg?name=release" alt="Build Status"></a>
+        <img src="https://github.com/spoved/entitas.cr/actions/workflows/release.yml/badge.svg" alt="Release Status"></a>
     <a href="https://github.com/spoved/entitas.cr/releases">
         <img src="https://img.shields.io/github/v/release/spoved/entitas.cr" alt="Latest release"></a>
 </p>
