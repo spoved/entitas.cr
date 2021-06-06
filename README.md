@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-    <a href="https://travis-ci.com/spoved/entitas.cr">
-        <img src="https://travis-ci.com/spoved/entitas.cr.svg?branch=master" alt="Build Status"></a>
+    <a href="https://github.com/spoved/entitas.cr/actions/workflows/spec.yml">
+        <img src="https://github.com/spoved/entitas.cr/actions/workflows/spec.yml/badge.svg?branch=master" alt="Build Status"></a>
     <a href="https://github.com/spoved/entitas.cr/releases">
         <img src="https://img.shields.io/github/v/release/spoved/entitas.cr" alt="Latest release"></a>
 </p>
