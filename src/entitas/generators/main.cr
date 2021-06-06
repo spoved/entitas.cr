@@ -22,7 +22,7 @@ macro finished
 
           {% for context in contexts %}
             {% for anno in context.args %}
-              {% context_map[anno] = [] of ArrayLiteral(TypeNode) if context_map[anno].nil? %}
+              {% context_map[anno] = [] of ArrayLiteral(TypeNode) if context_map[anno].is_a?(Nil) %}
               {% array = context_map[anno] %}
               {% if array == nil %}
                 {% context_map[anno] = [obj] %}
@@ -35,7 +35,7 @@ macro finished
 
         ### Gather all the events
         {% if obj.annotation(::Entitas::Event) %}
-          {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].nil? %}
+          {% events_map[obj] = [] of ArrayLiteral(Annotation) if events_map[obj].is_a?(Nil) %}
           {% events_map[obj] = obj.annotations(::Entitas::Event) %}
         {% end %} # end if obj.annotation(::Entitas::Event)
       {% end %} # end for obj in Object.all_subclasses.sort_by(&.name)
@@ -75,7 +75,7 @@ macro finished
           {% for comp in components %}
 
             # Append contexts to comp_map
-            {% comp_map[comp][:contexts] = [] of ArrayLiteral(TypeNode) if comp_map[comp][:contexts].nil? %}
+            {% comp_map[comp][:contexts] = [] of ArrayLiteral(TypeNode) if comp_map[comp][:contexts].is_a?(Nil) %}
             {% array = comp_map[comp][:contexts] %}
             {% if array == nil %}
               {% comp_map[comp][:contexts] = [context_name] %}

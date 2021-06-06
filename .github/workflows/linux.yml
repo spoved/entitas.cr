@@ -1,7 +1,7 @@
 name: Linux CI
 on: [push, pull_request]
 jobs:
-  test_linux:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -19,3 +19,5 @@ jobs:
         run: shards install
       - name: Run tests
         run: crystal spec
+      - name: Check formatting
+        run: crystal tool format --check
