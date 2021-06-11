@@ -50,28 +50,28 @@ module Entitas
     # Calls `#init` on all `InitializeSystem` and other
     # nested `Systems` instances in the order you added them.
     def init : Nil
-      {% if flag?(:entitas_enable_logging) %}Log.info { "running init on sub systems" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.trace { "running init on sub systems" }{% end %}
       self.initialize_systems.each &.init
     end
 
     # Calls `#execute` on all `ExecuteSystem` and other
     # nested `Systems` instances in the order you added them.
     def execute : Nil
-      {% if flag?(:entitas_enable_logging) %}Log.info { "running execute on sub systems" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.trace { "running execute on sub systems" }{% end %}
       self.execute_systems.each &.execute
     end
 
     # Calls `#cleanup` on all `CleanupSystem` and other
     # nested `Systems` instances in the order you added them.
     def cleanup : Nil
-      {% if flag?(:entitas_enable_logging) %}Log.info { "running cleanup on sub systems" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.trace { "running cleanup on sub systems" }{% end %}
       self.cleanup_systems.each &.cleanup
     end
 
     # Calls `#tear_down` on all `TearDownSystem` and other
     # nested `Systems` instances in the order you added them.
     def tear_down : Nil
-      {% if flag?(:entitas_enable_logging) %}Log.info { "running tear_down on sub systems" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.trace { "running tear_down on sub systems" }{% end %}
       self.tear_down_systems.each &.tear_down
     end
 

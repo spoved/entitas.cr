@@ -115,6 +115,9 @@ module Entitas
 
     private def _add_entity(entity : TEntity)
       return if self.entities.includes?(entity)
+      {% if flag?(:entitas_enable_logging) %}
+        Log.debug { "adding entity : #{entity}" }
+      {% end %}
       entities << entity
       entity.retain(self)
     end

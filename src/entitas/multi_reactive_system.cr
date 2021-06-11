@@ -66,7 +66,6 @@ module Entitas
     # Clears all accumulated changes.
     def clear
       {% if flag?(:entitas_enable_logging) %}Log.info { "clearing system" }{% end %}
-
       self.collectors.each &.clear
     end
 
@@ -74,7 +73,7 @@ module Entitas
       self.collectors.each do |collector|
         unless collector.empty?
           collector.entities.each do |e|
-            self.collected_buffer << e.as(Entitas::IEntity)
+            self.collected_buffer << e.as(Entitas::IEntity) unless self.collected_buffer.includes?(e)
           end
           collector.clear
         end
@@ -82,7 +81,7 @@ module Entitas
 
       collected_buffer.each do |e|
         if self.filter(e)
-          e.retain(self)
+          e.retain(self) # unless e.retained_by?(self)
           self.buffer << e unless buffer.includes?(e)
         end
       end

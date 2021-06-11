@@ -74,7 +74,7 @@ module Entitas
     end
 
     def execute : Nil
-      {% if flag?(:entitas_enable_logging) %}Log.info { "running execute on collector : #{self.collector}" }{% end %}
+      {% if flag?(:entitas_enable_logging) %}Log.trace { "running execute on collector : #{self.collector}" }{% end %}
 
       unless self.collector.empty?
         self.collector.each do |e|
