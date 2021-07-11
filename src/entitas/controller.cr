@@ -3,7 +3,6 @@ require "json"
 module Entitas
   abstract class Controller
     private property systems : Systems? = nil
-
     private getter mutex : Mutex = Mutex.new
 
     @[JSON::Field(ignore: true)]
@@ -16,6 +15,18 @@ module Entitas
     def with_contexts
       self.synchronize do
         yield self.contexts
+      end
+    end
+
+    def find_system(klass : Class)
+      self.systems.try &.find_system(klass)
+    end
+
+    def find_systems(klass : Class) : Array(Entitas::System)
+      if self.systems.nil?
+        Array(Entitas::System).new
+      else
+        self.systems.not_nil!.find_systems(klass)
       end
     end
 

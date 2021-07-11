@@ -114,5 +114,62 @@ module Entitas
         end
       end
     end
+
+    # Recusivly searches for sub systems with the type provided and returns the first match
+    def find_system(klass : Class) : Entitas::System?
+      case self
+      when klass
+        self
+      else
+        sys = _find_system(cleanup_systems, klass)
+        sys = _find_system(execute_systems, klass) if sys.nil?
+        sys = _find_system(initialize_systems, klass) if sys.nil?
+        sys = _find_system(tear_down_systems, klass) if sys.nil?
+        sys
+      end
+    end
+
+    # :no_doc:
+    private def _find_system(_systems, klass)
+      _systems.each do |sys|
+        s = case sys
+            when klass
+              sys
+            when Entitas::Systems, Entitas::Feature
+              sys.find_system(klass)
+            else
+              nil
+            end
+        return s unless s.nil?
+      end
+      nil
+    end
+
+    # Recusivly searches for sub systems with the type provided and returns all matches
+    def find_systems(klass : Class) : Array(Entitas::System)
+      _systems = Array(Entitas::System).new
+      _systems << self if self.class.==(klass)
+      _systems.concat(_find_systems(cleanup_systems, klass))
+      _systems.concat(_find_systems(execute_systems, klass))
+      _systems.concat(_find_systems(initialize_systems, klass))
+      _systems.concat(_find_systems(tear_down_systems, klass))
+      _systems.uniq!
+      _systems
+    end
+
+    # :no_doc:
+    private def _find_systems(sub_systems, klass)
+      _systems = Array(Entitas::System).new
+      sub_systems.each do |sys|
+        case sys
+        when klass
+          _systems << sys
+        when Entitas::Systems, Entitas::Feature
+          _systems.concat sys.find_systems(klass)
+        else
+        end
+      end
+      _systems
+    end
   end
 end

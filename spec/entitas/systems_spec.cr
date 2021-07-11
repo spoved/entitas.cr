@@ -70,6 +70,13 @@ describe Entitas::Systems do
       systems.add(InitializeSystemSpy.new).should be systems
     end
 
+    it "finds sub system" do
+      systems = Entitas::Systems.new
+      spy_sys = InitializeSystemSpy.new
+      systems.add(spy_sys).should be systems
+      systems.find_system(InitializeSystemSpy).should be spy_sys
+    end
+
     it "initializes InitializeSystem" do
       systems = Entitas::Systems.new
       sys = InitializeSystemSpy.new

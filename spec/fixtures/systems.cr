@@ -1,6 +1,5 @@
 class InitializeSystemSpy
   include Entitas::Systems::InitializeSystem
-
   property did_initialize = 0
 
   def init
@@ -10,7 +9,6 @@ end
 
 class CleanupSystemSpy
   include Entitas::Systems::CleanupSystem
-
   property did_cleanup = 0
 
   def cleanup
