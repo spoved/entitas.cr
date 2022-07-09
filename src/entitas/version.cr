@@ -1,3 +1,3 @@
 module Entitas
-  VERSION = "1.4.4"
+  VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify }}
 end
