@@ -23,6 +23,42 @@ module Entitas::IComponent
         INDEX
       end
 
+      # :nodoc:
+      # Method to initialize entity indexes for the component if needed
+      # This really should not be used, but it is here for backwards compatibility
+      def self.create_entity_index_for_ivars(ctx : T) forall T
+        {% verbatim do %}
+          {% for var in @type.instance_vars %}
+            {% if var.annotation(::EntityIndex) %}
+              {% index_name = (@type.id.gsub(/::/, "") + "EntityIndices#{var.name.camelcase.id}").underscore.upcase %}
+              {% if flag?(:entitas_debug_generator) %}{% puts "  - create_entity_index for component: #{@type.id}, name: #{index_name}" %}{% end %}
+              {% index = {
+                   const:         index_name,
+                   comp:          @type.id,
+                   comp_meth:     @type.id.gsub(/.*::/, "").underscore.downcase,
+                   prop:          var,
+                   prop_meth:     var.name.underscore.downcase,
+                   prop_type:     var.type.union_types.reject(&.==(Nil)).first,
+                   context_name:  T.id.gsub(/Context/, ""),
+                   contexts_meth: T.id.gsub(/Context/, "").underscore.downcase,
+                 } %}
+
+              ctx.add_entity_index(
+                ::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}).new(
+                  {{index[:const].stringify}},
+                  ctx.get_group(
+                    {{index[:context_name].id}}Matcher.{{index[:comp_meth].id}}
+                  ),
+                  ->(entity : {{index[:context_name].id}}Entity, component : Entitas::IComponent?) {
+                    component.nil? ? entity.{{index[:comp_meth].id}}.{{index[:prop_meth].id}} : component.as({{index[:comp].id}}).{{index[:prop_meth].id}}
+                  }
+                )
+              ) unless ctx.get_entity_index?({{index[:const].stringify}})
+            {% end %} # end if var.annotation(::EntityIndex)
+          {% end %} # end for var in @type.instance_vars
+        {% end %} # end verbatim do
+      end
+
       {{@type.id}}.create_initializers
     end
   end

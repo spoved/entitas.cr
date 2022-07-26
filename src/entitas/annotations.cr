@@ -45,15 +45,15 @@ annotation ::Entitas::PostConstructor; end
 #
 # ```
 # @[Context(Game)]
-# @[Entitas::Event(EventTarget::Any, EventType.Removed)]
+# @[Entitas::Event(EventTarget::Any, EventType::Removed)]
 # class FlagEvent < Entitas::Component
 # end
 # ```
 #
 # ```
 # @[Context(Game)]
-# @[Entitas::Event(EventTarget::Any, EventType.Added, priority: 1)]
-# @[Entitas::Event(EventTarget::Any, EventType.Removed, priority: 2)]
+# @[Entitas::Event(EventTarget::Any, EventType::Added, priority: 1)]
+# @[Entitas::Event(EventTarget::Any, EventType::Removed, priority: 2)]
 # class MultipleEventsStandardEvent < Entitas::Component
 #   prop :value, String
 # end

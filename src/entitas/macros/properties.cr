@@ -23,7 +23,7 @@ macro prop(var, kype, **kwargs)
         raise "Property {{ var.id }} cannot be nil!" if {{kwargs[:method]}}.nil?
         {{kwargs[:method]}}.as({{kype}})
       end
-    {% end %}
+    {% end %} # end if kwargs[:method]
 
   {% else %}
     setter {{ var.id }} : {{kype}}? = nil
@@ -48,7 +48,6 @@ macro prop(var, kype, **kwargs)
       @{{ var.id }}.as({{kype}})
     end
   end
-
 
   {% if kwargs[:index] %}
     Entitas::Contexts.create_contexts_index_name({{@type}}, {{var.id}})

@@ -1,8 +1,10 @@
 require "../spec_helper"
 
+TOTAL_COMPONENTS = 27
+
 describe Entitas::Component do
-  it "should have 5 total components" do
-    Entitas::Component::TOTAL_COMPONENTS.should eq 26
+  it "should have #{TOTAL_COMPONENTS} total components" do
+    Entitas::Component::TOTAL_COMPONENTS.should eq TOTAL_COMPONENTS
   end
 
   it "should add methods" do

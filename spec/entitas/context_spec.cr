@@ -793,4 +793,20 @@ describe Entitas::Context do
       end
     end
   end
+
+  # FIXME: we should be able to use a @[EntityIndex] annotation like so:
+  # ```
+  # @[Context(Test5)]
+  # class Test::NameIndex < Entitas::Component
+  #   # @[EntityIndex]
+  #   prop :value, String
+  # end
+  # ```
+  describe "when using EntityIndex annotation" do
+    it "should create a group with the correct index" do
+      ctx = Contexts.shared_instance.test5
+      ctx.entity_indices.should_not be_empty
+      ctx.entity_indices.["TEST_NAME_INDEX_ENTITY_INDICES_VALUE"].should be_a Entitas::EntityIndex(Test5Entity, String)
+    end
+  end
 end

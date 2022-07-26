@@ -105,3 +105,13 @@ end
 class Test::UniqueEvent < Entitas::Component
   prop :value, String
 end
+
+#################
+# EntityIndex
+#################
+
+@[Context(Test5)]
+class Test::NameIndex < Entitas::Component
+  @[EntityIndex]
+  prop :value, String
+end

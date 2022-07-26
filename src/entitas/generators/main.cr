@@ -406,7 +406,7 @@ macro finished
 
       # Create any entity indexes
       #############################################
-      {% entity_indicies = [] of HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
+      {% entity_indices = [] of HashLiteral(SymbolLiteral, HashLiteral(StringLiteral, ArrayLiteral(TypeNode)) | Bool) %}
 
       {% for comp, comp_methods in comp_map %}
         {% for meth in comp.methods %}
@@ -415,7 +415,7 @@ macro finished
             {% index_name = (comp.id.gsub(/::/, "") + "EntityIndices#{meth.name.camelcase.id}").underscore.upcase %}
             {% for context in comp_methods[:contexts] %}
               {%
-                entity_indicies.push({
+                entity_indices.push({
                   const:         index_name,
                   comp:          comp,
                   comp_meth:     comp_methods[:meth_name],
@@ -440,7 +440,18 @@ macro finished
         # all of the contexts.
         @[::Entitas::PostConstructor]
         def initialize_entity_indices
-          {% for index in entity_indicies %}
+          {% if flag?(:entitas_debug_generator) %}
+            {% puts "## Initialize entity indices" %}
+            {% puts " - found #{entity_indices.size} indices" %}
+          {% end %}
+
+          {% for comp, comp_methods in comp_map %}
+            {% for context in comp_methods[:contexts] %}
+              {{comp}}.create_entity_index_for_ivars(self.{{context.id.underscore.downcase}})
+            {% end %} # end for context in comp_methods[:contexts]
+          {% end %} # end for comp, comp_methods in comp_map
+
+          {% for index in entity_indices %}
             self.{{index[:contexts_meth].id}}.add_entity_index(
               ::Entitas::EntityIndex({{index[:context_name].id}}Entity, {{index[:prop_type].id}}).new(
                 ::Entitas::Contexts::{{index[:const].id}},
@@ -452,10 +463,10 @@ macro finished
                 }
               )
             )
-          {% end %} # end for index in entity_indicies
+          {% end %} # end for index in entity_indices
         end
 
-        {% for index in entity_indicies %}
+        {% for index in entity_indices %}
           {% if index[:comp].constants.find(&.stringify.==("#{index[:prop].id.titleize}Index")) %}
             {% raise "#{index[:comp].id}::#{index[:prop].id.titleize}Index has already been generated!" %}
           {% else %}
@@ -482,14 +493,14 @@ macro finished
               get_entities_with_{{ index[:comp_meth].id }}_{{ index[:prop].id }}(value).first?
             end
           end
-        {% end %} # end for index in entity_indicies
+        {% end %} # end for index in entity_indices
       end
 
-      {% for index in entity_indicies %}
+      {% for index in entity_indices %}
         class ::{{index[:context_name].id}}Context < Entitas::Context(::{{index[:context_name].id}}Entity)
           include ::Entitas::Contexts::Extensions::{{index[:context_name].id}}Indexes
         end
-      {% end %} # end for index in entity_indicies
+      {% end %} # end for index in entity_indices
 
     {% end %} # begin
   {% end %} # end verbatim do

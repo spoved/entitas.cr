@@ -14,7 +14,7 @@ describe Contexts do
     index.should be_a(Entitas::EntityIndex(TestEntity, String))
     index = index.as(Entitas::EntityIndex(TestEntity, String))
     index.get_entities("Monty").size.should eq 0
-    e = ctxs.test.create_entity.add_name_age(name: "Monty")
+    ctxs.test.create_entity.add_name_age(name: "Monty")
     index.get_entities("Monty").size.should eq 1
   end
 end
