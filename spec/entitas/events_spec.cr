@@ -23,7 +23,7 @@ private class RemoveEventTest
 
   property listener : Test4Entity
   property contexts : Contexts
-  property remove_comp_when_empty : Bool
+  property? remove_comp_when_empty : Bool
   property value : String? = nil
 
   def initialize(@contexts, @remove_comp_when_empty)
@@ -37,13 +37,13 @@ private class RemoveEventTest
 
   def on_standard_event(entity, component : StandardEvent)
     # logger.warn { "on_standard_event" }
-    @listener.remove_any_standard_event_listener(self, remove_comp_when_empty)
+    @listener.remove_any_standard_event_listener(self, remove_comp_when_empty?)
     @value = component.value
   end
 
   def on_flag_entity_event(entity, component : FlagEntityEvent)
     # logger.warn { "on_flag_entity_event" }
-    listener.remove_flag_entity_event_listener(self, remove_comp_when_empty)
+    listener.remove_flag_entity_event_listener(self, remove_comp_when_empty?)
     @value = "true"
   end
 end

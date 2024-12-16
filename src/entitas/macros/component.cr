@@ -59,7 +59,7 @@ module Entitas::IComponent
         {% end %} # end verbatim do
       end
 
-      {{@type.id}}.create_initializers
+      create_initializers
     end
   end
 
@@ -133,7 +133,7 @@ module Entitas::IComponent
     def to_json(json : JSON::Builder)
       json.object do
         json.field "name", {{@type.id.stringify}}
-        json.field "unique", is_unique?
+        json.field "unique", unique?
         json.field("data") do
           json.object do
             {% for var_name in comp_variables.keys %}
@@ -206,32 +206,31 @@ module Entitas::IComponent
 
   # :nodoc:
   macro setup_unique
+    {% unique = @type.annotation(::Component::Unique) ? true : false %}
 
-    {% is_unique = @type.annotation(::Component::Unique) ? true : false %}
-
-    {% if flag?(:entitas_debug_generator) %}{% puts "  - setup_unique for #{@type.id} : #{is_unique}" %}{% end %}
+    {% if flag?(:entitas_debug_generator) %}{% puts "  - setup_unique for #{@type.id} : #{unique}" %}{% end %}
 
     # If the component has the unique annotation,
     #   set the class method to `true`
     # The framework will make sure that only one instance of a unique component can be present in your context
-    {% if is_unique %}
+    {% if unique %}
       # Will return true if the class is a unique component for a context
-      def is_unique? : Bool
+      def unique? : Bool
         true
       end
 
       # :ditto:
-      def self.is_unique? : Bool
+      def self.unique? : Bool
         true
       end
     {% else %}
       # Will return true if the class is a unique component for a context
-      def is_unique? : Bool
+      def unique? : Bool
         false
       end
 
       # :ditto:
-      def self.is_unique? : Bool
+      def self.unique? : Bool
         false
       end
     {% end %}
@@ -244,10 +243,8 @@ module Entitas::IComponent
       {% raise "#{@type.id} is not a Entitas::IComponent" %}
     {% end %}
 
-    class ::{{@type.id}}
-      {{@type.id}}.setup_events
-      {{@type.id}}.setup_unique
-    end
+    setup_unique
+    setup_events
   end
 end
 
@@ -279,7 +276,7 @@ class Entitas::Component
         {% comp_map[comp] = comp_methods %}
       {% end %}
 
-      alias ComponentTypes = Union(Entitas::Component.class, {{*comp_map.keys.map(&.name.+(".class"))}})
+      alias ComponentTypes = Union(Entitas::Component.class, {{comp_map.keys.map(&.name.+(".class")).splat}})
 
       {% if comp_map.empty? %}
         enum Index

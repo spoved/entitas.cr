@@ -1,10 +1,10 @@
 name: entitas
-version: 1.4.5
+version: 1.5.0
 
 authors:
   - Holden Omans <holden.omans@gmail.com>
 
-crystal: ">= 0.36.1, < 2.0.0"
+crystal: ">= 1.14.0, < 2.0.0"
 
 license: MIT
 

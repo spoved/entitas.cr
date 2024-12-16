@@ -1,3 +1,5 @@
+require "../interfaces/i_component"
+
 module Entitas::Events
   # Will create `Entitas::Events` struct for the provided `name`. `opts` defines the struct variables.
   #
@@ -18,7 +20,7 @@ module Entitas::Events
   #   end
   # ```
   macro create_event(name, opts)
-    struct Entitas::Events::{{name.id}}
+    struct ::Entitas::Events::{{name.id}}
       {% for a, t in opts %}
       getter {{a.id}} : {{t.id}}
       {% end %}
@@ -106,7 +108,7 @@ end
 
 macro emit_event(event, *args)
   {% if flag?(:entitas_enable_logging) %}Log.debug { "Emitting event {{event.id}}" }{% end %}
-  self.receive_{{event.id.underscore.id}}_event(Entitas::Events::{{event.id}}.new({{*args}}))
+  self.receive_{{event.id.underscore.id}}_event(Entitas::Events::{{event.id}}.new({{args.splat}}))
 end
 
 # Wrapper for multiple `accept_event` calls
@@ -212,7 +214,7 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
 
   {% if Entitas::Component.all_subclasses.find(&.name.==(listener_component_module.gsub(/^::/, ""))) %}
     {% if flag?(:entitas_debug_generator) %}{% puts "        WARN: #{listener_component_module.id} already exists" %}{% end %}
-    @[::Context({{*contexts}})]
+    @[::Context({{contexts.splat}})]
     class {{listener_component_module.id}} < Entitas::Component; end
   {% else %}
     {% listener_component_meth_name = listener_component_name.underscore %}
@@ -225,7 +227,9 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
       {% end %}
     end
 
-    @[::Context({{*contexts}})]
+    {% if flag?(:entitas_debug_generator) %}{% puts "- defining listener #{listener_component_module.id}" %}{% end %}
+
+    @[::Context({{contexts.splat}})]
     class {{listener_component_module.id}} < Entitas::Component
       prop :value, Set({{listener_module.id}}), default: Set({{listener_module.id}}).new
 
@@ -250,7 +254,7 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
       end
 
       def remove_{{listener_component_meth_name.id}}(value : {{listener_module.id}}, remove_comp_when_empty = false)
-        {% if flag?(:entitas_enable_logging) %}Log.debug { "remove_{{listener_component_meth_name.id}} - remove_comp_when_empty: #{remove_comp_when_empty}, value: #{value}" }{% end %}
+        {% if flag?(:entitas_enable_logging) %}Log.debug { "remove_{{listener_component_meth_name.id}} - remove_comp_when_empty: #{remove_comp_when_empty?}, value: #{value}" }{% end %}
         %listeners = self.{{listener_component_meth_name.id}}.value
         %listeners.delete(value)
         if(remove_comp_when_empty && %listeners.empty?)
