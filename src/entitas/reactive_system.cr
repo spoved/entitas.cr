@@ -14,7 +14,7 @@ module Entitas
     private getter collector : ICollector
     private property buffer : Array(Entitas::IEntity) = Array(Entitas::IEntity).new
     private property to_string_cache : String? = nil
-    protected property _filter : Proc(Entitas::IEntity, Bool) = ->(entity : Entitas::IEntity) { true }
+    protected property _filter : Proc(Entitas::IEntity, Bool) = ->(_entity : Entitas::IEntity) { true }
 
     def initialize(@collector : ICollector); end
 

@@ -23,7 +23,7 @@ class Entitas::Contexts
     self.all_contexts.each &.reset
   end
 
-  def each
+  def each(& : Entitas::IContext? ->)
     self.all_contexts.each do |ctx|
       yield ctx
     end

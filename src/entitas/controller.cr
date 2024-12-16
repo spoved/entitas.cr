@@ -12,7 +12,7 @@ module Entitas
 
     # Will allow you to interact with the returned `Contexts` with a `Mutex` lock
     # preventing `#update` from being called in another thread
-    def with_contexts
+    def with_contexts(& : Entitas::Contexts ->)
       self.synchronize do
         yield self.contexts
       end
@@ -23,10 +23,11 @@ module Entitas
     end
 
     def find_systems(klass : Class) : Array(Entitas::System)
-      if self.systems.nil?
+      sys = self.systems
+      if sys.nil?
         Array(Entitas::System).new
       else
-        self.systems.not_nil!.find_systems(klass)
+        sys.find_systems(klass)
       end
     end
 

@@ -91,7 +91,7 @@ module Entitas
       self.entities.size
     end
 
-    def each
+    def each(& : TEntity ->)
       self.entities.each do |entity|
         yield entity
       end

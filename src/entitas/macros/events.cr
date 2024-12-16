@@ -254,7 +254,7 @@ macro component_event(contexts, comp, target, _type = EventType::Added, priority
       end
 
       def remove_{{listener_component_meth_name.id}}(value : {{listener_module.id}}, remove_comp_when_empty = false)
-        {% if flag?(:entitas_enable_logging) %}Log.debug { "remove_{{listener_component_meth_name.id}} - remove_comp_when_empty: #{remove_comp_when_empty}, value: #{value}" }{% end %}
+        {% if flag?(:entitas_enable_logging) %}Log.debug { "remove_{{listener_component_meth_name.id}} - remove_comp_when_empty: #{remove_comp_when_empty?}, value: #{value}" }{% end %}
         %listeners = self.{{listener_component_meth_name.id}}.value
         %listeners.delete(value)
         if(remove_comp_when_empty && %listeners.empty?)
