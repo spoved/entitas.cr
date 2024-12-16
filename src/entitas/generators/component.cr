@@ -56,7 +56,7 @@ class Entitas::Component
             include Entitas::IComponent
             {% end %} # end if !comp.ancestors.includes?(Entitas::IComponent)
 
-            {{comp.id}}.setup_base_comp
+            setup_base_comp
           end
 
           ### Create a Helper module for the component

@@ -59,7 +59,7 @@ module Entitas::IComponent
         {% end %} # end verbatim do
       end
 
-      {{@type.id}}.create_initializers
+      create_initializers
     end
   end
 
@@ -206,7 +206,6 @@ module Entitas::IComponent
 
   # :nodoc:
   macro setup_unique
-
     {% is_unique = @type.annotation(::Component::Unique) ? true : false %}
 
     {% if flag?(:entitas_debug_generator) %}{% puts "  - setup_unique for #{@type.id} : #{is_unique}" %}{% end %}
@@ -244,10 +243,8 @@ module Entitas::IComponent
       {% raise "#{@type.id} is not a Entitas::IComponent" %}
     {% end %}
 
-    class ::{{@type.id}}
-      {{@type.id}}.setup_events
-      {{@type.id}}.setup_unique
-    end
+    setup_unique
+    setup_events
   end
 end
 
@@ -279,7 +276,7 @@ class Entitas::Component
         {% comp_map[comp] = comp_methods %}
       {% end %}
 
-      alias ComponentTypes = Union(Entitas::Component.class, {{*comp_map.keys.map(&.name.+(".class"))}})
+      alias ComponentTypes = Union(Entitas::Component.class, {{comp_map.keys.map(&.name.+(".class")).splat}})
 
       {% if comp_map.empty? %}
         enum Index
