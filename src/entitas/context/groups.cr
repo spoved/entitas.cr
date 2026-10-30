@@ -3,34 +3,61 @@ require "../group"
 module Entitas
   abstract class Context(TEntity)
     getter groups : Hash(String, Group(TEntity)) = Hash(String, Group(TEntity)).new
+    private getter canonical_groups = Hash(String, Group(TEntity)).new
+    private getter custom_matcher_groups = Hash(UInt64, Group(TEntity)).new
     protected property groups_for_index : Array(Set(Group(TEntity)))
-    private property group_events_buffer = Array(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
+    private getter group_event_frames = Array(Array(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class))).new
+    private property group_event_depth = 0
 
     # Returns a group for the specified matcher.
     # Calling context.GetGroup(matcher) with the same matcher will always
     # return the same instance of the group.
     def get_group(matcher : Entitas::Matcher) : Group(TEntity)
-      if self.groups[matcher.to_s]?
-        self.groups[matcher.to_s]
+      # Only exact base matchers have fully described structural criteria.
+      # Subclasses can override matches? and carry instance-specific predicates;
+      # retain their original object and cache by identity instead of slicing it.
+      structural = matcher.class == Entitas::Matcher
+      key = structural ? matcher.cache_key : nil
+      if structural
+        if cached = self.canonical_groups[key.not_nil!]?
+          return cached
+        end
+        matcher = matcher.snapshot
       else
-        group = Group(TEntity).new(matcher)
-
-        {% if flag?(:entitas_enable_logging) %}Log.debug { "created new group: #{group}" }{% end %}
-
-        get_entities.each do |entity|
-          group.handle_entity_silently(entity)
+        if cached = self.custom_matcher_groups[matcher.object_id]?
+          return cached
         end
-
-        self.groups[matcher.to_s] = group
-
-        matcher.indices.each do |i|
-          groups_for_index[component_index_value(i)] << group
-        end
-
-        emit_event OnGroupCreated, self, group
-
-        group
       end
+      group = Group(TEntity).new(matcher)
+
+      {% if flag?(:entitas_enable_logging) %}Log.debug { "created new group: #{group}" }{% end %}
+
+      get_entities.each do |entity|
+        group.handle_entity_silently(entity)
+      end
+
+      # Different custom predicates can have identical display strings. Keep
+      # every registered group discoverable without replacing an earlier entry.
+      display = matcher.to_s
+      storage_key = display
+      suffix = 2
+      while self.groups.has_key?(storage_key)
+        storage_key = "#{display} [#{suffix}]"
+        suffix += 1
+      end
+      self.groups[storage_key] = group
+      if structural
+        self.canonical_groups[key.not_nil!] = group
+      else
+        self.custom_matcher_groups[matcher.object_id] = group
+      end
+
+      matcher.indices.each do |i|
+        groups_for_index[component_index_value(i)] << group
+      end
+
+      emit_event OnGroupCreated, self, group
+      group
     end
 
     def update_groups_component_added_or_removed(entity : TEntity, index : Int32, component : Entitas::IComponent?)
@@ -39,22 +66,31 @@ module Entitas
       _groups = self.groups_for_index[index]?
 
       if !_groups.nil?
-        group_events_buffer.clear
-
-        _groups.each do |group|
-          event_type = group.handle_entity(entity)
-
-          {% if flag?(:entitas_enable_logging) %}
-            Log.debug { "update_groups_component_added_or_removed : #{entity} : Event : #{event_type}" }
-          {% end %}
-
-          next if event_type.nil?
-          group_events_buffer << {group, event_type}
+        depth = group_event_depth
+        if group_event_frames.size == depth
+          group_event_frames << Array(Tuple(Group(TEntity), Entitas::Events::OnEntityAdded.class | Entitas::Events::OnEntityRemoved.class)).new
         end
+        group_events_buffer = group_event_frames[depth]
+        self.group_event_depth += 1
+        begin
+          _groups.each do |group|
+            event_type = group.handle_entity(entity)
 
-        while !group_events_buffer.empty?
-          group, event_type = group_events_buffer.pop
-          emit_group_event(group, event_type, entity, index, component)
+            {% if flag?(:entitas_enable_logging) %}
+              Log.debug { "update_groups_component_added_or_removed : #{entity} : Event : #{event_type}" }
+            {% end %}
+
+            next if event_type.nil?
+            group_events_buffer << {group, event_type}
+          end
+
+          while !group_events_buffer.empty?
+            group, event_type = group_events_buffer.pop
+            emit_group_event(group, event_type, entity, index, component)
+          end
+        ensure
+          group_events_buffer.clear
+          self.group_event_depth -= 1
         end
       end
     end

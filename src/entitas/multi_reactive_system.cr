@@ -14,6 +14,7 @@ module Entitas
     private getter collectors : Array(ICollector)
     private property collected_buffer : Array(IEntity) = Array(IEntity).new
     private property buffer : Array(IEntity) = Array(IEntity).new
+    private getter collected_ids = Set(UInt64).new
     private property to_string_cache : String? = nil
     protected property _filter : Proc(IEntity, Bool) = ->(_entity : IEntity) { true }
 
@@ -70,31 +71,25 @@ module Entitas
     end
 
     def execute
-      self.collectors.each do |collector|
-        unless collector.empty?
+      begin
+        self.collectors.each do |collector|
           collector.entities.each do |e|
-            self.collected_buffer << e.as(Entitas::IEntity) unless self.collected_buffer.includes?(e)
+            if collected_ids.add?(e.object_id)
+              e.retain(self)
+              self.collected_buffer << e.as(Entitas::IEntity)
+            end
           end
           collector.clear
         end
-      end
-
-      collected_buffer.each do |e|
-        if self.filter(e)
-          e.retain(self) # unless e.retained_by?(self)
-          self.buffer << e unless buffer.includes?(e)
+        collected_buffer.each do |e|
+          self.buffer << e if self.filter(e)
         end
-      end
-
-      unless self.buffer.empty?
-        begin
-          self.execute(self.buffer)
-        ensure
-          self.buffer.each(&.release(self))
-
-          self.collected_buffer.clear
-          self.buffer.clear
-        end
+        self.execute(self.buffer) unless self.buffer.empty?
+      ensure
+        self.collected_buffer.each(&.release(self))
+        self.collected_buffer.clear
+        self.collected_ids.clear
+        self.buffer.clear
       end
     end
 
