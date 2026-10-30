@@ -13,6 +13,7 @@ module Entitas
 
     private getter collector : ICollector
     private property buffer : Array(Entitas::IEntity) = Array(Entitas::IEntity).new
+    private getter captured = Array(Entitas::IEntity).new
     private property to_string_cache : String? = nil
     protected property _filter : Proc(Entitas::IEntity, Bool) = ->(_entity : Entitas::IEntity) { true }
 
@@ -77,22 +78,18 @@ module Entitas
       {% if flag?(:entitas_enable_logging) %}Log.trace { "running execute on collector : #{self.collector}" }{% end %}
 
       unless self.collector.empty?
-        self.collector.each do |e|
-          if self.filter(e)
+        begin
+          self.collector.each do |e|
             e.retain(self)
-            self.buffer << e unless buffer.includes?(e)
+            self.captured << e
           end
-        end
-
-        self.collector.clear
-
-        unless self.buffer.empty?
-          begin
-            self.execute(self.buffer)
-          ensure
-            self.buffer.each(&.release(self))
-            self.buffer.clear
-          end
+          self.collector.clear
+          self.captured.each { |e| self.buffer << e if self.filter(e) }
+          self.execute(self.buffer) unless self.buffer.empty?
+        ensure
+          self.captured.each(&.release(self))
+          self.captured.clear
+          self.buffer.clear
         end
       end
     end

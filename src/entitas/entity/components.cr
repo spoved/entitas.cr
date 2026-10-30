@@ -7,8 +7,6 @@ module Entitas
     ############################
 
     private property components_buffer = Set(Entitas::IComponent).new
-    private property components_indices_buffer = Set(Int32).new
-    private property components_index_indices_buffer = Set(Entitas::Component::Index).new
 
     def create_component(index : Entitas::Component::Index, **args)
       {% if flag?(:entitas_enable_logging) %}Log.debug { "create_component - index: #{index}" }{% end %}
@@ -117,12 +115,11 @@ module Entitas
     # Returns all indices of added components.
     def get_component_indices : Enumerable(Int32)
       if component_indices_cache.nil?
+        indices = Array(Int32).new
         self.components.each_with_index do |c, i|
-          components_indices_buffer << i unless c.nil?
-          components_index_indices_buffer << Entitas::Component::Index.new(i)
+          indices << i unless c.nil?
         end
-        self.component_indices_cache = components_indices_buffer.to_a
-        components_indices_buffer.clear
+        self.component_indices_cache = indices
       end
 
       component_indices_cache.as(Array(Int32))

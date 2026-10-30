@@ -17,6 +17,25 @@ module Entitas
 
     def initialize(@component_names : Array(String) = Array(String).new); end
 
+    # Canonical identity is independent of display names and insertion order.
+    def cache_key : String
+      {all_of_indices, any_of_indices, none_of_indices}.map do |indices|
+        indices.map(&.value).sort.join(",")
+      end.join("|")
+    end
+
+    def snapshot : Matcher
+      copy = Matcher.new(component_names.dup)
+      copy.all_of_indices = all_of_indices.dup
+      copy.any_of_indices = any_of_indices.dup
+      copy.none_of_indices = none_of_indices.dup
+      copy
+    end
+
+    protected def invalidate_indices : Nil
+      @indices = nil
+    end
+
     def indices : Set(Entitas::Component::Index)
       @indices ||= Set(Entitas::Component::Index).new.concat(
         self.all_of_indices

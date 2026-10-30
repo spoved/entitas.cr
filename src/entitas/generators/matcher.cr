@@ -59,6 +59,7 @@ class ::Entitas::Matcher
           # Entitas::Matcher.new.{{match.id}}_of(A, B)
           # ```
           def {{match.id}}_of(*comps : Entitas::Component::ComponentTypes) : {{interface.id}}
+            invalidate_indices
             self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(comps.size)
             comps.each { |c| self.{{match.id}}_of_indices << c.index }
             self
@@ -71,6 +72,7 @@ class ::Entitas::Matcher
           # Entitas::Matcher.new.{{match.id}}_of(0)
           # ```
           def {{match.id}}_of(*indices : Int32) : {{interface.id}}
+            invalidate_indices
             self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices.size)
             indices.each { |i| self.{{match.id}}_of_indices << Entitas::Component::Index.new(i) }
             self
@@ -83,6 +85,7 @@ class ::Entitas::Matcher
           # Entitas::Matcher.new.{{match.id}}_of(Entitas::Component::Index::A)
           # ```
           def {{match.id}}_of(*indices : Entitas::Component::Index) : {{interface.id}}
+            invalidate_indices
             self.{{match.id}}_of_indices = Set(Entitas::Component::Index).new(indices)
             self
           end
@@ -96,6 +99,7 @@ class ::Entitas::Matcher
           # matcher = Entitas::Matcher.new.{{match.id}}_of(m1, m2)
           # ```
           def {{match.id}}_of(*matchers : IMatcher) : {{interface.id}}
+            invalidate_indices
             self.{{match.id}}_of_indices.concat(self.class.merge_indicies(*matchers))
             self.class.set_component_names(self, *matchers)
             self
